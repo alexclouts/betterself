@@ -12,7 +12,16 @@
 			<copyright>{year}</copyright>
 		
 		
+			<lastBuildDate>Sun, 04 Oct 2026 14:30:00 +0000</lastBuildDate>
+		
 			<atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Présentation du blog</title>
+				<link>http://localhost:1313/posts/premiers-defis/blog/</link>
+				<pubDate>Sun, 04 Oct 2026 14:30:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/premiers-defis/blog/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/premiers-defis/blog/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;2560&#34;&#xA;    height=&#34;2560&#34;&#xA;    style=&#34;width: 500px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;p&gt;La publication que je vous partage aujourd&amp;rsquo;hui présente les derniers préparatifs avant d&amp;rsquo;entâmer le développement de l&amp;rsquo;application &lt;code&gt;BetterSelf&lt;/code&gt;. Dans le cadre d&amp;rsquo;une vidéo explicative, je vous explique les fonctionnalités du blog et les choix que j&amp;rsquo;ai fait afin de construire le site.&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>Mais qui êtes-vous ?</title>
 				<link>http://localhost:1313/posts/authentication/</link>
@@ -29,10 +38,10 @@
 			</item>
 			<item>
 				<title>Mes premiers défis!</title>
-				<link>http://localhost:1313/posts/premiers-defis/</link>
+				<link>http://localhost:1313/posts/premiers-defis/github-commits/</link>
 				<pubDate>Sat, 26 Sep 2026 08:45:00 +0000</pubDate>
-				<guid>http://localhost:1313/posts/premiers-defis/</guid>
-				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/premiers-defis/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;480&#34;&#xA;    height=&#34;480&#34;&#xA;    style=&#34;width: 500px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;premiers-défis-rencontrés&#34;&gt;Premiers défis rencontrés&lt;/h2&gt;&#xA;&lt;h3 id=&#34;configuration-de-lenvironnement-uv&#34;&gt;Configuration de l&amp;rsquo;environnement &lt;code&gt;uv&lt;/code&gt;&lt;/h3&gt;&#xA;&lt;p&gt;En configurant &lt;code&gt;uv&lt;/code&gt; avec la commande &lt;code&gt;uv init&lt;/code&gt;, j&amp;rsquo;ai rencontré plusieurs erreurs en voulant reproduire les exemples donnés durant les explications. Plutôt que de créer un fichier &lt;code&gt;main.py&lt;/code&gt; dans le répertoire de mon projet, ma commande configurait plutôt le fichier &lt;code&gt;__init__.py&lt;/code&gt; dans un nouveau répertoire &lt;code&gt;/src/betterself/&lt;/code&gt;.&lt;/p&gt;</description>
+				<guid>http://localhost:1313/posts/premiers-defis/github-commits/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/premiers-defis/github-commits/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;480&#34;&#xA;    height=&#34;480&#34;&#xA;    style=&#34;width: 500px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;premiers-défis-rencontrés&#34;&gt;Premiers défis rencontrés&lt;/h2&gt;&#xA;&lt;h3 id=&#34;configuration-de-lenvironnement-uv&#34;&gt;Configuration de l&amp;rsquo;environnement &lt;code&gt;uv&lt;/code&gt;&lt;/h3&gt;&#xA;&lt;p&gt;En configurant &lt;code&gt;uv&lt;/code&gt; avec la commande &lt;code&gt;uv init&lt;/code&gt;, j&amp;rsquo;ai rencontré plusieurs erreurs en voulant reproduire les exemples donnés durant les explications. Plutôt que de créer un fichier &lt;code&gt;main.py&lt;/code&gt; dans le répertoire de mon projet, ma commande configurait plutôt le fichier &lt;code&gt;__init__.py&lt;/code&gt; dans un nouveau répertoire &lt;code&gt;/src/betterself/&lt;/code&gt;.&lt;/p&gt;</description>
 			</item>
 			<item>
 				<title>Résumé de mes choix</title>

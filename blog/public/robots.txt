@@ -2,21 +2,25 @@ User-agent: *
 
 Disallow: /posts/
 
-Disallow: /tags/authentification/
-
 Disallow: /
 
 Disallow: /categories/cadrage-et-recherche/
 
 Disallow: /categories/
 
-Disallow: /posts/authentication/
+Disallow: /tags/d%C3%A9fi/
 
-Disallow: /tags/sql/
+Disallow: /posts/premiers-defis/blog/
 
 Disallow: /tags/
 
-Disallow: /tags/d%C3%A9fi/
+Disallow: /tags/vid%C3%A9o/
+
+Disallow: /tags/authentification/
+
+Disallow: /posts/authentication/
+
+Disallow: /tags/sql/
 
 Disallow: /tags/ia/
 
@@ -26,7 +30,7 @@ Disallow: /tags/inspiration/
 
 Disallow: /posts/inspirations/
 
-Disallow: /posts/premiers-defis/
+Disallow: /posts/premiers-defis/github-commits/
 
 Disallow: /tags/architecture/
 

@@ -1,0 +1,31 @@
+{{ define "main" }}
+
+{{ $phase := . }}
+{{ $posts := where site.RegularPages "Section" "posts" }}
+{{ $phasePosts := slice }}
+{{ range $posts }}
+  {{ if in .Params.categories $phase.Title }}
+    {{ $phasePosts = $phasePosts | append . }}
+  {{ end }}
+{{ end }}
+
+<div class="flex flex-col gap-1">
+  <h1 class="text-2xl font-extrabold">{{ .Title }}</h1>
+  {{ with .Params.description }}
+    <p>{{ . }}</p>
+  {{ end }}
+  {{ with .Content }}
+    {{ . }}
+  {{ end }}
+</div>
+
+<section class="flex flex-col">
+  {{ range $index, $post := $phasePosts }}
+    {{ partial "list/default" (dict "page" $post) }}
+    {{ if ne $index (sub (len $phasePosts) 1) }}
+      <hr class="my-8 border-0 border-t border-gray-200 dark:border-gray-700">
+    {{ end }}
+  {{ end }}
+</section>
+
+{{ end }}

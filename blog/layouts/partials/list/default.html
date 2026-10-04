@@ -1,8 +1,13 @@
 {{ $page := .page }}
 {{ $isTagTerm := and (eq $page.Kind "term") (eq $page.Data.Singular "tag") }}
 {{ $link := $page.Permalink }}
+{{ $postCount := 0 }}
 {{ if eq $page.Section "phases" }}
-  {{ $link = printf "/categories/%s/" ($page.Title | urlize) | relLangURL }}
+  {{ range where site.RegularPages "Section" "posts" }}
+    {{ if in .Params.categories $page.Title }}
+      {{ $postCount = add $postCount 1 }}
+    {{ end }}
+  {{ end }}
 {{ end }}
 
 <article class="flex items-center justify-between gap-10">
@@ -23,12 +28,6 @@
   <div class="flex flex-col gap-1 flex-1">
   <h1 style="margin-bottom: 0; padding-top: 0;">
     {{ if eq $page.Section "phases" }}
-      {{ $postCount := 0 }}
-      {{ range where site.RegularPages "Section" "posts" }}
-        {{ if in .Params.categories $page.Title }}
-          {{ $postCount = add $postCount 1 }}
-        {{ end }}
-      {{ end }}
       <a href="{{ $link }}">{{ $page.Title }} ({{ $postCount }})</a>
     {{ else }}
       <a href="{{ $link }}">{{ $page.Title }}</a>
