@@ -1,5 +1,9 @@
 {{ $page := .page }}
-{{ $isTagPage := .isTagPage }}
+{{ $isTagTerm := and (eq $page.Kind "term") (eq $page.Data.Singular "tag") }}
+{{ $link := $page.Permalink }}
+{{ if eq $page.Section "phases" }}
+  {{ $link = printf "/categories/%s/" ($page.Title | urlize) | relLangURL }}
+{{ end }}
 
 <article class="flex items-center justify-between gap-10">
 
@@ -18,10 +22,20 @@
   
   <div class="flex flex-col gap-1 flex-1">
   <h1 style="margin-bottom: 0; padding-top: 0;">
-    <a href="{{ $page.Permalink }}">{{ $page.Title }}</a>
+    {{ if eq $page.Section "phases" }}
+      {{ $postCount := 0 }}
+      {{ range where site.RegularPages "Section" "posts" }}
+        {{ if in .Params.categories $page.Title }}
+          {{ $postCount = add $postCount 1 }}
+        {{ end }}
+      {{ end }}
+      <a href="{{ $link }}">{{ $page.Title }} ({{ $postCount }})</a>
+    {{ else }}
+      <a href="{{ $link }}">{{ $page.Title }}</a>
+    {{ end }}
   </h1>
 
-    {{ if not $isTagPage }}
+    {{ if $page.Params.date }}
     <span class="date">
       <time datetime="{{ $page.PublishDate }}" title='{{ $page.PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM MST" }}'>
         {{ $page.PublishDate.Format "02/01/2006" }}
@@ -38,8 +52,12 @@
     </div>
 
     <div class="mt-2">
-      <a class="read-more" href="{{ $page.Permalink }}">
-        {{ i18n "readMore" }}
+      <a class="read-more" href="{{ $link }}">
+        {{ if or $isTagTerm (eq $page.Section "phases") }}
+          {{ i18n "viewPublications" }}
+        {{ else }}
+          {{ i18n "readMore" }}
+        {{ end }}
         <span class="w-4 h-4 stroke-2">
           {{ partial "utils/icon" "arrow-right" }}
         </span>

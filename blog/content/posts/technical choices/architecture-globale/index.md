@@ -5,6 +5,8 @@ date: 2026-09-25T08:55:00.000Z
 description: "Résumé des choix techniques actuels et présentation de l'architecture globale."
 tags:
   - Architecture
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

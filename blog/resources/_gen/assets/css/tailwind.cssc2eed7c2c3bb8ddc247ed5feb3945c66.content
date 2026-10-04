@@ -601,7 +601,7 @@ video {
   body {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
-  text-align: justify;
+  text-align: left;
   font-size: 1.125rem;
   line-height: 1.75rem;
   --tw-text-opacity: 1;
@@ -670,7 +670,7 @@ video {
 
   p, hr, pre, dl {
   margin-bottom: 1.25rem;
-  text-align: justify;
+  text-align: left;
 }
   
   article > h1 {
@@ -1411,7 +1411,7 @@ video {
 
   /* Misc */
   #site-title {
-  text-align: center;
+  text-align: left;
   font-size: 2.25rem;
   line-height: 2.5rem;
   font-weight: 800;
@@ -1421,12 +1421,6 @@ video {
   #site-title:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(243 244 246 / var(--tw-text-opacity, 1));
-}
-  @media (min-width: 640px) {
-
-  #site-title {
-    text-align: left;
-  }
 }
 
   .header {

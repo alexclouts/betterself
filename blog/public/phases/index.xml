@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Étapes du projet on Le Gourmet</title>
+		<link>http://localhost:1313/phases/</link>
+		<description>Recent content in Étapes du projet on Le Gourmet</description>
+		<generator>Hugo</generator>
+		<language>fr-CA</language>
+		
+		
+		
+			<copyright>{year}</copyright>
+		
+		
+			<atom:link href="http://localhost:1313/phases/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Cadrage et recherche</title>
+				<link>http://localhost:1313/phases/cadrage-et-recherche/</link>
+				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+				<guid>http://localhost:1313/phases/cadrage-et-recherche/</guid>
+				<description></description>
+			</item>
+	</channel>
+</rss>

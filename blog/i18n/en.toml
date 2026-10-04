@@ -4,6 +4,9 @@
 [readMore]
     other = 'Read more'
 
+[viewPublications]
+    other = 'View publications'
+
 [summary]
     other = 'Summary'
 

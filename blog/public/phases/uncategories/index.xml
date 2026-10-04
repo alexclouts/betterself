@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Uncategories on Le Gourmet</title>
+		<link>http://localhost:1313/phases/uncategories/</link>
+		<description>Recent content in Uncategories on Le Gourmet</description>
+		<generator>Hugo</generator>
+		<language>fr-CA</language>
+		
+		
+		
+			<copyright>{year}</copyright>
+		
+		
+			<atom:link href="http://localhost:1313/phases/uncategories/index.xml" rel="self" type="application/rss+xml" />
+	</channel>
+</rss>

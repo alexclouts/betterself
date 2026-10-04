@@ -6,6 +6,8 @@ description: "La stratégie d'hébergement et la base de données comme solution
 tags:
   - SQL
   - Hébergement
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

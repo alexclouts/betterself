@@ -6,6 +6,8 @@ description: "Processus d'authentification des utilisateurs, sécurité et gesti
 tags:
   - Authentification
   - SQL
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

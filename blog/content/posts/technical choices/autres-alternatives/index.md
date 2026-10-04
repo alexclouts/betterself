@@ -6,6 +6,8 @@ description: "Les principales technologies envisagées avant de retenir React, F
 tags:
   - Alternative
   - NoSQL
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

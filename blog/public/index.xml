@@ -12,8 +12,6 @@
 			<copyright>{year}</copyright>
 		
 		
-			<lastBuildDate>Sat, 03 Oct 2026 22:10:00 +0000</lastBuildDate>
-		
 			<atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
 			<item>
 				<title>Mais qui êtes-vous ?</title>
@@ -77,6 +75,13 @@
 				<pubDate>Fri, 25 Sep 2026 08:15:00 +0000</pubDate>
 				<guid>http://localhost:1313/posts/technical-choices/pourquoi-betterself/</guid>
 				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/pourquoi-betterself/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;1024&#34;&#xA;    height=&#34;1024&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;lidée-derrière-le-projet&#34;&gt;L&amp;rsquo;idée derrière le projet&lt;/h2&gt;&#xA;&lt;p&gt;L&amp;rsquo;idée derrière l&amp;rsquo;application web &lt;code&gt;BetterSelf&lt;/code&gt; est d&amp;rsquo;offrir une solution Open Source gratuite pour les gens qui suivent attentivement leur alimentation et qui consignent ce qu&amp;rsquo;ils mangent. Il s&amp;rsquo;agit d&amp;rsquo;une application Open Source, dont l&amp;rsquo;objectif est de permettre à l&amp;rsquo;utilisateur de consigner ce qu&amp;rsquo;il mange au quotidien afin qu&amp;rsquo;il puisse comparer sa consommation réelle à des objectifs nutritionnels qu&amp;rsquo;il vise à atteindre.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Cadrage et recherche</title>
+				<link>http://localhost:1313/phases/cadrage-et-recherche/</link>
+				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+				<guid>http://localhost:1313/phases/cadrage-et-recherche/</guid>
+				<description></description>
 			</item>
 	</channel>
 </rss>

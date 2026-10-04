@@ -8,6 +8,8 @@ tags:
   - Backend
   - Architecture
   - Validation
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

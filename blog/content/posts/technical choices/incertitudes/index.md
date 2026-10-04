@@ -6,6 +6,8 @@ description: "Les principales incertitudes techniques qui devront être résolue
 tags:
   - Incertitude
   - Questionnement
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

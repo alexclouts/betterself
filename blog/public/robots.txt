@@ -6,6 +6,10 @@ Disallow: /tags/authentification/
 
 Disallow: /
 
+Disallow: /categories/cadrage-et-recherche/
+
+Disallow: /categories/
+
 Disallow: /posts/authentication/
 
 Disallow: /tags/sql/
@@ -60,10 +64,6 @@ Disallow: /tags/probl%C3%A8me/
 
 Disallow: /about/
 
-Disallow: /categories/
+Disallow: /phases/cadrage-et-recherche/
 
-Disallow: /categories/css/
-
-Disallow: /categories/javascript/
-
-Disallow: /categories/uncategories/
+Disallow: /phases/

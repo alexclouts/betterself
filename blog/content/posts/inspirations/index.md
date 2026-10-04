@@ -6,6 +6,8 @@ description: "Logo, processus de On Boarding et recherche d'inspiration."
 tags:
   - Idée
   - Inspiration
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

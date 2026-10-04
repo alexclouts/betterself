@@ -6,6 +6,8 @@ tags:
   - Problème
   - Idée
   - Open Source
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

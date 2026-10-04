@@ -103,7 +103,7 @@
   }
 
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-lg text-justify;
+    @apply bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-lg text-left;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -139,7 +139,7 @@
   }
 
   p, hr, pre, dl {
-    @apply mb-5 text-justify;
+    @apply mb-5 text-left;
   }
   
   article > h1 {
@@ -351,7 +351,7 @@
 
   /* Misc */
   #site-title {
-    @apply text-center sm:text-left text-4xl font-extrabold text-gray-800 dark:text-gray-100;
+    @apply text-left text-4xl font-extrabold text-gray-800 dark:text-gray-100;
   }
 
   .header {

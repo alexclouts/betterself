@@ -6,6 +6,8 @@ description: "Configurer le projet GitHub et m'approprier l'IA."
 tags:
   - IA
   - Défi
+categories:
+  - Cadrage et recherche
 ---
 
 {{< img

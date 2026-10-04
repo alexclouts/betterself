@@ -6,9 +6,12 @@
 
     <div class="meta">
       {{/* Publish date */}}
-      <time datetime="{{ .PublishDate }}" title='{{ .PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM MST" }}'>
-        {{ .PublishDate.Format "02/01/2006" }} - {{ printf (i18n "estimatedReadingTime") .ReadingTime }}
-      </time>
+      {{ with .Params.date }}
+        <time datetime="{{ $.PublishDate }}" title='{{ $.PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM MST" }}'>
+          {{ $.PublishDate.Format "02/01/2006" }} -
+        </time>
+      {{ end }}
+      {{ printf (i18n "estimatedReadingTime") .ReadingTime }}
 
       {{/* Categories */}} 
       {{ with (.GetTerms "categories") }} — 
