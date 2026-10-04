@@ -37,3 +37,5 @@ Quand je vérifie le lien du renvoi, j'ai remarqué que l'URL n'a pas été modi
 src="screenshot2.png"
 alt="Capture d'écran 2"
 caption="">}}
+
+Après avoir découvert cette problématique, j'ai demandé à l'IA intégrée à Visual Studio Code d'apporter les modifications nécessaires pour rectifier la situation. Après avoir confirmé que la correction avait bien été faite, j'ai `push` la nouvelle version dans la branche principale du projet.
