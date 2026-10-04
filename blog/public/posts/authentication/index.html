@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr-CA" class="scroll-smooth dark">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mais qui êtes-vous ?</title>
+<meta
+  name="description"
+  content="Processus d&#39;authentification des utilisateurs, sécurité et gestion des sessions."
+/>
+<link rel="canonical" href="http://localhost:1313/posts/authentication/" />
+<link rel="robots" href="/robots.txt" />
+
+<link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
+
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });</script>
+
+<link rel="stylesheet" href="http://localhost:1313/css/app.css" /></head>
+
+  <body class="max-w-screen-md mx-auto px-2.5">
+    <div class="header">
+      <header class="flex flex-col sm:flex-row items-center gap-5 sm:gap-10 pt-16 py-12">
+   
+
+
+<div class="flex-none w-20 h-20 rounded-full overflow-hidden">
+  <a href="http://localhost:1313/">
+    <img
+      srcset="/img/logo_hu_a162af3880bd01e1.png 80w"
+      src="/img/logo.png"
+      width="1254"
+      height="1254"
+      alt="Le Gourmet"
+    />
+  </a>
+</div>
+
+  
+  <div class="flex flex-col gap-5">
+    <a href="http://localhost:1313/">
+  <h1 id="site-title">Le Gourmet</h1>
+</a>
+ 
+    <nav>
+  <ul>
+     
+    
+    <li>
+      <a href="/" class="">
+        Accueil
+      </a>
+    </li>
+    
+    <li>
+      <a href="/about" class="">
+        À propos
+      </a>
+    </li>
+    
+    <li>
+      <a href="/posts" class="">
+        Publications
+      </a>
+    </li>
+    
+    <li>
+      <a href="/tags" class="">
+        Tags
+      </a>
+    </li>
+    
+  </ul>
+</nav>
+
+  </div>
+</header>
+
+      <button class="toggle-theme" aria-label="Toggle Theme" title="Toggle Theme" onclick="toggleTheme()">
+  <span class="theme-icon light"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+</svg> </span>
+  <span class="theme-icon dark"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+</svg> </span>
+</button>
+
+<script>
+  function getPreferredTheme() {
+    const saved = sessionStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    const html = document.querySelector('html');
+
+    if (theme === 'light') {
+      html.classList.remove('dark');
+      document.querySelector('.theme-icon.light').style.display = 'none';
+      document.querySelector('.theme-icon.dark').style.display = 'block';
+    } else {
+      html.classList.add('dark');
+      document.querySelector('.theme-icon.dark').style.display = 'none';
+      document.querySelector('.theme-icon.light').style.display = 'block';
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.querySelector('html').classList.contains('dark') ? 'dark' : 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    sessionStorage.setItem('theme', next);
+    applyTheme(next);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTheme(getPreferredTheme());
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+    if (!sessionStorage.getItem('theme')) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+</script>
+    </div>
+  
+    <main id="content">
+
+<article class="flex flex-col gap-10">
+  <header class="flex flex-col gap-2">
+    <h2 class="title-large">Mais qui êtes-vous ?</h2>
+
+    <div class="meta">
+      
+      <time datetime="2026-10-03 22:10:00 &#43;0000 UTC" title='Sat, Oct 3, 2026, 10:10 PM UTC'>
+        03/10/2026 - Temps de lecture estimé: 6 minutes
+      </time>
+
+       
+      
+    </div>
+  </header>
+
+  
+
+  <section>
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/authentication/preview.png"
+    alt="Preview"
+    width="510"
+    height="510"
+    style="width: 500px; height: auto;"
+  />
+
+  
+</figure>
+<p>Même si l’application ne manipule pas de données médicales sensibles, elle contiendra tout de même des informations personnelles : adresse courriel, poids, objectifs, historique alimentaire de l&rsquo;utilisateur, etc. Il est donc important de mettre en place une méthode d&rsquo;authentification simple et suffisamment solide.</p>
+<h2 id="une-nécessité">Une nécessité</h2>
+<p>Chaque utilisateur devra pouvoir créer son propre compte afin que personne d&rsquo;autre ne puisse modifier ses repas, ses objectifs et ses statistiques. L’authentification permettra aussi de relier chaque donnée enregistrée à un utilisateur précis.</p>
+<p>Sans authentification, l&rsquo;application ne pourrait offrir qu’un usage local, ce qui limiterait fortement l’intérêt de l’application. Par exemple, un utilisateur ne pourrait pas récupérer ses données enregistrés sur un autre appareil. Si son appareil est réinitialisé, il perderait aussi toute sa progression. Avec des comptes utilisateurs, il devient possible de conserver un historique, de personnaliser les objectifs caloriques tout en protégeant les données personnelles.</p>
+<h2 id="courriel-et-mot-de-passe">Courriel et mot de passe</h2>
+<p>Ma méthode principale sera l’inscription classique par adresse courriel et mot de passe. Lors de la création d’un compte, l’utilisateur fournira une adresse courriel et un mot de passe. Le backend vérifiera que l’adresse n’est pas déjà utilisée, puis créera le compte. Il se pourrait que je décide d&rsquo;intégrer l&rsquo;authentification avec un compte Google, qui offre un API permettant d&rsquo;utiliser la fonctionnalité <strong>Single Sign-On</strong>, favorisant une expérience client plus optimale. Par contre, pour un premier déploiement, l’authentification par courriel et mot de passe reste plus simple à comprendre, à tester et à sécuriser. Elle pourra ensuite être complétée par une connexion externe si le projet évolue.</p>
+<h3 id="sécurité">Sécurité</h3>
+<p>Le mot de passe ne sera jamais enregistré en clair dans la base de données. Il sera transformé à l’aide d’une fonction de hachage lente et <em>salée</em>, comme <strong>Argon2id</strong> ou <strong>bcrypt</strong>. <code>OWASP</code> recommande précisément ce type d’algorithme pour le stockage des mots de passe, car ils sont conçus pour ralentir les attaques <em>bruteforce</em> si la base de données est compromise. À la connexion, le backend comparera le mot de passe fourni au hachage enregistré. Si les deux correspondent, l’utilisateur sera considéré comme authentifié par l&rsquo;application.</p>
+<h4 id="méthode-de-hachage">Méthode de hachage</h4>
+<p>Le <strong>hachage</strong> est une transformation à sens unique : à partir du mot de passe, on obtient une chaîne difficile à inverser. Ainsi, même si quelqu’un accède à la base de données, il ne verra pas les mots de passe réels. J’utiliserai un sel unique généré automatiquement pour chaque utilisateur. Le sel empêche deux personnes ayant le même mot de passe d’avoir le même hachage et complique l’utilisation de tables précalculées, comme les <em>rainbow tables</em>. En pratique, le backend utilisera une <a href="https://pypi.org/project/argon2-cffi/">bibliothèque Python spécialisée</a> plutôt que de devoir implémenter le hachage moi-même au sein du projet. Cela simplifiera le fonctionnement du code et facilitera sa mise en oeuvre.</p>
+<h2 id="jetons-jwt">Jetons JWT</h2>
+<p>Après une connexion réussie, le backend émettra un jeton d’accès de type <strong>JWT</strong> (<em>JSON Web Token</em>). Le frontend enverra ensuite ce jeton dans l’en-tête <code>Authorization</code> de chaque requête nécessitant d’être authentifié. D&rsquo;ailleurs, FastAPI documente ce modèle avec le flux OAuth2 « password »,. Le client envoie un identifiant et un mot de passe afin de recevoir un jeton d’accès, puis utilise ce jeton comme preuve d’authentification pour les requêtes suivantes.</p>
+<p>Un JWT contiendra :</p>
+<ul>
+<li>l’identifiant de l’utilisateur;</li>
+<li>la date d’expiration du jeton;</li>
+<li>son rôle ou ses permissions;</li>
+<li>une signature permettant au backend de vérifier que le jeton n’a pas été modifié.</li>
+</ul>
+<p>J’utiliserai des jetons d’accès à durée courte. Cela limite les conséquences si un jeton est volé, puisqu’il deviendra rapidement invalide. OWASP recommande aussi de valider la signature, l’émetteur et l’audience d’un jeton, ainsi que de gérer correctement sa durée de vie.</p>
+<h3 id="stockage-du-jeton">Stockage du jeton</h3>
+<p>Pour la première version, je privilégierai un cookie sécurisé de type <code>HttpOnly</code> plutôt que le <code>localStorage</code>. Un cookie <code>HttpOnly</code> n’est pas accessible directement par JavaScript, ce qui réduit le risque de vol du jeton en cas d’attaque XSS. OWASP recommande de ne pas conserver les jetons d’authentification dans des emplacements non sécurisés du navigateur et privilégie les cookies <code>HttpOnly</code> ou des mécanismes de stockage sécurisés.</p>
+<p>Le cookie sera configuré avec :</p>
+<ul>
+<li><code>Secure</code>, pour qu’il ne soit envoyé qu’en HTTPS;</li>
+<li><code>HttpOnly</code>, pour le protéger de l’accès JavaScript;</li>
+<li><code>SameSite</code>, pour réduire certains risques liés aux requêtes intersites;</li>
+<li>une expiration qui suit la durée de vie du jeton.</li>
+</ul>
+<h3 id="jetons-de-rafraîchissement">Jetons de rafraîchissement</h3>
+<p>Pour éviter de demander à l’utilisateur de se reconnecter trop souvent, j’envisage d’ajouter un <em>refresh token</em>. Le principe est simple : le jeton d’accès expire rapidement, tandis qu’un jeton de rafraîchissement, plus long, permet d’obtenir un nouveau jeton d’accès sans redemander le mot de passe. Par contre, OWASP souligne l’importance d’une stratégie sécurisée de rotation des jetons de rafraîchissement et d’une validation rigoureuse des jetons. Dans un premier temps, je pourrais commencer avec des sessions relativement courtes, puis ajouter cette fonctionnalité lorsque le reste de l’application sera stable.</p>
+<h2 id="les-erreurs-courantes">Les erreurs courantes</h2>
+<p>Voici une liste des choses que je devrai respecter au sujet de l&rsquo;authentification pendant le développement du projet :</p>
+<ul>
+<li>Ne jamais retourner un message indiquant si c’est le courriel ou le mot de passe qui est incorrect; le message sera simplement « identifiants invalides ».</li>
+<li>Limiter le nombre de tentatives de connexion.</li>
+<li>Utiliser HTTPS en production pour protéger les identifiants et les jetons.</li>
+<li>Ne pas enregistrer les mots de passe, les jetons ou les secrets de signature dans le code source.</li>
+<li>Conserver les variables sensibles dans des variables d’environnement.</li>
+</ul>
+<p>OWASP recommande notamment d’éviter les changements périodiques forcés de mot de passe, mais d’encourager des mots de passe robustes et, lorsque c’est pertinent, l’activation de l’authentification multifacteur.</p>
+<h2 id="mfa">MFA</h2>
+<p>La <strong>MFA</strong> <em>(Multi Factor Authentication)</em> ne sera pas présente dans la première version, car elle ajoute de la complexité pour l’utilisateur et pour le développement. Cependant, elle constitue une étape à privilégier une fois que les fonctionnalités principales seront en place. La MFA est particulièrement efficace contre les <strong>attaques liées aux mots de passe</strong>, comme le <em>credentials stuffing</em>, les attaques de <em>bruteforce</em> ou le <em>password spreading</em>. Pour l&rsquo;application, une méthode de sécurité pourrait être un code à usage unique envoyé par courriel lors d’une connexion depuis un nouvel appareil. Elle serait également implémenté plus tard durant le développement.</p>
+<h2 id="en-résumé">En résumé</h2>
+<p>En bref, je vais commencer avec une authentification par courriel et mot de passe, avec des mots de passe hachés à l’aide d’un algorithme adapté, des jetons JWT à courte durée et un stockage sécurisé pour le navigateur. Les jetons de rafraîchissement et la MFA représenteront des améliorations progressives qui s&rsquo;implémenteront après la première version, si le projet se poursuit.</p>
+<p>L’objectif est de garder une solution compréhensible et maintenable, tout en appliquant dès le départ les bases importantes de la sécurité.</p>
+<p><a href="http://localhost:1313/posts/">Retour</a></p>
+</section>
+
+  
+    
+  
+
+    
+  
+
+
+  <footer>
+    
+      <div class="pb-14 taxonomy-list tags-list">
+      
+        <a href="/tags/authentification/" alt="Authentification">
+          Authentification
+        </a>
+      
+        <a href="/tags/sql/" alt="SQL">
+          SQL
+        </a>
+      
+      </div>
+    
+  </footer>
+</article>
+
+
+
+    </main><footer class="pt-5 pb-10 grid gap-3 sm:grid-cols-2">
+    <div class="text-xs font-semibold text-gray-500 order-2 sm:order-1">
+  © 2026 — Tous droits réservés
+
+</div>
+
+    <div class="order-1 sm:order-2">
+  <ul class="flex sm:justify-end gap-5">
+    
+    
+    <li>    
+      <a href="https://github.com/alexclouts/betterself" target="_blank" rel="me noopener noreferrer">GitHub</a>
+    </li>
+    
+    
+  </ul>
+</div>
+
+</footer></body>
+</html>

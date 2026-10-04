@@ -1,0 +1,33 @@
+[[main]]
+    identifier = "home"
+    name = "Accueil"
+    url = "/"
+    weight = 1
+
+[[main]]
+    identifier = "about"
+    name = "À propos"
+    url = "/about"
+    weight = 2
+
+[[main]]
+    identifier = "posts"
+    name = "Publications"
+    url = "/posts"
+    weight = 3
+
+[[main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags"
+    weight = 4
+
+    
+# Social Media Configuration
+
+
+[[social]]
+    identifier = "github"
+    name = "GitHub"
+    url = "https://github.com/alexclouts/betterself"
+    weight = 3

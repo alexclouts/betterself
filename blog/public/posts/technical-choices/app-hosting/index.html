@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en-US" class="scroll-smooth dark">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Comment BetterSelf sera-t-il hébergé?</title>
+<meta
+  name="description"
+  content="La stratégie d&#39;hébergement envisagée pour le frontend React, le backend FastAPI et la base de données."
+/>
+<link rel="canonical" href="http://localhost:1313/posts/technical-choices/app-hosting/" />
+<link rel="robots" href="/robots.txt" />
+
+<link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
+
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });</script>
+
+<link rel="stylesheet" href="http://localhost:1313/css/app.css" /></head>
+
+  <body class="max-w-screen-md mx-auto px-2.5">
+    <div class="header">
+      <header class="flex flex-col sm:flex-row items-center gap-5 sm:gap-10 pt-16 py-12">
+   
+
+
+<div class="flex-none w-20 h-20 rounded-full overflow-hidden">
+  <a href="http://localhost:1313/">
+    <img
+      srcset="/img/profile_pic_hu_3313524d519b95.png 80w"
+      src="/img/profile_pic.png"
+      width="1086"
+      height="1086"
+      alt="La bouchée du bonheur"
+    />
+  </a>
+</div>
+
+  
+  <div class="flex flex-col gap-5">
+    <a href="http://localhost:1313/">
+  <h1 id="site-title">La bouchée du bonheur</h1>
+</a>
+ 
+    <nav>
+  <ul>
+     
+    
+    <li>
+      <a href="/" class="">
+        Accueil
+      </a>
+    </li>
+    
+    <li>
+      <a href="/about" class="">
+        À propos
+      </a>
+    </li>
+    
+    <li>
+      <a href="/posts" class="">
+        Publications
+      </a>
+    </li>
+    
+    <li>
+      <a href="/tags" class="">
+        Tags
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://ko-fi.com/nixentric" class="">
+        Don
+      </a>
+    </li>
+    
+  </ul>
+</nav>
+
+  </div>
+</header>
+
+      <button class="toggle-theme" aria-label="Toggle Theme" title="Toggle Theme" onclick="toggleTheme()">
+  <span class="theme-icon light"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+</svg> </span>
+  <span class="theme-icon dark"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+</svg> </span>
+</button>
+
+<script>
+  function getPreferredTheme() {
+    const saved = sessionStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    const html = document.querySelector('html');
+
+    if (theme === 'light') {
+      html.classList.remove('dark');
+      document.querySelector('.theme-icon.light').style.display = 'none';
+      document.querySelector('.theme-icon.dark').style.display = 'block';
+    } else {
+      html.classList.add('dark');
+      document.querySelector('.theme-icon.dark').style.display = 'none';
+      document.querySelector('.theme-icon.light').style.display = 'block';
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.querySelector('html').classList.contains('dark') ? 'dark' : 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    sessionStorage.setItem('theme', next);
+    applyTheme(next);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTheme(getPreferredTheme());
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+    if (!sessionStorage.getItem('theme')) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+</script>
+    </div>
+  
+    <main id="content">
+
+
+
+
+<div class="flex flex-col gap-1">
+  <h1 class="text-2xl font-extrabold">
+    
+      Comment BetterSelf sera-t-il hébergé?
+      
+    </h1>
+  
+  
+    <h1 id="comment-betterself-sera-t-il-hébergé">Comment BetterSelf sera-t-il hébergé?</h1>
+<p>Le choix de l&rsquo;hébergement n&rsquo;est pas encore définitif, mais une première architecture se dessine.</p>
+<p>L&rsquo;objectif est de maintenir les coûts aussi bas que possible pendant le développement tout en conservant une architecture qui pourra évoluer si l&rsquo;application gagne des utilisateurs.</p>
+<h2 id="backend-railway">Backend: Railway</h2>
+<p>Pour le backend FastAPI, <strong>Railway</strong> est actuellement envisagé comme solution d&rsquo;hébergement provisoire.</p>
+<p>L&rsquo;un des avantages recherchés est la simplicité du déploiement d&rsquo;une application Python et la possibilité de travailler avec une architecture conteneurisée.</p>
+<p>Le backend pourrait ainsi être empaqueté dans un conteneur Docker et déployé sur la plateforme.</p>
+<p>Railway offre également des possibilités d&rsquo;hébergement de bases de données, ce qui pourrait simplifier l&rsquo;architecture initiale.</p>
+<p>Cependant, les limites du forfait utilisé, les coûts éventuels et les caractéristiques du stockage devront être vérifiés avant un déploiement destiné à de vrais utilisateurs.</p>
+<h2 id="frontend-github-pages">Frontend: GitHub Pages</h2>
+<p>Le frontend React pourrait être hébergé séparément sur <strong>GitHub Pages</strong>.</p>
+<p>Cette approche permettrait de réduire les coûts associés à l&rsquo;hébergement du frontend puisque celui-ci est constitué principalement de fichiers statiques une fois compilé.</p>
+<p>L&rsquo;architecture serait alors approximativement:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Utilisateur
+</span></span><span style="display:flex;"><span>    │
+</span></span><span style="display:flex;"><span>    ├──────────────► GitHub Pages
+</span></span><span style="display:flex;"><span>    │                 React / PWA
+</span></span><span style="display:flex;"><span>    │
+</span></span><span style="display:flex;"><span>    └──────────────► Railway
+</span></span><span style="display:flex;"><span>                      FastAPI
+</span></span><span style="display:flex;"><span>                         │
+</span></span><span style="display:flex;"><span>                         ▼
+</span></span><span style="display:flex;"><span>                    Base de données
+</span></span></code></pre></div><h2 id="linconvénient-deux-environnements">L&rsquo;inconvénient: deux environnements</h2>
+<p>Cette architecture introduit toutefois une certaine complexité.</p>
+<p>Le frontend et le backend seraient hébergés sur deux plateformes différentes.</p>
+<p>Il faudra notamment gérer correctement les communications entre les deux services, les variables de configuration, les politiques CORS et les différentes étapes de déploiement.</p>
+<p>Cette séparation devra donc être comparée avec une solution permettant d&rsquo;héberger davantage de composants au même endroit.</p>
+<h2 id="une-décision-encore-provisoire">Une décision encore provisoire</h2>
+<p>Le choix de Railway et GitHub Pages n&rsquo;est donc pas considéré comme définitif.</p>
+<p>Avant le déploiement final, je devrai notamment évaluer:</p>
+<ul>
+<li>les coûts;</li>
+<li>la facilité de configuration;</li>
+<li>la persistance des données;</li>
+<li>les performances;</li>
+<li>la facilité de déploiement;</li>
+<li>les possibilités de migration;</li>
+<li>la complexité générale de l&rsquo;architecture.</li>
+</ul>
+<p>L&rsquo;objectif est de trouver un compromis raisonnable entre simplicité, coût et capacité d&rsquo;évolution.</p>
+
+  
+</div>
+
+<section class="flex flex-col gap-10">
+  
+</section>
+
+
+
+
+    </main><footer class="pt-5 pb-10 grid gap-3 sm:grid-cols-2">
+    <div class="text-xs font-semibold text-gray-500 order-2 sm:order-1">
+  © 2026 —
+  <a href="http://localhost:1313/">La bouchée du bonheur</a> 
+  <span class="font-normal">with</span>
+  <a
+    href="https://github.com/nixentric/Lowkey-Hugo-Theme"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Lowkey
+  </a>
+</div>
+
+    <div class="order-1 sm:order-2">
+  <ul class="flex sm:justify-end gap-5">
+    
+    
+    <li>    
+      <a href="#" target="_blank" rel="me noopener noreferrer">Twitter</a>
+    </li>
+    
+    <li>    
+      <a href="#" target="_blank" rel="me noopener noreferrer">Instagram</a>
+    </li>
+    
+    <li>    
+      <a href="#" target="_blank" rel="me noopener noreferrer">GitHub</a>
+    </li>
+    
+    
+  </ul>
+</div>
+
+</footer></body>
+</html>

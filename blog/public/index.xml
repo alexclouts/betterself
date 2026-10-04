@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Bonjour 👋 on Le Gourmet</title>
+		<link>http://localhost:1313/</link>
+		<description>Recent content in Bonjour 👋 on Le Gourmet</description>
+		<generator>Hugo</generator>
+		<language>fr-CA</language>
+		
+		
+		
+			<copyright>{year}</copyright>
+		
+		
+			<lastBuildDate>Sat, 03 Oct 2026 22:10:00 +0000</lastBuildDate>
+		
+			<atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Mais qui êtes-vous ?</title>
+				<link>http://localhost:1313/posts/authentication/</link>
+				<pubDate>Sat, 03 Oct 2026 22:10:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/authentication/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/authentication/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;510&#34;&#xA;    height=&#34;510&#34;&#xA;    style=&#34;width: 500px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;p&gt;Même si l’application ne manipule pas de données médicales sensibles, elle contiendra tout de même des informations personnelles : adresse courriel, poids, objectifs, historique alimentaire de l&amp;rsquo;utilisateur, etc. Il est donc important de mettre en place une méthode d&amp;rsquo;authentification simple et suffisamment solide.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>La première impression</title>
+				<link>http://localhost:1313/posts/inspirations/</link>
+				<pubDate>Sat, 26 Sep 2026 08:45:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/inspirations/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/inspirations/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;591&#34;&#xA;    height=&#34;591&#34;&#xA;    style=&#34;width: 500px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;inspiration-et-recherche-didées&#34;&gt;Inspiration et recherche d&amp;rsquo;idées&lt;/h2&gt;&#xA;&lt;p&gt;En attendant que le projet soit validé et que je puisse aller de l&amp;rsquo;avant, j&amp;rsquo;ai commencé à m&amp;rsquo;attarder au &lt;code&gt;UI&lt;/code&gt;. Je me suis fixé 3 tâches pour m&amp;rsquo;aider à visualiser de quoi l&amp;rsquo;application aura l&amp;rsquo;air :&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Mes premiers défis!</title>
+				<link>http://localhost:1313/posts/premiers-defis/</link>
+				<pubDate>Sat, 26 Sep 2026 08:45:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/premiers-defis/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/premiers-defis/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;480&#34;&#xA;    height=&#34;480&#34;&#xA;    style=&#34;width: 500px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;premiers-défis-rencontrés&#34;&gt;Premiers défis rencontrés&lt;/h2&gt;&#xA;&lt;h3 id=&#34;configuration-de-lenvironnement-uv&#34;&gt;Configuration de l&amp;rsquo;environnement &lt;code&gt;uv&lt;/code&gt;&lt;/h3&gt;&#xA;&lt;p&gt;En configurant &lt;code&gt;uv&lt;/code&gt; avec la commande &lt;code&gt;uv init&lt;/code&gt;, j&amp;rsquo;ai rencontré plusieurs erreurs en voulant reproduire les exemples donnés durant les explications. Plutôt que de créer un fichier &lt;code&gt;main.py&lt;/code&gt; dans le répertoire de mon projet, ma commande configurait plutôt le fichier &lt;code&gt;__init__.py&lt;/code&gt; dans un nouveau répertoire &lt;code&gt;/src/betterself/&lt;/code&gt;.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Résumé de mes choix</title>
+				<link>http://localhost:1313/posts/technical-choices/architecture-globale/</link>
+				<pubDate>Fri, 25 Sep 2026 08:55:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/technical-choices/architecture-globale/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/architecture-globale/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;740&#34;&#xA;    height=&#34;740&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;larchitecture-actuelle&#34;&gt;L&amp;rsquo;architecture actuelle&lt;/h2&gt;&#xA;&lt;p&gt;Après avoir comparé différentes possibilités, on peut établir un tableau décrivant la première architecture technique du projet.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Encore incertain...</title>
+				<link>http://localhost:1313/posts/technical-choices/incertitudes/</link>
+				<pubDate>Fri, 25 Sep 2026 08:50:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/technical-choices/incertitudes/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/incertitudes/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;673&#34;&#xA;    height=&#34;673&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;détails-à-explorer&#34;&gt;Détails à explorer&lt;/h2&gt;&#xA;&lt;p&gt;À ce stade, même si l&amp;rsquo;architecture générale du projet commence à prendre forme, plusieurs décisions importantes n&amp;rsquo;ont pas encore été prises.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Quoi d&#39;autre ?</title>
+				<link>http://localhost:1313/posts/technical-choices/autres-alternatives/</link>
+				<pubDate>Fri, 25 Sep 2026 08:45:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/technical-choices/autres-alternatives/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/autres-alternatives/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;1024&#34;&#xA;    height=&#34;684&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;frontend&#34;&gt;Frontend&lt;/h2&gt;&#xA;&lt;h3 id=&#34;application-native-android-kotlinjava&#34;&gt;Application native Android (Kotlin/Java)&lt;/h3&gt;&#xA;&lt;p&gt;L&amp;rsquo;utilisation de Kotlin, en particulier la technologie Kotlin Multiplatform est une solution intéressante. Pour l&amp;rsquo;avoir déjà utilisé dans le passé, elle est très complexe à mettre en place et récente. Certaines librairies ne sont pas encore compatibles avec cette technologie, ce qui exige une double implémentation (soit en Kotlin pour Android et en Swift pour iOs). Dans le cadre du travail, on nous demande de concevoir une application Web, et cette solution ne répond pas à ce critère, ce pourquoi elle n&amp;rsquo;a pas été envisagée plus sérieusement.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Hébergement &amp; stockage</title>
+				<link>http://localhost:1313/posts/technical-choices/choix-sql-hebergement/</link>
+				<pubDate>Fri, 25 Sep 2026 08:40:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/technical-choices/choix-sql-hebergement/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/choix-sql-hebergement/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;736&#34;&#xA;    height=&#34;736&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;pourquoi-sql&#34;&gt;Pourquoi SQL?&lt;/h2&gt;&#xA;&lt;p&gt;Pour stocker les données locales (utilisateurs, aliments, repas, consommations, objectifs), j’ai choisi la base de données relationnelle (&lt;strong&gt;SQL&lt;/strong&gt;). Une fois de plus, j&amp;rsquo;ai déjà utilisé cette technologie précédemment, donc je suis familié avec son fonctionnement et sa syntaxe pour effectuer le traitement de données. Le modèle relationnel comprend plusieurs avantages pour les cas d&amp;rsquo;utilisation de &lt;code&gt;BetterSelf&lt;/code&gt;.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>On se lançe !</title>
+				<link>http://localhost:1313/posts/technical-choices/choix-techniques/</link>
+				<pubDate>Fri, 25 Sep 2026 08:35:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/technical-choices/choix-techniques/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/choix-techniques/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;1500&#34;&#xA;    height=&#34;1000&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;frontend--pourquoi-react-et-pwa-&#34;&gt;Frontend : Pourquoi React et PWA ?&lt;/h2&gt;&#xA;&lt;p&gt;Le premier choix technologique important concerne l&amp;rsquo;interface utilisateur de &lt;code&gt;BetterSelf&lt;/code&gt;. J’ai choisi d’utiliser &lt;strong&gt;React&lt;/strong&gt;, une bibliothèque &lt;em&gt;JavaScript&lt;/em&gt; très répandue pour construire des interfaces web interactives. L&amp;rsquo;un de ses principaux avantages est son modèle basé sur des composants. Une interface comme celle de notre application peut être divisée en plusieurs éléments indépendants: recherche d&amp;rsquo;aliments, lecteur de code-barres, journal alimentaire, objectifs nutritionnels, tableau de bord, etc. Ces composants peuvent ensuite être réutilisés à différents endroits de l&amp;rsquo;application. React offre également un vaste éventail de bibliothèques et une grande quantité d&amp;rsquo;explications et d&amp;rsquo;exemples. Comme il s&amp;rsquo;agit d&amp;rsquo;une technologie très répandue, il sera relativement facile de trouver de l&amp;rsquo;information lorsque je rencontrerai un problème pendant le développement.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Pourquoi BetterSelf?</title>
+				<link>http://localhost:1313/posts/technical-choices/pourquoi-betterself/</link>
+				<pubDate>Fri, 25 Sep 2026 08:15:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/technical-choices/pourquoi-betterself/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/pourquoi-betterself/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;1024&#34;&#xA;    height=&#34;1024&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;lidée-derrière-le-projet&#34;&gt;L&amp;rsquo;idée derrière le projet&lt;/h2&gt;&#xA;&lt;p&gt;L&amp;rsquo;idée derrière l&amp;rsquo;application web &lt;code&gt;BetterSelf&lt;/code&gt; est d&amp;rsquo;offrir une solution Open Source gratuite pour les gens qui suivent attentivement leur alimentation et qui consignent ce qu&amp;rsquo;ils mangent. Il s&amp;rsquo;agit d&amp;rsquo;une application Open Source, dont l&amp;rsquo;objectif est de permettre à l&amp;rsquo;utilisateur de consigner ce qu&amp;rsquo;il mange au quotidien afin qu&amp;rsquo;il puisse comparer sa consommation réelle à des objectifs nutritionnels qu&amp;rsquo;il vise à atteindre.&lt;/p&gt;</description>
+			</item>
+	</channel>
+</rss>

@@ -1,0 +1,23 @@
+{{ $img := .Page.Resources.GetMatch (.Get "src") }}
+{{ $alt := .Get "alt" }}
+{{ $caption := .Get "caption" }}
+{{ $captionPosition := .Get "caption-position" }}
+{{ $width := .Get "width" }}
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="{{ $img.RelPermalink }}"
+    {{ with $alt }}alt="{{ . }}"{{ end }}
+    width="{{ $img.Width }}"
+    height="{{ $img.Height }}"
+    {{ with $width }}style="width: {{ . }}px; height: auto;"{{ end }}
+  />
+
+  {{ with $caption }}
+    <figcaption
+      class="{{ if eq $captionPosition "center" }}flex justify-center{{ else if eq $captionPosition "end" }}flex justify-end{{ end }}"
+    >
+      {{ . }}
+    </figcaption>
+  {{ end }}
+</figure>

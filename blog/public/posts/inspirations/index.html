@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr-CA" class="scroll-smooth dark">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>La première impression</title>
+<meta
+  name="description"
+  content="Logo, processus de On Boarding et recherche d&#39;inspiration."
+/>
+<link rel="canonical" href="http://localhost:1313/posts/inspirations/" />
+<link rel="robots" href="/robots.txt" />
+
+<link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
+
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });</script>
+
+<link rel="stylesheet" href="http://localhost:1313/css/app.css" /></head>
+
+  <body class="max-w-screen-md mx-auto px-2.5">
+    <div class="header">
+      <header class="flex flex-col sm:flex-row items-center gap-5 sm:gap-10 pt-16 py-12">
+   
+
+
+<div class="flex-none w-20 h-20 rounded-full overflow-hidden">
+  <a href="http://localhost:1313/">
+    <img
+      srcset="/img/logo_hu_a162af3880bd01e1.png 80w"
+      src="/img/logo.png"
+      width="1254"
+      height="1254"
+      alt="Le Gourmet"
+    />
+  </a>
+</div>
+
+  
+  <div class="flex flex-col gap-5">
+    <a href="http://localhost:1313/">
+  <h1 id="site-title">Le Gourmet</h1>
+</a>
+ 
+    <nav>
+  <ul>
+     
+    
+    <li>
+      <a href="/" class="">
+        Accueil
+      </a>
+    </li>
+    
+    <li>
+      <a href="/about" class="">
+        À propos
+      </a>
+    </li>
+    
+    <li>
+      <a href="/posts" class="">
+        Publications
+      </a>
+    </li>
+    
+    <li>
+      <a href="/tags" class="">
+        Tags
+      </a>
+    </li>
+    
+  </ul>
+</nav>
+
+  </div>
+</header>
+
+      <button class="toggle-theme" aria-label="Toggle Theme" title="Toggle Theme" onclick="toggleTheme()">
+  <span class="theme-icon light"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+</svg> </span>
+  <span class="theme-icon dark"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+</svg> </span>
+</button>
+
+<script>
+  function getPreferredTheme() {
+    const saved = sessionStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    const html = document.querySelector('html');
+
+    if (theme === 'light') {
+      html.classList.remove('dark');
+      document.querySelector('.theme-icon.light').style.display = 'none';
+      document.querySelector('.theme-icon.dark').style.display = 'block';
+    } else {
+      html.classList.add('dark');
+      document.querySelector('.theme-icon.dark').style.display = 'none';
+      document.querySelector('.theme-icon.light').style.display = 'block';
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.querySelector('html').classList.contains('dark') ? 'dark' : 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    sessionStorage.setItem('theme', next);
+    applyTheme(next);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTheme(getPreferredTheme());
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+    if (!sessionStorage.getItem('theme')) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+</script>
+    </div>
+  
+    <main id="content">
+
+<article class="flex flex-col gap-10">
+  <header class="flex flex-col gap-2">
+    <h2 class="title-large">La première impression</h2>
+
+    <div class="meta">
+      
+      <time datetime="2026-09-26 08:45:00 &#43;0000 UTC" title='Sat, Sep 26, 2026, 8:45 AM UTC'>
+        26/09/2026 - Temps de lecture estimé: 3 minutes
+      </time>
+
+       
+      
+    </div>
+  </header>
+
+  
+
+  <section>
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/inspirations/preview.png"
+    alt="Preview"
+    width="591"
+    height="591"
+    style="width: 500px; height: auto;"
+  />
+
+  
+</figure>
+<h2 id="inspiration-et-recherche-didées">Inspiration et recherche d&rsquo;idées</h2>
+<p>En attendant que le projet soit validé et que je puisse aller de l&rsquo;avant, j&rsquo;ai commencé à m&rsquo;attarder au <code>UI</code>. Je me suis fixé 3 tâches pour m&rsquo;aider à visualiser de quoi l&rsquo;application aura l&rsquo;air :</p>
+<ul>
+<li>Créer un logo et choisir la couleur primaire et secondaire.</li>
+<li>Déterminer les informations à obtenir lors du processus de <code>On Boarding</code>.</li>
+<li>Rechercher des designs qui serviront d&rsquo;inspiration pour le projet.</li>
+</ul>
+<h3 id="création-du-logo">Création du logo</h3>
+<p>L&rsquo;IA m&rsquo;a aidé à générer un logo basé sur les couleurs que je vais utiliser dans mon projet, soit <strong>bleu</strong> comme couleur primaire et <strong>orange</strong> comme couleur secondaire.</p>
+
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/inspirations/logo.png"
+    alt="Logo de BetterSelf"
+    width="1254"
+    height="1254"
+    style="width: 300px; height: auto;"
+  />
+
+  
+</figure>
+<h3 id="le-processus-on-boarding">Le processus On Boarding</h3>
+<p>La création d&rsquo;un compte sur l&rsquo;application nécessite un processus de <strong>On boarding</strong> sous forme de questions à répondre. Les réponses fournies par l&rsquo;utilisateur serviront à mettre de l&rsquo;avant les fonctionnalités de l&rsquo;application pour qu&rsquo;elles reflètent bien ses objectifs. Certains sujets devraient être abordés, tel que démontré sur le tableau blanc.</p>
+
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/inspirations/tableau.jpg"
+    alt="Croquis du processus sur tableau blanc"
+    width="3825"
+    height="1775"
+    style="width: 600px; height: auto;"
+  />
+
+  
+</figure>
+<p>Ces points m&rsquo;aident à prévoir les informations que je devrai stocker au sujet de l&rsquo;utilisateur dès le lancement de l&rsquo;application. Ils seront utiles lors du développement de la base de données SQL.</p>
+<h2 id="bibliothèque-de-designs">Bibliothèque de designs</h2>
+<h3 id="design-1">Design #1</h3>
+<p>Source: <a href="https://dribbble.com/shots/27762376-Dashboard-UI-for-Real-Estate-Arden">https://dribbble.com/shots/27762376-Dashboard-UI-for-Real-Estate-Arden</a></p>
+
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/inspirations/design1.jpg"
+    alt="Image du design 1"
+    width="1440"
+    height="1080"
+    
+  />
+
+  
+</figure>
+<h4 id="points-clés">Points clés:</h4>
+<ul>
+<li>Le contraste des couleurs qu&rsquo;on retrouve dans les <code>layouts</code>, soit le gris plus foncé pour les éléments non sélectionnés, la couleur de fond blanc/gris et la couleur primaire quand l&rsquo;utilisateur sélectionne un choix.</li>
+<li>La manière dont les composantes sont disposés sur l&rsquo;écran, de sorte qu&rsquo;on peut voir plusieurs informations sur une seule page.</li>
+<li>Je crois que ce modèle s&rsquo;adapterait bien à une application mobile.</li>
+<li>Les barres de progression dans la section <code>Property Views</code> serait une excellente manière de présenter l&rsquo;évolution des aliments consignés durant la journée.</li>
+</ul>
+<h3 id="design-2">Design #2</h3>
+<p>Source: <a href="https://dribbble.com/shots/27761977-Money-Management-Dashboard">https://dribbble.com/shots/27761977-Money-Management-Dashboard</a></p>
+
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/inspirations/design2.png"
+    alt="Image du design 2"
+    width="916"
+    height="654"
+    
+  />
+
+  
+</figure>
+<h4 id="points-clés-1">Points clés:</h4>
+<ul>
+<li>Je trouve que le menu à gauche facilite le passage d&rsquo;une section à l&rsquo;autre dans l&rsquo;application. Sur l&rsquo;interface mobile, le menu pourrait défilé en cliquant sur un bouton burger au coin gauche de l&rsquo;écran.</li>
+<li>La section <code>Overview</code> donne immédiatement un aperçu des données importantes pour l&rsquo;utilisateur, que je pourrais reproduire en affichant sa progression pour la période en cours.</li>
+<li>La section des <code>Recent Transactions</code> pourrait aussi être remplacé par les aliments qui ont récemment été consigné, avec la possibilité de faire un ajout rapide.</li>
+<li>Le style des chartes en demi-lune et linéaire qui permet rapidement de voir nos résultats.</li>
+</ul>
+<h3 id="design-3">Design #3</h3>
+<p>Source: <a href="https://dribbble.com/shots/27760886-Dieting-Mobile-App">https://dribbble.com/shots/27760886-Dieting-Mobile-App</a></p>
+
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/inspirations/design3.png"
+    alt="Image du design 3"
+    width="1024"
+    height="768"
+    
+  />
+
+  
+</figure>
+<h4 id="points-clés-2">Points clés:</h4>
+<ul>
+<li>Ce design ressemble davantage à mon idée d&rsquo;application.</li>
+<li>La manière dont les repas de la journée sont divisés en sous-catégorie (<code>breakfast</code>, <code>lunch</code>, <code>snacks</code> et <code>dinner</code>) et chacune d&rsquo;elle affiche le nombre de calories consommés.</li>
+<li>Ça donne une façon de mieux organiser son alimentation.</li>
+<li>Par contre, l&rsquo;usage de l&rsquo;IA pour scanner la nourriture n&rsquo;est pas une fonctionnalité que je veux implémenter en raison du coût et de la complexité qu&rsquo;elle impose.</li>
+<li>À mon avis, le calendrier n&rsquo;est pas nécessaire puisqu&rsquo;il entraîne une surcharge de travail inutile et qu&rsquo;il ne s&rsquo;agit pas d&rsquo;une fonctionnalité essentielle.</li>
+</ul>
+<p><a href="http://localhost:1313/posts/">Retour</a></p>
+</section>
+
+  
+    
+  
+
+    
+  
+
+
+  <footer>
+    
+      <div class="pb-14 taxonomy-list tags-list">
+      
+        <a href="/tags/id%C3%A9e/" alt="Idée">
+          Idée
+        </a>
+      
+        <a href="/tags/inspiration/" alt="Inspiration">
+          Inspiration
+        </a>
+      
+      </div>
+    
+  </footer>
+</article>
+
+
+
+    </main><footer class="pt-5 pb-10 grid gap-3 sm:grid-cols-2">
+    <div class="text-xs font-semibold text-gray-500 order-2 sm:order-1">
+  © 2026 — Tous droits réservés
+
+</div>
+
+    <div class="order-1 sm:order-2">
+  <ul class="flex sm:justify-end gap-5">
+    
+    
+    <li>    
+      <a href="https://github.com/alexclouts/betterself" target="_blank" rel="me noopener noreferrer">GitHub</a>
+    </li>
+    
+    
+  </ul>
+</div>
+
+</footer></body>
+</html>

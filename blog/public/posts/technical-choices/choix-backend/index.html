@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en-US" class="scroll-smooth dark">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Les technologies choisies</title>
+<meta
+  name="description"
+  content="Les raisons derrière les choix du framework et des technologies frontend / backend."
+/>
+<link rel="canonical" href="http://localhost:1313/posts/technical-choices/choix-backend/" />
+<link rel="robots" href="/robots.txt" />
+
+<link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
+
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });</script>
+
+<link rel="stylesheet" href="http://localhost:1313/css/app.css" /></head>
+
+  <body class="max-w-screen-md mx-auto px-2.5">
+    <div class="header">
+      <header class="flex flex-col sm:flex-row items-center gap-5 sm:gap-10 pt-16 py-12">
+   
+
+
+<div class="flex-none w-20 h-20 rounded-full overflow-hidden">
+  <a href="http://localhost:1313/">
+    <img
+      srcset="/img/profile_pic_hu_3313524d519b95.png 80w"
+      src="/img/profile_pic.png"
+      width="1086"
+      height="1086"
+      alt="La bouchée du bonheur"
+    />
+  </a>
+</div>
+
+  
+  <div class="flex flex-col gap-5">
+    <a href="http://localhost:1313/">
+  <h1 id="site-title">La bouchée du bonheur</h1>
+</a>
+ 
+    <nav>
+  <ul>
+     
+    
+    <li>
+      <a href="/" class="">
+        Accueil
+      </a>
+    </li>
+    
+    <li>
+      <a href="/about" class="">
+        À propos
+      </a>
+    </li>
+    
+    <li>
+      <a href="/posts" class="">
+        Publications
+      </a>
+    </li>
+    
+    <li>
+      <a href="/tags" class="">
+        Tags
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://ko-fi.com/nixentric" class="">
+        Don
+      </a>
+    </li>
+    
+  </ul>
+</nav>
+
+  </div>
+</header>
+
+      <button class="toggle-theme" aria-label="Toggle Theme" title="Toggle Theme" onclick="toggleTheme()">
+  <span class="theme-icon light"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+</svg> </span>
+  <span class="theme-icon dark"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+</svg> </span>
+</button>
+
+<script>
+  function getPreferredTheme() {
+    const saved = sessionStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    const html = document.querySelector('html');
+
+    if (theme === 'light') {
+      html.classList.remove('dark');
+      document.querySelector('.theme-icon.light').style.display = 'none';
+      document.querySelector('.theme-icon.dark').style.display = 'block';
+    } else {
+      html.classList.add('dark');
+      document.querySelector('.theme-icon.dark').style.display = 'none';
+      document.querySelector('.theme-icon.light').style.display = 'block';
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.querySelector('html').classList.contains('dark') ? 'dark' : 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    sessionStorage.setItem('theme', next);
+    applyTheme(next);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTheme(getPreferredTheme());
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+    if (!sessionStorage.getItem('theme')) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+</script>
+    </div>
+  
+    <main id="content">
+
+
+
+
+<div class="flex flex-col gap-1">
+  <h1 class="text-2xl font-extrabold">
+    
+      Les technologies choisies
+      
+    </h1>
+  
+  
+    <h1 id="backend--pourquoi-python-et-fastapi">Backend : Pourquoi Python et FastAPI?</h1>
+<p>Pour l’interface utilisateur, j’ai choisi d’utiliser <strong>React</strong>, une bibliothèque <em>JavaScript</em> très répandue pour construire des interfaces web interactives. Cette technologie, combinée avec l&rsquo;approche des <strong>PWA</strong>, permettra à l&rsquo;application de se comporter comme s&rsquo;il s&rsquo;agissait d&rsquo;une application native. L&rsquo;utilisateur pourra donc utiliser ses fonctionnalités à partir de son téléphone cellulaire directement sans avoir à se connecter à une interface Web à chaque fois. Ce choix permet également d&rsquo;éviter les restrictions imposées par les Apps Store, tels que Google Play, qui ont souvent plusieurs exigences à satisfaire pour que l&rsquo;application soit accessible.</p>
+<p>De plus, l&rsquo;objectif est que l’application soit également utilisable sur ordinateur (pour les tests, le développement et l’évaluation). Cette technologie est le meilleur des deux mondes. Elle est également très répandue au sein des applications modernes, ce qui rend la documentation exhaustive et facile d&rsquo;accès.</p>
+<p>Backend : Python et FastAPI</p>
+<p>Côté backend, j’ai choisi d&rsquo;utiliser le language Python, couplé au framework FastAPI. D&rsquo;abord, je suis déjà familié avec la syntaxe de Python pour l&rsquo;avoir déjà utilisé au sein de projets divers. Je considère que la syntaxe est simple et bien adaptée à ce projet et à ses besoins en terme d&rsquo;infrastructures. Python est également un language qui intègre bien des fonctionnalités clés de l&rsquo;application, telles que la gestion des bases de données, l&rsquo;authentification d&rsquo;un utilisateur et les appels à des API externes (comme Open Food Facts dans notre cas). Je ne suis pas familier avec FastAPI, mais ce framework a été choisi pour la construction d&rsquo;un API Web afin d&rsquo;acheminer les requêtes du frontend au bases de données intégrées. Cette technologie est facile à exécuter localement et à déployer dans un conteneur Docker. J&rsquo;utiliserai la librairie Pydantic afin de valider les données et les schémas. Mon backend exposera des endpoints via le protocole HTTP afin de transiger les informations demandées par l&rsquo;utilisateur. Voici des exemples de requête :</p>
+<pre><code>GET /api/foods?search=... – rechercher des aliments;
+GET /api/foods/by-barcode?barcode=... – obtenir les infos d’un produit via son code-barres;
+POST /api/consumptions – enregistrer un aliment consommé;
+GET /api/consumptions?date=... – consulter l’historique d’une journée;
+GET /api/goals, PUT /api/goals – gérer les objectifs caloriques et protéiques.
+</code></pre>
+<p>Le backend de BetterSelf sera développé avec <strong>Python</strong> et <strong>FastAPI</strong>.</p>
+<p>Ce choix repose autant sur les besoins du projet que sur mes connaissances actuelles.</p>
+<h2 id="pourquoi-python">Pourquoi Python?</h2>
+<p>J&rsquo;ai déjà utilisé Python dans plusieurs projets. Je connais donc déjà sa syntaxe et plusieurs concepts fondamentaux du langage.</p>
+<p>Pour ce projet, cette familiarité représente un avantage important. Je pourrai consacrer davantage de temps à la conception de l&rsquo;application et à l&rsquo;apprentissage de FastAPI plutôt qu&rsquo;à l&rsquo;apprentissage simultané d&rsquo;un nouveau langage et d&rsquo;un nouveau framework.</p>
+<p>Python dispose également d&rsquo;un écosystème très développé pour les applications Web, les bases de données et l&rsquo;utilisation d&rsquo;API externes.</p>
+<p>BetterSelf devra notamment communiquer avec <strong>Open Food Facts</strong> afin de rechercher des produits alimentaires et de récupérer leurs informations nutritionnelles.</p>
+<h2 id="pourquoi-fastapi">Pourquoi FastAPI?</h2>
+<p>FastAPI sera utilisé pour créer l&rsquo;API Web qui servira d&rsquo;intermédiaire entre React et le backend.</p>
+<p>L&rsquo;architecture sera donc séparée en plusieurs couches:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Utilisateur
+</span></span><span style="display:flex;"><span>    ↓
+</span></span><span style="display:flex;"><span>React / PWA
+</span></span><span style="display:flex;"><span>    ↓ HTTP
+</span></span><span style="display:flex;"><span>FastAPI
+</span></span><span style="display:flex;"><span>    ↓
+</span></span><span style="display:flex;"><span>Logique applicative
+</span></span><span style="display:flex;"><span>    ↓
+</span></span><span style="display:flex;"><span>Base de données
+</span></span></code></pre></div><p>Le frontend ne communiquera donc pas directement avec la base de données.</p>
+<p>Cette séparation permet notamment de centraliser la logique métier et les règles de validation dans le backend.</p>
+<h2 id="validation-avec-pydantic">Validation avec Pydantic</h2>
+<p>FastAPI utilise <strong>Pydantic</strong> pour définir et valider les données échangées avec l&rsquo;API.</p>
+<p>Cela sera particulièrement utile pour BetterSelf puisque plusieurs types de données devront être transmis entre le frontend et le backend.</p>
+<p>Par exemple, lorsqu&rsquo;un utilisateur enregistre une consommation, le backend devra vérifier que les informations reçues correspondent bien au format attendu.</p>
+<p>La validation côté serveur constitue également une protection importante: le frontend ne doit pas être considéré comme une source de données fiable simplement parce qu&rsquo;il contrôle les champs présentés à l&rsquo;utilisateur.</p>
+<h2 id="les-endpoints-prévus">Les endpoints prévus</h2>
+<p>Quelques endpoints envisagés sont:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>GET  /api/foods?search=...
+</span></span><span style="display:flex;"><span>GET  /api/foods/by-barcode?barcode=...
+</span></span><span style="display:flex;"><span>POST /api/consumptions
+</span></span><span style="display:flex;"><span>GET  /api/consumptions?date=...
+</span></span><span style="display:flex;"><span>GET  /api/goals
+</span></span><span style="display:flex;"><span>PUT  /api/goals
+</span></span></code></pre></div><p>Cette organisation permet de séparer clairement les différentes responsabilités de l&rsquo;API.</p>
+<p>Par exemple, <code>/api/foods</code> sera associé à la recherche d&rsquo;aliments tandis que <code>/api/consumptions</code> servira à gérer les aliments effectivement consommés par l&rsquo;utilisateur.</p>
+<h2 id="pourquoi-ne-pas-utiliser-javascript-également-pour-le-backend">Pourquoi ne pas utiliser JavaScript également pour le backend?</h2>
+<p>Une alternative naturelle aurait été d&rsquo;utiliser Node.js afin d&rsquo;utiliser JavaScript ou TypeScript autant pour le frontend que pour le backend.</p>
+<p>Cette solution aurait l&rsquo;avantage de réduire le nombre de langages utilisés dans le projet.</p>
+<p>Cependant, mes connaissances actuelles en Python sont plus solides que celles que j&rsquo;ai en Node.js et TypeScript. Le choix de Python devrait donc réduire la courbe d&rsquo;apprentissage et faciliter le développement et le débogage.</p>
+<h2 id="déploiement">Déploiement</h2>
+<p>FastAPI se prête également bien à une architecture conteneurisée avec Docker.</p>
+<p>Cela permettra de reproduire plus facilement l&rsquo;environnement de développement sur l&rsquo;environnement d&rsquo;hébergement lorsque le projet sera déployé.</p>
+<p>Le choix exact de la plateforme d&rsquo;hébergement demeure toutefois à confirmer.</p>
+
+  
+</div>
+
+<section class="flex flex-col gap-10">
+  
+</section>
+
+
+
+
+    </main><footer class="pt-5 pb-10 grid gap-3 sm:grid-cols-2">
+    <div class="text-xs font-semibold text-gray-500 order-2 sm:order-1">
+  © 2026 —
+  <a href="http://localhost:1313/">La bouchée du bonheur</a> 
+  <span class="font-normal">with</span>
+  <a
+    href="https://github.com/nixentric/Lowkey-Hugo-Theme"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Lowkey
+  </a>
+</div>
+
+    <div class="order-1 sm:order-2">
+  <ul class="flex sm:justify-end gap-5">
+    
+    
+    <li>    
+      <a href="#" target="_blank" rel="me noopener noreferrer">Twitter</a>
+    </li>
+    
+    <li>    
+      <a href="#" target="_blank" rel="me noopener noreferrer">Instagram</a>
+    </li>
+    
+    <li>    
+      <a href="#" target="_blank" rel="me noopener noreferrer">GitHub</a>
+    </li>
+    
+    
+  </ul>
+</div>
+
+</footer></body>
+</html>

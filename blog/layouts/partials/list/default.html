@@ -1,0 +1,50 @@
+{{ $page := .page }}
+{{ $isTagPage := .isTagPage }}
+
+<article class="flex items-center justify-between gap-10">
+
+{{ with $page.Resources.GetMatch "preview.*" }}
+  {{ $preview := .Fill "160x160 Center" }}
+
+  <a href="{{ $page.Permalink }}" class="post-preview">
+    <img
+      src="{{ $preview.RelPermalink }}"
+      width="160"
+      height="160"
+      alt="{{ $page.Title }}"
+    >
+  </a>
+{{ end }}
+  
+  <div class="flex flex-col gap-1 flex-1">
+  <h1 style="margin-bottom: 0; padding-top: 0;">
+    <a href="{{ $page.Permalink }}">{{ $page.Title }}</a>
+  </h1>
+
+    {{ if not $isTagPage }}
+    <span class="date">
+      <time datetime="{{ $page.PublishDate }}" title='{{ $page.PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM MST" }}'>
+        {{ $page.PublishDate.Format "02/01/2006" }}
+      </time>
+    </span>
+    {{ end }}
+
+    <div class="description">
+      {{ if $page.Params.description }}
+        {{ $page.Params.description }}
+      {{ else if $page.Summary }}
+        {{ $page.Summary }}
+      {{ end }}
+    </div>
+
+    <div class="mt-2">
+      <a class="read-more" href="{{ $page.Permalink }}">
+        {{ i18n "readMore" }}
+        <span class="w-4 h-4 stroke-2">
+          {{ partial "utils/icon" "arrow-right" }}
+        </span>
+      </a>
+    </div>
+  </div>
+
+</article>

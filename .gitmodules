@@ -1,0 +1,3 @@
+[submodule "blog/themes/enchanted-lowkey"]
+	path = blog/themes/enchanted-lowkey
+	url = git@github.com:nixentric/Lowkey-Hugo-Theme.git

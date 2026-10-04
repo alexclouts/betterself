@@ -1,0 +1,35 @@
+{{ define "main" }}
+
+{{ $pages := .Pages }}
+{{ $paginator := .Paginate $pages }}
+{{ $isTagPage := eq .Data.Singular `tag` }}
+
+<div class="flex flex-col gap-1">
+  <h1 class="text-2xl font-extrabold">
+    {{ if .Params.header }}
+      {{ .Params.header }}
+    {{ else }}
+      {{ .Title }}
+      {{ end }}
+    </h1>
+  
+  {{ with .Content }}
+    {{ . }}
+  {{ end }}
+</div>
+
+<section class="flex flex-col">
+  {{ range $index, $page := $paginator.Pages }}
+    {{ partial "list/default" (dict "page" $page "isTagPage" $isTagPage) }}
+
+    {{ if ne $index (sub (len $paginator.Pages) 1) }}
+      <hr class="my-8 border-0 border-t border-gray-200 dark:border-gray-700">
+    {{ end }}
+  {{ end }}
+</section>
+
+{{ if gt $paginator.TotalPages 1 }}
+  {{ partial "list/pagination" . }}
+{{ end }}
+
+{{ end }}

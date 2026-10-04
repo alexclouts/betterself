@@ -19,4 +19,5 @@ def test_is_valid_email():
 	assert is_valid_email("first.last+tag@example.co.uk")
 	assert not is_valid_email("user@example")
 	assert not is_valid_email("user @example.com")
+	assert not is_valid_email("us..er@example..com")
 

@@ -1,0 +1,69 @@
+User-agent: *
+
+Disallow: /posts/
+
+Disallow: /tags/authentification/
+
+Disallow: /
+
+Disallow: /posts/authentication/
+
+Disallow: /tags/sql/
+
+Disallow: /tags/
+
+Disallow: /tags/d%C3%A9fi/
+
+Disallow: /tags/ia/
+
+Disallow: /tags/id%C3%A9e/
+
+Disallow: /tags/inspiration/
+
+Disallow: /posts/inspirations/
+
+Disallow: /posts/premiers-defis/
+
+Disallow: /tags/architecture/
+
+Disallow: /posts/technical-choices/architecture-globale/
+
+Disallow: /posts/technical-choices/incertitudes/
+
+Disallow: /tags/incertitude/
+
+Disallow: /tags/questionnement/
+
+Disallow: /tags/alternative/
+
+Disallow: /tags/nosql/
+
+Disallow: /posts/technical-choices/autres-alternatives/
+
+Disallow: /tags/h%C3%A9bergement/
+
+Disallow: /posts/technical-choices/choix-sql-hebergement/
+
+Disallow: /tags/backend/
+
+Disallow: /tags/frontend/
+
+Disallow: /posts/technical-choices/choix-techniques/
+
+Disallow: /tags/validation/
+
+Disallow: /tags/open-source/
+
+Disallow: /posts/technical-choices/pourquoi-betterself/
+
+Disallow: /tags/probl%C3%A8me/
+
+Disallow: /about/
+
+Disallow: /categories/
+
+Disallow: /categories/css/
+
+Disallow: /categories/javascript/
+
+Disallow: /categories/uncategories/

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Pourquoi React et une Progressive Web App? on La bouchée du bonheur</title>
+		<link>http://localhost:1313/posts/technical-choices/why-react-pwa/</link>
+		<description>Recent content in Pourquoi React et une Progressive Web App? on La bouchée du bonheur</description>
+		<generator>Hugo</generator>
+		<language>en-US</language>
+		
+		
+		
+			<copyright>{year}</copyright>
+		
+		
+			<lastBuildDate></lastBuildDate>
+		
+			<atom:link href="http://localhost:1313/posts/technical-choices/why-react-pwa/index.xml" rel="self" type="application/rss+xml" />
+	</channel>
+</rss>

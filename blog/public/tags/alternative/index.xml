@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Alternative on Le Gourmet</title>
+		<link>http://localhost:1313/tags/alternative/</link>
+		<description>Recent content in Alternative on Le Gourmet</description>
+		<generator>Hugo</generator>
+		<language>fr-CA</language>
+		
+		
+		
+			<copyright>{year}</copyright>
+		
+		
+			<lastBuildDate>Fri, 25 Sep 2026 08:45:00 +0000</lastBuildDate>
+		
+			<atom:link href="http://localhost:1313/tags/alternative/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Quoi d&#39;autre ?</title>
+				<link>http://localhost:1313/posts/technical-choices/autres-alternatives/</link>
+				<pubDate>Fri, 25 Sep 2026 08:45:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/technical-choices/autres-alternatives/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/autres-alternatives/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;1024&#34;&#xA;    height=&#34;684&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;frontend&#34;&gt;Frontend&lt;/h2&gt;&#xA;&lt;h3 id=&#34;application-native-android-kotlinjava&#34;&gt;Application native Android (Kotlin/Java)&lt;/h3&gt;&#xA;&lt;p&gt;L&amp;rsquo;utilisation de Kotlin, en particulier la technologie Kotlin Multiplatform est une solution intéressante. Pour l&amp;rsquo;avoir déjà utilisé dans le passé, elle est très complexe à mettre en place et récente. Certaines librairies ne sont pas encore compatibles avec cette technologie, ce qui exige une double implémentation (soit en Kotlin pour Android et en Swift pour iOs). Dans le cadre du travail, on nous demande de concevoir une application Web, et cette solution ne répond pas à ce critère, ce pourquoi elle n&amp;rsquo;a pas été envisagée plus sérieusement.&lt;/p&gt;</description>
+			</item>
+	</channel>
+</rss>

@@ -1,0 +1,17 @@
+[latestPosts]
+    other = 'Nouvelles publications'
+    
+[readMore]
+    other = 'Lire plus'
+
+[summary]
+    other = 'Résumé'
+
+[estimatedReadingTime]
+    other = 'Temps de lecture estimé: %d minutes'
+
+[404_title]
+    other = 'Page introuvable'
+
+[404_text]
+    other = "Oups ! La page que vous cherchez n'existe pas ou a été déplacée. "

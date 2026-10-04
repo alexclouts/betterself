@@ -1,0 +1,19 @@
+{{ $screenshots := .Page.Resources.Match "screenshots/*" }}
+
+{{ with $screenshots }}
+  <div class="phone-carousel" aria-label="Captures d'écran de l'application">
+    {{ range . }}
+      {{ $image := .Fill "360x720 Center" }}
+
+      <figure class="phone-carousel-item">
+        <img
+          src="{{ $image.RelPermalink }}"
+          width="{{ $image.Width }}"
+          height="{{ $image.Height }}"
+          alt="Capture d'écran de l'application BetterSelf"
+          loading="lazy"
+        >
+      </figure>
+    {{ end }}
+  </div>
+{{ end }}
