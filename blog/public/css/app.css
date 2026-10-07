@@ -1517,21 +1517,6 @@ video {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 }
 
-@media (max-width: 767px) {
-  article > section img {
-    display: block;
-    width: 85% !important;
-    max-width: 85% !important;
-    height: auto !important;
-    margin-inline: auto;
-  }
-
-  article > section .phone-carousel-item img {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-}
-
 .hover\:scroll-auto:hover {
   scroll-behavior: auto;
 }
