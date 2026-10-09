@@ -7,7 +7,7 @@ tags:
   - Idée
   - Inspiration
 categories:
-  - Cadrage et recherche
+  - Fondations
 ---
 
 {{< img
@@ -97,4 +97,4 @@ caption="">}}
 - Par contre, l'usage de l'IA pour scanner la nourriture n'est pas une fonctionnalité que je veux implémenter en raison du coût et de la complexité qu'elle impose.
 - À mon avis, le calendrier n'est pas nécessaire puisqu'il entraîne une surcharge de travail inutile et qu'il ne s'agit pas d'une fonctionnalité essentielle.
 
-[Retour](http://localhost:1313/posts/)
+[Retour](https://alexclouts.github.io/betterself/posts/)

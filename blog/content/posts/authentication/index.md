@@ -7,7 +7,7 @@ tags:
   - Authentification
   - SQL
 categories:
-  - Cadrage et recherche
+  - Fondations
 ---
 
 {{< img
@@ -86,4 +86,4 @@ En bref, je vais commencer avec une authentification par courriel et mot de pass
 
 L’objectif est de garder une solution compréhensible et maintenable, tout en appliquant dès le départ les bases importantes de la sécurité.
 
-[Retour](http://localhost:1313/posts/)
+[Retour](https://alexclouts.github.io/betterself/posts/)

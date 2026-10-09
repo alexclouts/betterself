@@ -3,24 +3,36 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-10-04T14:30:00+00:00</lastmod>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/architecture/</loc>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/architecture-et-donn%C3%A9es/</loc>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>
-    <lastmod>2026-10-04T14:30:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/categories/cadrage-et-recherche/</loc>
-    <lastmod>2026-10-04T14:30:00+00:00</lastmod>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2026-10-04T14:30:00+00:00</lastmod>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/database-management/</loc>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/sql/</loc>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2026-10-07T21:56:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/d%C3%A9fi/</loc>
     <lastmod>2026-10-04T14:30:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/premiers-defis/blog/</loc>
+    <loc>http://localhost:1313/categories/fondations/</loc>
     <lastmod>2026-10-04T14:30:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>http://localhost:1313/posts/first_challenges/blog/</loc>
     <lastmod>2026-10-04T14:30:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/vid%C3%A9o/</loc>
@@ -30,9 +42,6 @@
     <lastmod>2026-10-03T22:10:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/authentication/</loc>
-    <lastmod>2026-10-03T22:10:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/sql/</loc>
     <lastmod>2026-10-03T22:10:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/ia/</loc>
@@ -47,16 +56,13 @@
     <loc>http://localhost:1313/posts/inspirations/</loc>
     <lastmod>2026-09-26T08:45:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/premiers-defis/github-commits/</loc>
+    <loc>http://localhost:1313/posts/first_challenges/github_commits/</loc>
     <lastmod>2026-09-26T08:45:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/architecture/</loc>
+    <loc>http://localhost:1313/posts/technical_choices/architecture-globale/</loc>
     <lastmod>2026-09-25T08:55:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/technical-choices/architecture-globale/</loc>
-    <lastmod>2026-09-25T08:55:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/technical-choices/incertitudes/</loc>
+    <loc>http://localhost:1313/posts/technical_choices/incertitudes/</loc>
     <lastmod>2026-09-25T08:50:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/incertitude/</loc>
@@ -71,13 +77,13 @@
     <loc>http://localhost:1313/tags/nosql/</loc>
     <lastmod>2026-09-25T08:45:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/technical-choices/autres-alternatives/</loc>
+    <loc>http://localhost:1313/posts/technical_choices/autres-alternatives/</loc>
     <lastmod>2026-09-25T08:45:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/h%C3%A9bergement/</loc>
     <lastmod>2026-09-25T08:40:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/technical-choices/choix-sql-hebergement/</loc>
+    <loc>http://localhost:1313/posts/technical_choices/choix-sql-hebergement/</loc>
     <lastmod>2026-09-25T08:40:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/backend/</loc>
@@ -86,7 +92,7 @@
     <loc>http://localhost:1313/tags/frontend/</loc>
     <lastmod>2026-09-25T08:35:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/technical-choices/choix-techniques/</loc>
+    <loc>http://localhost:1313/posts/technical_choices/choix-techniques/</loc>
     <lastmod>2026-09-25T08:35:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/validation/</loc>
@@ -95,7 +101,7 @@
     <loc>http://localhost:1313/tags/open-source/</loc>
     <lastmod>2026-09-25T08:15:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/technical-choices/pourquoi-betterself/</loc>
+    <loc>http://localhost:1313/posts/technical_choices/pourquoi-betterself/</loc>
     <lastmod>2026-09-25T08:15:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/probl%C3%A8me/</loc>
@@ -103,8 +109,10 @@
   </url><url>
     <loc>http://localhost:1313/about/</loc>
   </url><url>
-    <loc>http://localhost:1313/phases/cadrage-et-recherche/</loc>
+    <loc>http://localhost:1313/phases/schemas/</loc>
   </url><url>
     <loc>http://localhost:1313/phases/</loc>
+  </url><url>
+    <loc>http://localhost:1313/phases/foundations/</loc>
   </url>
 </urlset>

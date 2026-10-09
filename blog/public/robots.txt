@@ -2,25 +2,31 @@ User-agent: *
 
 Disallow: /posts/
 
-Disallow: /
+Disallow: /tags/architecture/
 
-Disallow: /categories/cadrage-et-recherche/
+Disallow: /categories/architecture-et-donn%C3%A9es/
+
+Disallow: /
 
 Disallow: /categories/
 
-Disallow: /tags/d%C3%A9fi/
+Disallow: /posts/database-management/
 
-Disallow: /posts/premiers-defis/blog/
+Disallow: /tags/sql/
 
 Disallow: /tags/
+
+Disallow: /tags/d%C3%A9fi/
+
+Disallow: /categories/fondations/
+
+Disallow: /posts/first_challenges/blog/
 
 Disallow: /tags/vid%C3%A9o/
 
 Disallow: /tags/authentification/
 
 Disallow: /posts/authentication/
-
-Disallow: /tags/sql/
 
 Disallow: /tags/ia/
 
@@ -30,13 +36,11 @@ Disallow: /tags/inspiration/
 
 Disallow: /posts/inspirations/
 
-Disallow: /posts/premiers-defis/github-commits/
+Disallow: /posts/first_challenges/github_commits/
 
-Disallow: /tags/architecture/
+Disallow: /posts/technical_choices/architecture-globale/
 
-Disallow: /posts/technical-choices/architecture-globale/
-
-Disallow: /posts/technical-choices/incertitudes/
+Disallow: /posts/technical_choices/incertitudes/
 
 Disallow: /tags/incertitude/
 
@@ -46,28 +50,30 @@ Disallow: /tags/alternative/
 
 Disallow: /tags/nosql/
 
-Disallow: /posts/technical-choices/autres-alternatives/
+Disallow: /posts/technical_choices/autres-alternatives/
 
 Disallow: /tags/h%C3%A9bergement/
 
-Disallow: /posts/technical-choices/choix-sql-hebergement/
+Disallow: /posts/technical_choices/choix-sql-hebergement/
 
 Disallow: /tags/backend/
 
 Disallow: /tags/frontend/
 
-Disallow: /posts/technical-choices/choix-techniques/
+Disallow: /posts/technical_choices/choix-techniques/
 
 Disallow: /tags/validation/
 
 Disallow: /tags/open-source/
 
-Disallow: /posts/technical-choices/pourquoi-betterself/
+Disallow: /posts/technical_choices/pourquoi-betterself/
 
 Disallow: /tags/probl%C3%A8me/
 
 Disallow: /about/
 
-Disallow: /phases/cadrage-et-recherche/
+Disallow: /phases/schemas/
 
 Disallow: /phases/
+
+Disallow: /phases/foundations/

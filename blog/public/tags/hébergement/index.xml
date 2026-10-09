@@ -17,10 +17,10 @@
 			<atom:link href="http://localhost:1313/tags/h%C3%A9bergement/index.xml" rel="self" type="application/rss+xml" />
 			<item>
 				<title>Hébergement &amp; stockage</title>
-				<link>http://localhost:1313/posts/technical-choices/choix-sql-hebergement/</link>
+				<link>http://localhost:1313/posts/technical_choices/choix-sql-hebergement/</link>
 				<pubDate>Fri, 25 Sep 2026 08:40:00 +0000</pubDate>
-				<guid>http://localhost:1313/posts/technical-choices/choix-sql-hebergement/</guid>
-				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical-choices/choix-sql-hebergement/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;736&#34;&#xA;    height=&#34;736&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;pourquoi-sql&#34;&gt;Pourquoi SQL?&lt;/h2&gt;&#xA;&lt;p&gt;Pour stocker les données locales (utilisateurs, aliments, repas, consommations, objectifs), j’ai choisi la base de données relationnelle (&lt;strong&gt;SQL&lt;/strong&gt;). Une fois de plus, j&amp;rsquo;ai déjà utilisé cette technologie précédemment, donc je suis familié avec son fonctionnement et sa syntaxe pour effectuer le traitement de données. Le modèle relationnel comprend plusieurs avantages pour les cas d&amp;rsquo;utilisation de &lt;code&gt;BetterSelf&lt;/code&gt;.&lt;/p&gt;</description>
+				<guid>http://localhost:1313/posts/technical_choices/choix-sql-hebergement/</guid>
+				<description>&lt;figure class=&#34;mb-5 flex justify-center&#34;&gt;&#xA;  &lt;img&#xA;    src=&#34;http://localhost:1313/posts/technical_choices/choix-sql-hebergement/preview.png&#34;&#xA;    alt=&#34;Preview&#34;&#xA;    width=&#34;736&#34;&#xA;    height=&#34;736&#34;&#xA;    style=&#34;width: 600px; height: auto;&#34;&#xA;  /&gt;&#xA;&#xA;  &#xA;&lt;/figure&gt;&#xA;&lt;h2 id=&#34;pourquoi-sql&#34;&gt;Pourquoi SQL?&lt;/h2&gt;&#xA;&lt;p&gt;Pour stocker les données locales (utilisateurs, aliments, repas, consommations, objectifs), j’ai choisi la base de données relationnelle (&lt;strong&gt;SQL&lt;/strong&gt;). Une fois de plus, j&amp;rsquo;ai déjà utilisé cette technologie précédemment, donc je suis familié avec son fonctionnement et sa syntaxe pour effectuer le traitement de données. Le modèle relationnel comprend plusieurs avantages pour les cas d&amp;rsquo;utilisation de &lt;code&gt;BetterSelf&lt;/code&gt;.&lt;/p&gt;</description>
 			</item>
 	</channel>
 </rss>

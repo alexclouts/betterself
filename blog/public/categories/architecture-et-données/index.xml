@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Architecture Et Données on Le Gourmet</title>
+		<link>http://localhost:1313/categories/architecture-et-donn%C3%A9es/</link>
+		<description>Recent content in Architecture Et Données on Le Gourmet</description>
+		<generator>Hugo</generator>
+		<language>fr-CA</language>
+		
+		
+		
+			<copyright>{year}</copyright>
+		
+		
+			<lastBuildDate>Wed, 07 Oct 2026 21:56:00 +0000</lastBuildDate>
+		
+			<atom:link href="http://localhost:1313/categories/architecture-et-donn%C3%A9es/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Réflexions sur le schéma des données</title>
+				<link>http://localhost:1313/posts/database-management/</link>
+				<pubDate>Wed, 07 Oct 2026 21:56:00 +0000</pubDate>
+				<guid>http://localhost:1313/posts/database-management/</guid>
+				<description>&lt;h1 id=&#34;comment-schématiser-les-données-&#34;&gt;Comment schématiser les données ?&lt;/h1&gt;&#xA;&lt;p&gt;Pour m&amp;rsquo;aider à déterminer la meilleure manière de structurer les données dans le cadre du projet, j&amp;rsquo;ai décidé de diviser la tâche par thèmes, ou plutôt par problèmes à résoudre. J&amp;rsquo;aborderai chacun de ces sujets, un à un, afin de définir les schémas les plus appropriés pour la gestion de leurs données.&lt;/p&gt;</description>
+			</item>
+	</channel>
+</rss>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr-CA" class="scroll-smooth dark">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Réflexions sur le schéma des données</title>
+<meta
+  name="description"
+  content="Réfléchir à comment organiser les données dans l&#39;application de la meilleure manière envisageable, selon les tâches à accomplir."
+/>
+<link rel="canonical" href="http://localhost:1313/posts/database-management/" />
+<link rel="robots" href="/robots.txt" />
+
+<link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
+
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });</script>
+
+<link rel="stylesheet" href="http://localhost:1313/css/app.css" /></head>
+
+  <body class="max-w-screen-md mx-auto px-2.5">
+    <div class="header">
+      <header class="flex flex-col sm:flex-row items-center gap-5 sm:gap-10 pt-16 py-12">
+   
+
+
+<div class="flex-none w-20 h-20 rounded-full overflow-hidden">
+  <a href="http://localhost:1313/">
+    <img
+      srcset="/img/logo_hu_a162af3880bd01e1.png 80w"
+      src="/img/logo.png"
+      width="1254"
+      height="1254"
+      alt="Le Gourmet"
+    />
+  </a>
+</div>
+
+  
+  <div class="flex flex-col gap-5">
+    <a href="http://localhost:1313/">
+  <h1 id="site-title">Le Gourmet</h1>
+</a>
+ 
+    <nav>
+  <ul>
+     
+    
+    <li>
+      <a href="/" class="">
+        Accueil
+      </a>
+    </li>
+    
+    <li>
+      <a href="/posts" class="">
+        Publications
+      </a>
+    </li>
+    
+    <li>
+      <a href="/tags" class="">
+        Tags
+      </a>
+    </li>
+    
+    <li>
+      <a href="/about" class="">
+        À propos
+      </a>
+    </li>
+    
+    <li>
+      <a href="/phases" class="">
+        Étapes du projet
+      </a>
+    </li>
+    
+  </ul>
+</nav>
+
+  </div>
+</header>
+
+      <button class="toggle-theme" aria-label="Toggle Theme" title="Toggle Theme" onclick="toggleTheme()">
+  <span class="theme-icon light"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+</svg> </span>
+  <span class="theme-icon dark"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+</svg> </span>
+</button>
+
+<script>
+  function getPreferredTheme() {
+    const saved = sessionStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    const html = document.querySelector('html');
+
+    if (theme === 'light') {
+      html.classList.remove('dark');
+      document.querySelector('.theme-icon.light').style.display = 'none';
+      document.querySelector('.theme-icon.dark').style.display = 'block';
+    } else {
+      html.classList.add('dark');
+      document.querySelector('.theme-icon.dark').style.display = 'none';
+      document.querySelector('.theme-icon.light').style.display = 'block';
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.querySelector('html').classList.contains('dark') ? 'dark' : 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    sessionStorage.setItem('theme', next);
+    applyTheme(next);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTheme(getPreferredTheme());
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+    if (!sessionStorage.getItem('theme')) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+</script>
+    </div>
+  
+    <main id="content">
+
+<article class="flex flex-col gap-10">
+  <header class="flex flex-col gap-2">
+    <h2 class="title-large">Réflexions sur le schéma des données</h2>
+
+    <div class="meta">
+      
+      
+        <time datetime="2026-10-07 21:56:00 &#43;0000 UTC" title='Wed, Oct 7, 2026, 9:56 PM UTC'>
+          07/10/2026 -
+        </time>
+      
+      Temps de lecture estimé: 10 minutes
+
+       
+       — 
+        
+          <a class="categories" href="/categories/architecture-et-donn%C3%A9es/" alt="Architecture Et Données">
+            Architecture Et Données
+          </a>
+         
+      
+    </div>
+  </header>
+
+  
+
+  <section>
+
+
+
+
+
+<figure class="mb-5 flex justify-center">
+  <img
+    src="/posts/database-management/preview.png"
+    alt="Preview"
+    width="1024"
+    height="1024"
+    style="width: 500px; height: auto;"
+  />
+
+  
+</figure>
+<h1 id="comment-schématiser-les-données-">Comment schématiser les données ?</h1>
+<p>Pour m&rsquo;aider à déterminer la meilleure manière de structurer les données dans le cadre du projet, j&rsquo;ai décidé de m&rsquo;attarder à chaque fonctionnalité de l&rsquo;application en analysant les problèmes à résoudre. J&rsquo;aborderai chacun de ces thèmes, un à un, afin de définir les schémas les plus appropriés pour la gestion de leurs données.</p>
+<h2 id="authentification-des-utilisateurs">Authentification des utilisateurs</h2>
+<p>L&rsquo;authentification comprend la connexion de l&rsquo;utilisateur à l&rsquo;application. Cette table devrait être la plus épurée possible selon moi. On ne veut pas qu&rsquo;elle contienne des mesures comme le poids, sexe, âge, niveau d&rsquo;activité, ect. puisque, même si ces informations portent sur l&rsquo;utilisateur, cette table sert uniquement à l&rsquo;authentifier. La séparation des tâches évite de faire appel à cette table si, par exemple, un utilisateur perd 1 lbs. et qu&rsquo;il apporte des modifications à son profile. On limite les raisons d&rsquo;interagir avec cette table afin de limiter son exposition et des enjeux de sécurité.</p>
+<h3 id="sauvegarde-du-hash">Sauvegarde du hash</h3>
+<p>Comme je l&rsquo;ai expliqué dans une <a href="https://alexclouts.github.io/betterself/posts/authentication/" title="Mais qui êtes-vous ?">publication</a> portant sur l&rsquo;authentification la semaine dernière, c&rsquo;est important de <strong>ne pas sauvegarder le mot de passe en <em>plain text</em> dans la base de données</strong>. C&rsquo;est ici que le hash entre en jeu. On va plutôt utiliser des algorithmes pour encrypter le mot de passe, tels que <strong>Argon2id et bcrypt</strong>.</p>
+<h2 id="autres-informations-du-profile">Autres informations du profile</h2>
+<p>Ce qui nous amène aux autres informations que nous obtenons au sujet de l&rsquo;utilisateur pour calculer son <code>BMR</code> (Basal Metabolic Rate) - soit le nombre de calories dépensé au repos. En apprendre davantage <a href="https://my.clevelandclinic.org/health/body/basal-metabolic-rate-bmr/" title="BMR (Basal Metabolic Rate)">ici</a>. Nous chercherons à obtenir ces informations assez rapidement une fois que l&rsquo;utilisateur aura créé son compte. Le calcul du BMR se fait selon plusieurs paramètres :</p>
+<ul>
+<li>Le poids (qu&rsquo;on peut sauvegarder en <em>kg</em> <strong>dans une table dédiée</strong> comme expliqué ensuite)</li>
+<li>La taille (en <em>cm</em>)</li>
+<li>L&rsquo;âge. Pour ne pas sauvegarder des données personnelles inutilement, on conserve l&rsquo;année de naissance uniquement.</li>
+<li>Le niveau d&rsquo;activité physique. Faible à Élevé. Cette valeur sera choisie sous forme de choix à suggestions.</li>
+</ul>
+<p>Ces informations sont associés à un seul utilisateur, qu&rsquo;on peut identifier avec son ID. On peut également récupérer son nom pour favoriser un meilleur <em>UX</em>.</p>
+<h3 id="changement-de-poids-au-fil-du-temps">Changement de poids au fil du temps</h3>
+<p>On se retrouve face à un problème d&rsquo;architecture intéressant. Naturellement, le poids de l&rsquo;utilisateur fluctue au fil du temps. S&rsquo;il désire connaître l&rsquo;évolution de son poids, par exemple, sur un graphique, nous devons trouver un moyen de stocker ces données de manière cohérente. Il nous faudrait donc une table qui sauvegarde les enregistrements de son poids à un temps donné, et qu&rsquo;on associe cette entrée à l&rsquo;utilisateur qui l&rsquo;a créé. Parmi les données qu&rsquo;on voudra enregistrer, on y trouve :</p>
+<ul>
+<li>L&rsquo;ID de l&rsquo;utilisateur à qui appartient la saisie</li>
+<li>Le poids mesuré (en kg)</li>
+<li>Un <em>timestamp</em> qui identifie le moment exact de la capture.</li>
+<li>Une photo ?</li>
+</ul>
+
+
+
+<div class="alert-box info">
+  
+    <h3 class="alert-title">La photo de progression</h3>
+  
+  <p class="flex flex-row items-center gap-2">
+    
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="alert-icon"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+      />
+    </svg>
+    
+    
+Dans une version 2.0, je pourrais configurer la fonction de joindre une photo associée au poids enregistré.
+
+  </p>
+</div>
+
+<h2 id="les-objectifs">Les objectifs</h2>
+<p>Comme mentionné dans la <a href="https://alexclouts.github.io/betterself/posts/inspirations/" title="La première impression">présentation</a> du projet, l&rsquo;utilisateur commence le processus de On Boarding en se fixant des objectifs en matière de nutrition. Ces objectifs doivent être sauvegardés à quelque part avec un format structuré.</p>
+<h3 id="type-dobjectif">Type d&rsquo;objectif</h3>
+<p>On se demande d&rsquo;abord, veut-il:</p>
+<ul>
+<li>Perdre du poids</li>
+<li>Prendre de la masse musculaire</li>
+<li>Maintenir son poids corporel</li>
+<li>Faire une recomposition corporelle</li>
+</ul>
+
+
+
+<div class="alert-box info">
+  
+    <h3 class="alert-title">La recomposition corporelle</h3>
+  
+  <p class="flex flex-row items-center gap-2">
+    
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="alert-icon"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+      />
+    </svg>
+    
+    
+La recomposition corporelle passe aussi par l'entraînement physique de l'utilisateur, ce qui implique une forme de suivi des séances. Pour garder le projet initial simple, la version 1.0 ne couvrira pas cet aspect.
+
+  </p>
+</div>
+
+<p>On veut aussi conserver des informations telles que:</p>
+<ul>
+<li>La date de début de l&rsquo;objectif (<em>timestamp</em>)</li>
+<li>La date de fin prévue pour atteindre l&rsquo;objectif (<em>timestamp</em>)</li>
+<li>Le poids qu&rsquo;il vise à atteindre (en kg)</li>
+</ul>
+<h3 id="des-objectifs-plus-spécifiques">Des objectifs plus spécifiques</h3>
+<p>Ces informations sont déterminées dès le jour 1, et elles ne sont pas supposés changer tant que l&rsquo;objectif n&rsquo;est pas accompli. Cependant, on aimerait pouvoir accéder à des objectifs plus concrets au quotidien, tel que de savoir le nombre de calories et de protéines devront être consommés durant la journée (aussi appelée la cible). Quand le poids d&rsquo;une personne change, un nouveau calcul du BMR devra être fait pour ajuster le déficit en conséquence.</p>
+<p>C&rsquo;est pourquoi il est préférable de contenir ces données dans une seconde table, soit pour les cibles courantes qui sont régulièrement mises à jour. Chaque nouvelle entrée de poids par l&rsquo;utilisateur entraînera la création d&rsquo;une nouvelle <em>cible nutritionnelle</em>, qui prendra la place de l&rsquo;ancien.</p>
+<h2 id="aliments">Aliments</h2>
+<p>Du côté des aliments, il est certain que nous devons concevoir un schéma pour représenter les aliments. On veut aussi pouvoir lui attribuer des données nutritionnelles. Une première table serait de représenter un aliment par ses informations nominatives et des indications qui lui permettent de voir d&rsquo;où il provient (sa source).</p>
+<h4 id="indécision-au-sujet-des-informations-nutritionnelles">Indécision au sujet des informations nutritionnelles</h4>
+<p>Pour cette approche, j&rsquo;ai des hésitations au sujet de ce qui est préférable. Devrais-je conserver les données nutritionnelles d&rsquo;un aliment dans une table distincte? Si je conserve les valeurs nutritionnelles de cet aliment dans une table différente, cela me permettrait de séparer clairement deux responsabilités, soit l&rsquo;identité de l&rsquo;aliment et sa composition. Cette façon de faire permettrait aussi de gérer plusieurs sources pour le même aliment, selon la marque, par exemple. Par contre, cette division rend l&rsquo;architecture de la base de données plus complexe. Comme je veux <code>Keep It Simple Stupid</code> pour l&rsquo;instant, j&rsquo;ai privilégié une structure tout-en-un pour le moment.</p>
+
+
+
+<div class="alert-box info">
+  
+    <h3 class="alert-title">Le partage des aliments</h3>
+  
+  <p class="flex flex-row items-center gap-2">
+    
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="alert-icon"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+      />
+    </svg>
+    
+    
+Dans une version 2.0, je pourrais ajouter la fonctionnalité de créer un aliment accessible par d'autres utilisateurs. Cette fonction nécessiterait la configuration d'une base de données en ligne afin de servir les requêtes en provenance de l'application.
+
+  </p>
+</div>
+
+<h3 id="la-création-dune-recette">La création d&rsquo;une recette</h3>
+<p>Je considère que cette fonctionnalité est assez importante pour être inclue dès la première version. Un utilisateur pourra créer une recette (un repas, en d&rsquo;autres mots), en y ajoutant des aliments. Une fois la <em>recette</em> créée, elle se comporte de la même manière qu&rsquo;un aliment, c&rsquo;est-à-dire que la personne peut l&rsquo;ajouter à son journal sans devoir consigner tous les aliments un-à-un. Selon moi, lorsqu&rsquo;une recette est créée, on devrait toujours pouvoir consulter les aliments qui la compose. Nous devrions ainsi avoir deux tables distinctes: une qui contient l&rsquo;<em>identité</em> de la recette, et l&rsquo;autre qui contient tous les aliments associés à celle-ci.</p>
+<p>Pour créer une recette, on devra avoir des informations telles que le poids total, l&rsquo;ID du propriétaire à l&rsquo;origine de l&rsquo;entrée, un nom et une description facultative. Maintenant, pou déterminer ce qui compose une recette, on doit avoir une table qui comprend :</p>
+<ul>
+<li>L&rsquo;ID de la recette liée à l&rsquo;entrée</li>
+<li>L&rsquo;ID de l&rsquo;aliment ajouté</li>
+<li>La quantité ajouté</li>
+</ul>
+<h4 id="questionnements-au-sujet-de-la-suite-logique">Questionnements au sujet de la suite logique</h4>
+<p>Si on se projette dans le fonctionnement des requêtes, l&rsquo;utilisateur qui ajoute une recette à son journal entraînera les opérations suivantes :</p>
+<ol>
+<li>Depuis la table <code>recipe_ingredients</code>, récupération des ingrédients associés à l&rsquo;ID de la recette.</li>
+<li>Depuis la table <code>foods</code>, récupération des informations nutritionnelles associées à chaque aliment de la liste obtenue. Les valeurs que nous recherchons sont <code>reference_weight_g</code>, <code>calories_kcal</code>, et la quantité de macronutriments.</li>
+<li>En fonction de la quantité indiquée par l&rsquo;utilisateur, il faut calculer, au prorata, la valeur nutritionnelle de la recette selon les valeurs pour chaque aliment.</li>
+</ol>
+<p>Maintenant, je me demande si une méthode plus simple me permettrait d&rsquo;alléger cette procédure? Si une recette est consignée tel un aliment lorsque l&rsquo;utilisateur l&rsquo;ajoute à son journal, ne serait-il pas plus simple de créer une nouvelle entrée dans la table <code>aliment</code> qui hériterait des informations de la recette? La valeur nutritionnelle pourrait se calculer seulement lorsque la recette est créée, ce qui éliminerait la nécessité d&rsquo;effectuer des requêtes successives à chaque fois que l&rsquo;utilisateur ajoute une recette au journal.</p>
+<p>Cette situation me faisait hésiter jusqu&rsquo;à ce que je me pose la question suivante: <em>qu&rsquo;adviendrait-il si on ajoute un aliment à notre recette après sa création, ou qu&rsquo;on modifie le poids d&rsquo;un item?</em> Les informations associé à la recette ne seraient plus valides. Si on veut que les informations restent cohérentes, on devrait alors mettre à jour <strong>deux tables</strong> à chaque fois qu&rsquo;un aliment au sein d&rsquo;une liste subit des modifications, soit:</p>
+<ol>
+<li><code>recipe_ingredients</code>: Ajout d&rsquo;un ingrédient ou mise à jour de sa quantité</li>
+<li><code>foods</code>: Recalcul de la valeur nutritionnelle totale associé à la recette, puisque sa composition a changé.</li>
+</ol>
+<p>Je crois aussi que la bonne pratique à adopter dans ce contexte est de conserver une séparation logique entre les entités. Une recette et un aliment ont <strong>des propriétés distinctes</strong> qu&rsquo;on ne doit pas confondre. Quand j&rsquo;analyse le processus de cette façon, cette nouvelle alternative est définitivement une façon de faire moins intuitive que l&rsquo;idée proposée initialement. Je crois qu&rsquo;il est préférable que l&rsquo;application mesure la composition d&rsquo;une recette à chaque fois qu&rsquo;un utilisateur l&rsquo;ajoute à son journal. Cela nous garantit qu&rsquo;on aura toujours les valeurs à jour. La gestion de la mémoire <em>cache</em> permettra aussi d&rsquo;accélérer ce processus et de minimiser les requêtes faites à la base de données.</p>
+<h2 id="entrée-dans-le-journal">Entrée dans le journal</h2>
+<p>D&rsquo;ailleurs, il faut réléchir à la manière dont l&rsquo;utilisateur pourra consigner un aliment dans son journal, tout en s&rsquo;assurant que l&rsquo;application puisse récupérer l&rsquo;historique alimentaire de la personne. Il faut considérer les caractéristiques suivantes :</p>
+<ol>
+<li>Une entrée est associé à un utilisateur, donc elle devra conserver son ID.</li>
+<li>Une entrée peut être un aliment ou une recette. Comme mentionné ci-haut, elles sont dans une table différente, donc il faut conserver leur ID dans un champ propre à chacun afin de retracer la ressource originale.</li>
+<li>Un seul champ entre <code>food_id</code> et <code>recipe_id</code> doit être déclaré. L&rsquo;autre sera forcément <code>NULL</code>.</li>
+<li>Puisqu&rsquo;on veut conserver l&rsquo;historique des entrées, les informations doivent être à l&rsquo;abri des modifications futures apportées aux recettes ou aux aliments. Pour cette raison, le nom et la valeur nutritionnelle de l&rsquo;aliment seront enregistrés au moment où il est consommé.</li>
+<li>On doit conserver la date de l&rsquo;ajout et la recette associée à cette consigne.</li>
+</ol>
+<h1 id="conception-actuelle">Conception actuelle</h1>
+<p>Pour résumé la conception de la base de données, voici les tables conçues jusqu&rsquo;à présent :</p>
+<ol>
+<li>Pour l&rsquo;utilisateur:</li>
+</ol>
+<ul>
+<li><code>users</code>: Données liées à l&rsquo;authentification uniquement.</li>
+<li><code>user_profiles</code>: Données du profile, permettant de mesurer le BMR.</li>
+<li><code>body_measurements</code>: Données liées à la mesure du poids.</li>
+<li><code>nutrition_goals</code>: Données portant sur les objectifs globaux.</li>
+<li><code>goal_targets</code>: Données portant sur les objectifs quotidiens.</li>
+</ul>
+<ol start="2">
+<li>Pour le journal:</li>
+</ol>
+<ul>
+<li><code>foods</code>: Données nominatives et nutritionnelles d&rsquo;un aliment.</li>
+<li><code>recipes</code>: Données nominatives d&rsquo;une recette.</li>
+<li><code>recipe_ingredients</code>: Données d&rsquo;un aliment consigné dans une recette.</li>
+<li><code>food_consumptions</code>: Données associées à une entrée dans le journal.</li>
+</ul>
+<h1 id="éléments-manquants-au-mvp">Éléments manquants au MVP</h1>
+<p>J&rsquo;ai questionné l&rsquo;IA à savoir si des tables sont manquantes selon ma conception initiale des besoins de l&rsquo;application. Elle m&rsquo;a offert des suggestions intéressantes que je pourrai implémenter une fois que le <em>MVP</em> sera fonctionnel. Elle m&rsquo;a suggéré les point suivants :</p>
+<h2 id="les-portions">Les portions</h2>
+<p>Actuellement, toutes les quantités sont saisies en grammes, mais ce principe ne permet pas d&rsquo;ajouter des quantités plus intuitives pour l&rsquo;utilisateur, comme: une banane, deux oeufs, une tasse de riz, etc. Cette option permettrait d&rsquo;améliorer l&rsquo;UX au sein de l&rsquo;application. Pour ce faire, l&rsquo;IA me propose d&rsquo;ajouter une table qui s&rsquo;occupe <strong>des portions</strong>, afin d&rsquo;associer une quantité (mesurée en grammes) à une mesure abstraite qu&rsquo;on peut choisir lorsqu&rsquo;on ajoute un aliment.</p>
+<h2 id="optimisation-des-repas-de-la-journée">Optimisation des repas de la journée</h2>
+<p>Les repas de la journée sont directement imbriquées dans l&rsquo;entrée de la table <code>food_consumptions</code>. Cette méthode est simple et fonctionnel pour le MVP, mais elle offre moins de liberté si, par exemple, l&rsquo;utilisateur veut diviser sa journée en 6 repas, ou s&rsquo;il veut leur assigner un nom personnalisé. L&rsquo;IA me suggère donc de créer une table <code>meals</code> dédiée à chaque repas. Au lieu de <em>hardcodé</em> le nom du repas dans l&rsquo;entrée du journal, on pourrait conserver l&rsquo;ID qui fait référence au repas associé.</p>
+<h2 id="résumé-nutritionnel-quotidien">Résumé nutritionnel quotidien</h2>
+<p>Cette dernière est facultative selon l&rsquo;IA, mais elle est particulièrement pratique si je désire afficher rapidement des statistiques en lien avec l&rsquo;historique de consommation de l&rsquo;utilisateur. Il s&rsquo;agirait d&rsquo;une table <code>daily_nutrition_summaries</code>, qui regroupe les résumés quotidien de l&rsquo;apport calorique et nutritionnelle consommé.</p>
+</section>
+
+  
+    
+  
+
+    
+  
+
+
+  <footer>
+    
+      <div class="pb-14 taxonomy-list tags-list">
+      
+        <a href="/tags/sql/" alt="SQL">
+          SQL
+        </a>
+      
+        <a href="/tags/architecture/" alt="Architecture">
+          Architecture
+        </a>
+      
+      </div>
+    
+  </footer>
+</article>
+
+
+
+    </main><footer class="pt-5 pb-10 grid gap-3 sm:grid-cols-2">
+    <div class="text-xs font-semibold text-gray-500 order-2 sm:order-1">
+  © 2026 — Tous droits réservés
+
+</div>
+
+    <div class="order-1 sm:order-2">
+  <ul class="flex sm:justify-end gap-5">
+    
+    
+    <li>    
+      <a href="https://github.com/alexclouts/betterself" target="_blank" rel="me noopener noreferrer">GitHub</a>
+    </li>
+    
+    
+  </ul>
+</div>
+
+</footer></body>
+</html>
