@@ -1,5 +1,5 @@
 ---
-title: "Mes premiers défis!"
+title: "Configuration de GitHub et l'IA"
 header: ""
 date: 2026-09-26T08:45:00.000Z
 description: "Configurer le projet GitHub et m'approprier l'IA."

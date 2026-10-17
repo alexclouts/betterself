@@ -1,5 +1,5 @@
 ---
-title: "Résumé de mes choix"
+title: "Résumé de l'architecture"
 header: ""
 date: 2026-09-25T08:55:00.000Z
 description: "Résumé des choix techniques actuels et présentation de l'architecture globale."

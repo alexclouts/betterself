@@ -1,5 +1,5 @@
 ---
-title: "Mais qui êtes-vous ?"
+title: "Processus d'authentification"
 header: ""
 date: 2026-10-03T22:10:00.000Z
 description: "Processus d'authentification des utilisateurs, sécurité et gestion des sessions."

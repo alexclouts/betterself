@@ -1,5 +1,5 @@
 ---
-title: "On se lançe !"
+title: "Mes choix techniques"
 header: ""
 date: 2026-09-25T08:35:00.000Z
 description: "Présentation des choix du framework et des technologies frontend / backend."

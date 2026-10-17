@@ -1,5 +1,5 @@
 ---
-title: "Encore incertain..."
+title: "Incertitudes et questionnements"
 header: ""
 date: 2026-09-25T08:50:00.000Z
 description: "Les principales incertitudes techniques qui devront être résolues pendant le développement."

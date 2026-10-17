@@ -1,5 +1,5 @@
 ---
-title: "Quoi d'autre ?"
+title: "Les alternatives envisagées"
 header: ""
 date: 2026-09-25T08:45:00.000Z
 description: "Les principales technologies envisagées avant de retenir React, FastAPI et la base de données SQL."

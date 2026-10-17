@@ -1,5 +1,5 @@
 ---
-title: "Réflexions sur le schéma des données"
+title: "Les schéma de données"
 header: ""
 date: 2026-10-07T21:56:00.000Z
 description: "Réfléchir à comment organiser les données dans l'application de la meilleure manière envisageable, selon les tâches à accomplir."

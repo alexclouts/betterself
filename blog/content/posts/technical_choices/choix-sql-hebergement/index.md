@@ -1,5 +1,5 @@
 ---
-title: "Hébergement & stockage"
+title: "Les choix d'hébergement"
 header: ""
 date: 2026-09-25T08:40:00.000Z
 description: "La stratégie d'hébergement et la base de données comme solution de stockage."
