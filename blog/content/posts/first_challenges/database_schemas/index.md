@@ -20,13 +20,13 @@ width="500">}}
 
 # Une architecture complète
 
-Dans ma [publication précédente](https://alexclouts.github.io/betterself/posts/data-schema/), j’ai présenté la manière dont je souhaitais structurer les données de BetterSelf. J’y ai expliqué la séparation entre les utilisateurs, leurs profils, leurs mesures corporelles, leurs objectifs et leurs consommations alimentaires.
+Dans ma [publication précédente](https://alexclouts.github.io/betterself/posts/data_schema/), j’ai présenté la manière dont je souhaitais structurer les données de BetterSelf. J’y ai expliqué la séparation entre les utilisateurs, leurs profils, leurs mesures corporelles, leurs objectifs et leurs consommations alimentaires.
 
 Au cours des dernières semaines, j'ai écrit plusieurs publications décrivant les raisons derrières l'architecture choisie pour la conception de ce projet. Vous pouvez consulter un résumé de ces choix sur [cette page](https://alexclouts.github.io/betterself/posts/technical_choices/architecture-globale/).
 
 ## L'organisation du code
 
-La décision la plus importante que j’ai prise entoure l'organisation du code. Il consiste à séparer clairement le frontend du backend. Une explication plus exhausive de cette démarche se trouve dans la documentation [ADR: Choix de l’organisation du code](https://github.com/alexclouts/betterself/tree/main/docs/adr/code-organisation).
+La décision la plus importante que j’ai prise entoure l'organisation du code. Il consiste à séparer clairement le frontend du backend. Une explication plus exhausive de cette démarche se trouve dans la documentation [ADR: Choix de l’organisation du code](https://github.com/alexclouts/betterself/tree/main/docs/adr/code-organisation/index.md).
 
 BetterSelf sera composé de trois parties principales.
 
@@ -60,13 +60,13 @@ De plus, l’application devra interroger l’API Open Food Facts pour récupér
 
 Le choix de ces architectures a été expliqué dans ma publication portant sur [Mes choix techniques](https://alexclouts.github.io/betterself/posts/technical_choices/choix-techniques/), où je décris d'ailleurs ce qui les démarque des autres solutions.
 
-Vous pouvez également retrouvé un comparatif de mon choix avec les alternatives que j'ai envisagé pour la conception de ce projet dans la documentation [ADR: Choix d'un frontend React](https://github.com/alexclouts/betterself/tree/main/docs/adr/react-frontend) et [ADR: Choix d'un backend FastAPI](https://github.com/alexclouts/betterself/tree/main/docs/adr/fastapi-backend).
+Vous pouvez également retrouvé un comparatif de mon choix avec les alternatives que j'ai envisagé pour la conception de ce projet dans la documentation [ADR: Choix d'un frontend React](https://github.com/alexclouts/betterself/tree/main/docs/adr/react-frontend/index.md) et [ADR: Choix d'un backend FastAPI](https://github.com/alexclouts/betterself/tree/main/docs/adr/fastapi-backend/index.md).
 
 React et FastAPI forment un combo gagnant pour BetterSelf parce qu’ils permettent une séparation claire entre l’interface et la logique métier. Le frontend envoie les requêtes, le backend applique les règles métier, interroge Open Food Facts et accède à la base SQL. Cette architecture découplée facilite les tests, la maintenance et l’évolution progressive de l’application.
 
 ## Python pour la victoire
 
-Le choix de FastAPI entraîne naturellement le choix de Python comme langage backend. C'est ce pourquoi je n'ai pas envisagé d'autre alternative à ce choix technique. J'ai tout de même conçu une [ADR: Choix du language Python](https://github.com/alexclouts/betterself/tree/main/docs/adr/python-language) afin d'évaluer si ce language est véritablement adapté à mes besoins.
+Le choix de FastAPI entraîne naturellement le choix de Python comme langage backend. C'est ce pourquoi je n'ai pas envisagé d'autre alternative à ce choix technique. J'ai tout de même conçu une [ADR: Choix du language Python](https://github.com/alexclouts/betterself/tree/main/docs/adr/python-language/index.md) afin d'évaluer si ce language est véritablement adapté à mes besoins.
 
 Python est adapté à BetterSelf parce qu’il est utilisé à la fois pour le développement Web, l’analyse de données et l’apprentissage machine. Sa syntaxe lisible facilite la maintenance du code, et son écosystème offre plusieurs bibliothèques pertinentes pour le projet.
 

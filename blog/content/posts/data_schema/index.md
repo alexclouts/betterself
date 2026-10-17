@@ -105,24 +105,23 @@ Pour créer une recette, on devra avoir des informations telles que le poids tot
 
 #### Questionnements au sujet de la suite logique
 
-Si on se projette dans le fonctionnement des requêtes, l'utilisateur qui ajoute une recette à son journal entraînera les opérations suivantes :
+#### Questionnement au sujet du calcul des valeurs nutritionnelles
 
-1. Depuis la table `recipe_ingredients`, récupération des ingrédients associés à l'ID de la recette.
-2. Depuis la table `foods`, récupération des informations nutritionnelles associées à chaque aliment de la liste obtenue. Les valeurs que nous recherchons sont `reference_weight_g`, `calories_kcal`, et la quantité de macronutriments.
-3. En fonction de la quantité indiquée par l'utilisateur, il faut calculer, au prorata, la valeur nutritionnelle de la recette selon les valeurs pour chaque aliment.
+Lorsqu’un utilisateur ajoute une recette à son journal, l’application doit déterminer ses calories et ses macronutriments. Comme une recette est composée de plusieurs aliments, il faut récupérer les informations nutritionnelles de chacun, puis les ajuster selon la quantité consommée.
 
-Maintenant, je me demande si une méthode plus simple me permettrait d'alléger cette procédure? Si une recette est consignée tel un aliment lorsque l'utilisateur l'ajoute à son journal, ne serait-il pas plus simple de créer une nouvelle entrée dans la table `aliment` qui hériterait des informations de la recette? La valeur nutritionnelle pourrait se calculer seulement lorsque la recette est créée, ce qui éliminerait la nécessité d'effectuer des requêtes successives à chaque fois que l'utilisateur ajoute une recette au journal.
+Au départ, je me suis demandé s’il serait plus simple de calculer ces valeurs une seule fois, lors de la création de la recette. La recette pourrait alors être enregistrée comme un aliment, avec ses calories et macronutriments déjà calculés. Ainsi, chaque ajout au journal serait plus rapide, puisqu’il n’y aurait pas besoin de refaire le calcul.
 
-Cette situation me faisait hésiter jusqu'à ce que je me pose la question suivante: _qu'adviendrait-il si on ajoute un aliment à notre recette après sa création, ou qu'on modifie le poids d'un item?_ Les informations associé à la recette ne seraient plus valides. Si on veut que les informations restent cohérentes, on devrait alors mettre à jour **deux tables** à chaque fois qu'un aliment au sein d'une liste subit des modifications, soit:
+Toutefois, cette approche pose un problème : une recette peut évoluer. L’utilisateur pourrait ajouter un aliment, retirer un ingrédient ou modifier une quantité après avoir créé la recette. Dans ce cas, les valeurs nutritionnelles enregistrées ne correspondraient plus à la composition réelle de la recette.
 
-1. `recipe_ingredients`: Ajout d'un ingrédient ou mise à jour de sa quantité
-2. `foods`: Recalcul de la valeur nutritionnelle totale associé à la recette, puisque sa composition a changé.
+Pour garder les données cohérentes, il faudrait alors mettre à jour deux tables à chaque modification : `recipe_ingredients`, pour la composition, et `foods`, pour les valeurs nutritionnelles de la recette. Cette duplication augmente le risque qu’une mise à jour soit oubliée.
 
-Je crois aussi que la bonne pratique à adopter dans ce contexte est de conserver une séparation logique entre les entités. Une recette et un aliment ont **des propriétés distinctes** qu'on ne doit pas confondre. Quand j'analyse le processus de cette façon, cette nouvelle alternative est définitivement une façon de faire moins intuitive que l'idée proposée initialement. Je crois qu'il est préférable que l'application mesure la composition d'une recette à chaque fois qu'un utilisateur l'ajoute à son journal. Cela nous garantit qu'on aura toujours les valeurs à jour. La gestion de la mémoire _cache_ permettra aussi d'accélérer ce processus et de minimiser les requêtes faites à la base de données.
+J’ai donc choisi de conserver une séparation claire entre une recette et un aliment. La recette est enregistrée dans `recipes`, sa composition dans `recipe_ingredients`, et les valeurs nutritionnelles sont calculées au moment où la recette est ajoutée au journal. Les résultats calculés sont ensuite enregistrés dans `food_consumptions`.
+
+Ainsi, l’historique reste fidèle au moment de la consommation, même si la recette est modifiée plus tard. Cette approche évite également de traiter une recette comme un aliment, alors qu’il s’agit en réalité d’un assemblage d’aliments.
 
 ## Entrée dans le journal
 
-D'ailleurs, il faut réléchir à la manière dont l'utilisateur pourra consigner un aliment dans son journal, tout en s'assurant que l'application puisse récupérer l'historique alimentaire de la personne. Il faut considérer les caractéristiques suivantes :
+Iil faut aussi réléchir à la manière dont l'utilisateur pourra consigner un aliment dans son journal, tout en s'assurant que l'application puisse récupérer l'historique alimentaire de la personne. Il faut considérer les caractéristiques suivantes :
 
 1. Une entrée est associé à un utilisateur, donc elle devra conserver son ID.
 2. Une entrée peut être un aliment ou une recette. Comme mentionné ci-haut, elles sont dans une table différente, donc il faut conserver leur ID dans un champ propre à chacun afin de retracer la ressource originale.
@@ -134,7 +133,7 @@ D'ailleurs, il faut réléchir à la manière dont l'utilisateur pourra consigne
 
 Pour résumé la conception de la base de données, voici les tables conçues jusqu'à présent :
 
-1. Pour l'utilisateur:
+1. **Pour l'utilisateur:**
 
 - `users`: Données liées à l'authentification uniquement.
 - `user_profiles`: Données du profile, permettant de mesurer le BMR.
@@ -142,7 +141,7 @@ Pour résumé la conception de la base de données, voici les tables conçues ju
 - `nutrition_goals`: Données portant sur les objectifs globaux.
 - `goal_targets`: Données portant sur les objectifs quotidiens.
 
-2. Pour le journal:
+2. **Pour le journal:**
 
 - `foods`: Données nominatives et nutritionnelles d'un aliment.
 - `recipes`: Données nominatives d'une recette.
