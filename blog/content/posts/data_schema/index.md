@@ -103,8 +103,6 @@ Pour créer une recette, on devra avoir des informations telles que le poids tot
 - L'ID de l'aliment ajouté
 - La quantité ajouté
 
-#### Questionnements au sujet de la suite logique
-
 #### Questionnement au sujet du calcul des valeurs nutritionnelles
 
 Lorsqu’un utilisateur ajoute une recette à son journal, l’application doit déterminer ses calories et ses macronutriments. Comme une recette est composée de plusieurs aliments, il faut récupérer les informations nutritionnelles de chacun, puis les ajuster selon la quantité consommée.
