@@ -19,6 +19,8 @@ width="500">}}
 
 # Déploiement du projet
 
+Je vous invite à consulter la [Vidéo 2: Données et début de conception](https://youtu.be/KnhiKsN72_A). Celle-ci vous présente brièvement la progression réalisée au cours des dernières semaines. Bon visionnement.
+
 ## Un premier problème
 
 J'ai commencé en suivant les instructions données par l'IA pour déployer le frontend et le backend. J'ai utilisé `npm` pour installer les environnements nécessaires. J'utilise le framework `Vite` pour ensuite avoir la possibilité de le déployer sur un appareil mobile.

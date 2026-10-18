@@ -8,4 +8,7 @@ Bienvenue sur mon blog **Le Gourmet** ! L'objectif de ce blog est de documenter 
 Le menu `Publications` vous offre un aperçu des plus récents développements.
 Vous y trouverez mes réflexions, les choix techniques que j'ai fait pour ce projet et les connaissances acquises en cours de route.
 
-Pour un aperçu de la navigation sur le site, je vous invite à consulter la [première capsule YouTube](https://www.youtube.com/watch?v=CSiVBhjG1qg "Vidéo 1: Présentation du Blog") que j'ai enregistré. Bon visionnement !
+Voici la liste des vidéos réalisées lors du développement du projet :
+
+- Pour la navigation sur le site, consultez la [Vidéo 1: Présentation du Blog](https://www.youtube.com/watch?v=CSiVBhjG1qg).
+- Pour la rédaction des ADRs et des schémas de données, consultez la [Vidéo 2: Données et début de conception](https://youtu.be/KnhiKsN72_A).
