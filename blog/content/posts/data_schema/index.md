@@ -1,5 +1,5 @@
 ---
-title: "Les schéma de données"
+title: "Les schémas de données"
 header: ""
 date: 2026-10-07T21:56:00.000Z
 description: "Réfléchir à comment organiser les données dans l'application de la meilleure manière envisageable, selon les tâches à accomplir."
@@ -20,6 +20,8 @@ width="500">}}
 
 Pour m'aider à déterminer la meilleure manière de structurer les données dans le cadre du projet, j'ai décidé de m'attarder à chaque fonctionnalité de l'application en analysant les problèmes à résoudre. J'aborderai chacun de ces thèmes, un à un, afin de définir les schémas les plus appropriés pour la gestion de leurs données.
 
+Le résultat de cette analyse m'a permis servi de guide afin de construire les schémas de la base de données. Vous pouvez consulter les [modèles de données](https://github.com/alexclouts/betterself/blob/main/docs/data-model.md) du projet pour en savoir davantage.
+
 ## Authentification des utilisateurs
 
 L'authentification comprend la connexion de l'utilisateur à l'application. Cette table devrait être la plus épurée possible selon moi. On ne veut pas qu'elle contienne des mesures comme le poids, sexe, âge, niveau d'activité, ect. puisque, même si ces informations portent sur l'utilisateur, cette table sert uniquement à l'authentifier. La séparation des tâches évite de faire appel à cette table si, par exemple, un utilisateur perd 1 lbs. et qu'il apporte des modifications à son profile. On limite les raisons d'interagir avec cette table afin de limiter son exposition et des enjeux de sécurité.
@@ -30,7 +32,7 @@ Comme je l'ai expliqué dans une [publication](https://alexclouts.github.io/bett
 
 ## Autres informations du profile
 
-Ce qui nous amène aux autres informations que nous obtenons au sujet de l'utilisateur pour calculer son `BMR` (Basal Metabolic Rate) - soit le nombre de calories dépensé au repos. En apprendre davantage [ici](https://my.clevelandclinic.org/health/body/basal-metabolic-rate-bmr/ "BMR (Basal Metabolic Rate)"). Nous chercherons à obtenir ces informations assez rapidement une fois que l'utilisateur aura créé son compte. Le calcul du BMR se fait selon plusieurs paramètres :
+Ce qui nous amène aux autres informations que nous obtenons au sujet de l'utilisateur pour calculer son `BMR` ([Basal Metabolic Rate](https://my.clevelandclinic.org/health/body/basal-metabolic-rate-bmr/)) - soit le nombre de calories dépensé au repos. Nous chercherons à obtenir ces informations assez rapidement une fois que l'utilisateur aura créé son compte. Le calcul du BMR se fait selon plusieurs paramètres :
 
 - Le poids (qu'on peut sauvegarder en _kg_ **dans une table dédiée** comme expliqué ensuite)
 - La taille (en _cm_)

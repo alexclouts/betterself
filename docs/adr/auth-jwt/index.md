@@ -1,4 +1,4 @@
-# ADR: Choix d’une méthode d’authentification
+# ADR: Authentification JWT Token
 
 ## Contexte
 

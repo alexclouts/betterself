@@ -84,7 +84,7 @@ J’ai aussi envisagé Firebase, qui permettrait un déploiement rapide. Par con
 
 ## L’authentification avec JWT
 
-Pour l’authentification, j’ai choisi des jetons JWT (JSON Web Tokens). Vous pouvez consulter mon [ADR: Choix d’une méthode d’authentification](https://github.com/alexclouts/betterself/tree/main/docs/adr/authentication/index.md).
+Pour l’authentification, j’ai choisi des jetons JWT (JSON Web Tokens). Vous pouvez consulter mon [ADR: Authentification JWT Token](https://github.com/alexclouts/betterself/tree/main/docs/adr/auth-jwt/index.md).
 
 Les explications plus complètes à ce sujet sont d'ailleurs abordé dans ma publication portant sur le [processus d'authentification](https://alexclouts.github.io/betterself/posts/authentication/).
 
