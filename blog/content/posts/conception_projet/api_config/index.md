@@ -11,6 +11,12 @@ categories:
   - Développement
 ---
 
+{{< img
+src="preview.png"
+alt="Preview"
+caption=""
+width="500">}}
+
 # Déploiement du projet
 
 ## Un premier problème
@@ -44,7 +50,7 @@ export default App;
 src="snap_indisponible.png"
 alt="Capture d'écran"
 caption=""
-width="500">}}
+width="800">}}
 
 Pour obtenir plus d'informations sur ce problème, j'ai décidé de concevoir l'infrastructure autour des tests unitaires pour tenter de comprendre ce qui ne fonctionne pas. J'ai finalement compris, avec un peu d'aide, que le problème était que j'ai 2 projets Python dans le répertoire mère. J'ai oublié que j'avais déjà créer un projet Python en configurant mes premiers tests unitaires. Cela fait en sorte que le module `uv` peut remonter et détecter le **pyproject.toml** de la racine. Il utilise alors le .venv de la racine, qui ne contient pas FastAPI, httpx ou pytest. Cela causait un `ModuleNotFoundError`, qui expliquait pourquoi mes tests échouaient.
 
@@ -52,7 +58,7 @@ Pour obtenir plus d'informations sur ce problème, j'ai décidé de concevoir l'
 src="snap_test_erreur.png"
 alt="Capture d'écran 2"
 caption=""
-width="500">}}
+width="700">}}
 
 En vérifiant de nouveau sur le serveur, je vois toujours le même message d'erreur à l'écran. Puisque le test a réussi, je comprends que le problème n'est pas situé du côté API. Pour m'assurer qu'il ne provient pas du backend, je vérifie sur mon navigateur, qui m'affiche la réponse que je veux voir:
 
@@ -68,7 +74,7 @@ Je continue d'investiguer pour me rendre compte que je n'ai pas configuré CORS 
 src="snap_cors_blocked.png"
 alt="Capture d'écran 3"
 caption=""
-width="500">}}
+width="700">}}
 
 ### Bonnes pratiques à préconiser
 
