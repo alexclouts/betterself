@@ -3,7 +3,12 @@ name = "backend"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "alembic>=1.20.0",
     "fastapi[standard]>=0.143.3",
+    "passlib[argon2]>=1.7.4",
+    "pydantic-settings>=2.16.0",
+    "python-jose[cryptography]>=3.5.0",
+    "sqlalchemy>=2.1.5",
 ]
 [tool.pytest.ini_options]
 pythonpath = ["src"]

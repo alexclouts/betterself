@@ -52,7 +52,9 @@ alt="Capture d'écran"
 caption=""
 width="800">}}
 
-Pour obtenir plus d'informations sur ce problème, j'ai décidé de concevoir l'infrastructure autour des tests unitaires pour tenter de comprendre ce qui ne fonctionne pas. J'ai finalement compris, avec un peu d'aide, que le problème était que j'ai 2 projets Python dans le répertoire mère. J'ai oublié que j'avais déjà créer un projet Python en configurant mes premiers tests unitaires. Cela fait en sorte que le module `uv` peut remonter et détecter le **pyproject.toml** de la racine. Il utilise alors le .venv de la racine, qui ne contient pas FastAPI, httpx ou pytest. Cela causait un `ModuleNotFoundError`, qui expliquait pourquoi mes tests échouaient.
+Pour obtenir plus d'informations sur ce problème, j'ai décidé de concevoir l'infrastructure autour des tests unitaires pour tenter de comprendre ce qui ne fonctionne pas. J'ai finalement compris, avec un peu d'aide, quel était le problème: j'ai 2 projets Python dans le même projet, soit un dans le répertoire mère et un dans `/betterself/backend/`.
+
+J'ai oublié que j'avais déjà créer un projet Python en configurant mes premiers tests unitaires. Cela fait en sorte que le module `uv` peut remonter et détecter le **pyproject.toml** de la racine. Il utilise alors le .venv de la racine, qui ne contient pas FastAPI, httpx ou pytest. Cela causait un `ModuleNotFoundError`, qui expliquait pourquoi mes tests échouaient.
 
 {{< img
 src="snap_test_erreur.png"
@@ -60,7 +62,7 @@ alt="Capture d'écran 2"
 caption=""
 width="700">}}
 
-En vérifiant de nouveau sur le serveur, je vois toujours le même message d'erreur à l'écran. Puisque le test a réussi, je comprends que le problème n'est pas situé du côté API. Pour m'assurer qu'il ne provient pas du backend, je vérifie sur mon navigateur, qui m'affiche la réponse que je veux voir:
+En vérifiant de nouveau sur le serveur à partir d'un navigateur Web, je vois toujours le même message d'erreur à l'écran. Puisque le test a réussi, je comprends que le problème n'est pas situé du côté API. Pour m'assurer qu'il ne provient pas du backend, je vérifie sur mon navigateur, qui m'affiche la réponse que je veux voir:
 
 ```
 {"status":"ok"}
@@ -68,7 +70,7 @@ En vérifiant de nouveau sur le serveur, je vois toujours le même message d'err
 
 ## Bloqué par la politique CORS
 
-Je continue d'investiguer pour me rendre compte que je n'ai pas configuré CORS pour permettre à mon frontend de communiquer avec mon backend. La meilleure pratique qui m'est suggéré est de définir une configuration contrôlée par environnement., tout en évitant d'utiliser `allow_origins=["*"]` avec `allow_credentials=True`.
+Je continue d'investiguer pour me rendre compte que je n'ai pas configuré CORS. Une politique CORS permettrait à mon frontend de communiquer avec mon backend. La meilleure pratique qui m'est suggéré est de définir une configuration contrôlée par environnement.
 
 {{< img
 src="snap_cors_blocked.png"
@@ -76,6 +78,8 @@ alt="Capture d'écran 3"
 caption=""
 width="700">}}
 
-### Bonnes pratiques à préconiser
+### Bonnes pratiques à adopter
 
-Il faut que je fasse attention à autoriser uniquement dans CORS les origines précises dans mon frontend. Je conserve cette liste dans une variable d'environnement. Après avoir apporté les modifications à mon projet, je reçois finalement un réponse `Backend: ok`.
+Il faut que je fasse attention à ne pas utiliser `allow_origins=["*"]` avec `allow_credentials=True`. De plus, il faut autoriser uniquement dans CORS les origines précises dans mon frontend. Je conserve cette liste dans une variable d'environnement.
+
+Après avoir apporté les modifications à mon projet, je reçois finalement un réponse `Backend: ok`.
