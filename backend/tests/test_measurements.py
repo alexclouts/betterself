@@ -140,3 +140,113 @@ def test_list_measurements_empty(client):
     measurements = response.json()
     assert len(measurements) == 0
 
+
+
+# Test pour vérifier la récupération des mesures filtrées par date
+def test_list_measurements_by_date(client):
+    access_token = register_and_login(client)
+
+    # Crée plusieurs échantillons pour tester le filtrage par date
+    create_measurement(client, access_token, date(2024, 6, 1), 75)
+    create_measurement(client, access_token, date(2024, 8, 14), 80)
+    create_measurement(client, access_token, date(2024, 9, 2), 85)
+
+    response = client.get(
+        "/measurements?start_date=2024-06-01&end_date=2024-08-16",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert response.status_code == 200
+    measurements = response.json()
+
+    # Vérifie que la mesure retournée correspond à la date filtrée
+    assert len(measurements) == 2
+    assert measurements[0]["weight_kg"] == 75
+
+    assert measurements[0]["date"] == "2024-06-01"
+    assert measurements[1]["date"] == "2024-08-14"
+
+
+"""
+Tests pour la récupérations d'une seule mesure à partir du endpoint /measurements/<id>.
+"""
+
+def test_get_measurement_success(client):
+    access_token = register_and_login(client)
+
+    # Crée une mesure pour tester la récupération par ID
+    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
+
+    # Vérifie que la création de la mesure a réussi
+    assert response.status_code == 201
+
+    measurement_id = response.json()["id"]
+
+    # Récupère la mesure par ID
+    response = client.get(
+        f"/measurements/{measurement_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    # Vérifie que la récupération de la mesure par ID a réussi
+    assert response.status_code == 200
+    measurement = response.json()
+
+    # Vérifie que les données de la mesure sont correctes
+    assert measurement["id"] == measurement_id
+    assert measurement["weight_kg"] == 75
+    assert measurement["date"] == "2024-06-01"
+
+
+# Test pour vérifier la récupération d'une mesure qui n'existe pas
+def test_get_measurement_not_found(client):
+    access_token = register_and_login(client)
+
+    response = client.get(
+        "/measurements/9999",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert response.status_code == 404
+
+
+# Test pour vérifier l'accès non autorisé à une mesure existante
+def test_get_measurement_unauthorized(client):
+    response = client.get("/measurements/1")
+    assert response.status_code == 401
+
+
+# Test pour vérifier que l'utilisateur ne peut pas accéder à la mesure d'un autre utilisateur
+def test_get_measurement_for_another_user(client):
+    access_token = register_and_login(client)
+
+    # Crée une mesure pour l'utilisateur courant
+    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
+    assert response.status_code == 201
+    measurement_id = response.json()["id"]
+
+    # Simule un autre utilisateur en s'enregistrant et en se connectant
+    client.post(
+        "/auth/register",
+        json={
+            "email": "another@example.com",
+            "password": "anotherpassword",
+        },
+    )
+
+    second_login = client.post(
+        "/auth/login",
+        data={
+            "username": "another@example.com",
+            "password": "anotherpassword",
+        },
+    )
+
+    second_token = second_login.json()["access_token"]
+
+    # Tente de récupérer la mesure de l'utilisateur précédent avec le nouvel utilisateur
+    response = client.get(
+        f"/measurements/{measurement_id}",
+        headers={"Authorization": f"Bearer {second_token}"},
+    )
+    assert response.status_code == 404
+
+

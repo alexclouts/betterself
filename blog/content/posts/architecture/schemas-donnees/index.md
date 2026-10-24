@@ -28,7 +28,7 @@ L'authentification comprend la connexion de l'utilisateur à l'application. Cett
 
 ### Sauvegarde du hash
 
-Comme je l'ai expliqué dans une [publication](https://alexclouts.github.io/betterself/posts/authentication/ "Mais qui êtes-vous ?") portant sur l'authentification la semaine dernière, c'est important de **ne pas sauvegarder le mot de passe en _plain text_ dans la base de données**. C'est ici que le hash entre en jeu. On va plutôt utiliser des algorithmes pour encrypter le mot de passe, tels que **Argon2id et bcrypt**.
+Comme je l'ai expliqué dans une [publication](https://alexclouts.github.io/betterself/posts/authentication/) portant sur l'authentification la semaine dernière, c'est important de **ne pas sauvegarder le mot de passe en _plain text_ dans la base de données**. C'est ici que le hash entre en jeu. On va plutôt utiliser des algorithmes pour encrypter le mot de passe, tels que **Argon2id et bcrypt**.
 
 ## Autres informations du profile
 

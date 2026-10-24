@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 from betterself.core.database import get_db
@@ -30,3 +30,21 @@ def get_measurements(
 ):
     service = MeasurementService(db)
     return service.get_measurements_for_user(user=current_user, start_date=start_date, end_date=end_date)
+
+
+
+# Endpoint pour récupérer une mesure spécifique par ID pour l'utilisateur courant
+@router.get("/{measurement_id}", response_model=MeasurementRead)
+def get_measurement(
+    measurement_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(read_current_user)
+):
+    service = MeasurementService(db)
+
+    measurement = service.get_measurement_by_id(user=current_user, measurement_id=measurement_id)
+
+    if measurement is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mesure introuvable.")
+
+    return measurement

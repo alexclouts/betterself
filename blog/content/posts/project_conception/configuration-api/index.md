@@ -7,6 +7,7 @@ tags:
   - FastAPI
   - Problème
   - CORS
+  - Vidéo
 categories:
   - Développement
 ---

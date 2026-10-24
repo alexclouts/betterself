@@ -1,0 +1,14 @@
+
+.env
+*.db
+
+.vscode
+.pytest_cache
+backend/tests/__pycache__/
+*.py[cod]
+
+# Ignorer les fichiers générés par le blog
+blog/public
+blog/node_modules
+blog/resources/_gen/
+blod/ExampleSite
