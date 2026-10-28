@@ -1,12 +1,15 @@
 baseURL = 'http://example.org/'
 copyright = "{year}" # To make 2007 - 2022. Just add before {year} example: 2007 - {year}
-languageCode = 'fr-CA'
 defaultContentLanguage = 'fr'
 theme = 'enchanted-lowkey'
 title = 'Le Gourmet'
 enableRobotsTXT = true
 summaryLength = 15
 paginate = 5
+
+[languges]
+  [languages.fr]
+    locale = "fr"
 
 
 [markup]
