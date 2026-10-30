@@ -7,6 +7,7 @@ tags:
   - Architecture
   - FastAPI
   - Pydantic
+  - IA
 categories:
   - Développement
 ---
