@@ -11,6 +11,12 @@ categories:
   - Développement
 ---
 
+{{< img
+src="preview.png"
+alt="Preview"
+caption=""
+width="500">}}
+
 # Par où commencer
 
 Maintenant que l'architecture a été choisie, je veux savoir ce qui constitue le meilleur point de départ pour débuter la conception du projet. Je crois qu'il est facile de tomber dans le "piège" de s'attaquer tout de suite au frontend, comme il s'agit d'une façon concrète de voir ma progression de jour en jour. J'ai donc demandé à l'IA de m'aider à situer les premières étapes sur lesquelles je pourrai m'appuyer pour aller de l'avant.
@@ -19,7 +25,7 @@ La prochaine section illustre une conversation condensée que j'ai eu avec _Perp
 
 ## Conversation avec l'IA (1)
 
-### Donc mon pipeline CI fonctionne et l'API parvient à se connecter au frontend. Quelle serait la prochaine étape logique?
+#### Donc mon pipeline CI fonctionne et l'API parvient à se connecter au frontend. Quelle serait la prochaine étape logique?
 
 Bravo : ta base est maintenant solide. La prochaine étape logique est d’implémenter **l’authentification des utilisateurs**, parce qu’elle débloque toutes les autres fonctionnalités : profils, mesures, objectifs et journal alimentaire devront appartenir à un utilisateur authentifié.
 
@@ -65,7 +71,7 @@ De plus, elle ne reflète pas la méthode que je désirais préconiser, soit l'a
 
 ## Conversation avec l'IA (2)
 
-### J'aimerais adopter une approche Test-Driven Development. Peux-tu orienter le projet en ce sens? Je ne veux pas aller trop vite. Pour le moment j'ai créé le fichier config.py avec la classe Settings. Pour commencer, je veux que tu m'aides à déclarer le fichier database.py et les fichiers unitaires pour la base de données.
+#### J'aimerais adopter une approche Test-Driven Development. Peux-tu orienter le projet en ce sens? Je ne veux pas aller trop vite. Pour le moment j'ai créé le fichier config.py avec la classe Settings. Pour commencer, je veux que tu m'aides à déclarer le fichier database.py et les fichiers unitaires pour la base de données.
 
 Oui, c’est une excellente approche pour BetterSelf. En TDD, tu écris d’abord un test qui échoue (**rouge**), puis le minimum de code pour le faire passer (**vert**), et enfin tu améliores le code sans casser les tests. Restons sur une seule étape : créer l’infrastructure de base de données, puis vérifier qu’elle fonctionne avec un test. On n’ajoutera pas encore les utilisateurs ni les routes.
 
