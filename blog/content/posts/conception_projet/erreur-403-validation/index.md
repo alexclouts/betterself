@@ -1,7 +1,7 @@
 ---
 title: "Validation et gestion des erreurs"
 header: ""
-date: 2026-10-18T00:04:00.000Z
+date: 2026-10-30T00:10:15.000Z
 description: "Comment valider les données d'un modèle et choix du code d'erreur (404, 403) associé à la mise à jour d'un enregistrement."
 tags:
   - Architecture
@@ -122,7 +122,29 @@ C’est la solution la plus propre : la règle appartient au schéma, donc FastA
 
 ## Analyse
 
-Cette discussion m'a permis de mieux comprendre le rôle de Pydantic au sein de mon application. Dans les classes _MeasurementUpdate_ et _MeasurementCreate_, il me suffit d'ajouter des fonctions annotés avec `@field_validator` pour indiquer les règles que je veux imposer aux données. C'est donc ce que je vais privilégié à l'avenir.
+Cette discussion m'a permis de mieux comprendre le rôle de Pydantic au sein de mon application. Dans les classes _MeasurementUpdate_ et _MeasurementCreate_, il me suffit d'ajouter des fonctions annotés avec `@field_validator` pour indiquer les règles que je veux imposer aux données. C'est donc cette méthode que je vais privilégier à l'avenir.
+
+```python
+
+class MeasurementCreate(BaseModel):
+    date: DateType
+    weight_kg: float = Field(gt=0)
+
+    @field_validator("weight_kg")
+    @classmethod
+    def validate_weight(cls, value):
+        if value <= 30 or value > 500:
+            raise ValueError("Poids invalide")
+        return value
+
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, value):
+        if value > DateType.today() or value < DateType(2020, 1, 1):
+            raise ValueError("Date invalide")
+        return value
+
+```
 
 # Mise à jour d'un enregistrement
 
