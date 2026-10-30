@@ -23,9 +23,9 @@ Maintenant que l'architecture a été choisie, je veux savoir ce qui constitue l
 
 La prochaine section illustre une conversation condensée que j'ai eu avec _Perplexity_. Celle-ci m'offre l'option de convertir les idées échangées sous forme de fichier `Markdown`. Elle fait suite à l'implémentation de FastAPI et de la politique CORS, discuté dans la [dernière publication](https://alexclouts.github.io/betterself/posts/configuration-api/).
 
-## Conversation avec l'IA (1)
+## Conversation avec l'IA
 
-#### Donc mon pipeline CI fonctionne et l'API parvient à se connecter au frontend. Quelle serait la prochaine étape logique?
+#### _Ma question:_ Donc mon pipeline CI fonctionne et l'API parvient à se connecter au frontend. Quelle serait la prochaine étape logique?
 
 Bravo : ta base est maintenant solide. La prochaine étape logique est d’implémenter **l’authentification des utilisateurs**, parce qu’elle débloque toutes les autres fonctionnalités : profils, mesures, objectifs et journal alimentaire devront appartenir à un utilisateur authentifié.
 
@@ -63,15 +63,15 @@ Je te recommande de ne pas passer à l’étape suivante avant que l’étape co
 L'IA m'a proposé le code associé à chaque étape énoncée ci-haut. Celles-ci ont été abrégées pour faciliter la lecture.
 {{< /alert >}}
 
-## Ma réflexion
+## Analyse
 
 J'ai aimé que l'IA me propose rapidement une feuille de route à suivre. Par contre, la suite de la conversation est trop précipitée à mon avis : elle me propose aussitôt 13 étapes afin d'implémenter les premières composantes, sans fournir les explications qui me permettraient de comprendre leur rôle au sien de l'application.
 
 De plus, elle ne reflète pas la méthode que je désirais préconiser, soit l'approche de _Test-Driven Development_. Plutôt que de recopier aveuglement les suggestions proposées, j'ai choisi de corriger le tir en apportant des précisions :
 
-## Conversation avec l'IA (2)
+## Conversation avec l'IA
 
-#### J'aimerais adopter une approche Test-Driven Development. Peux-tu orienter le projet en ce sens? Je ne veux pas aller trop vite. Pour le moment j'ai créé le fichier config.py avec la classe Settings. Pour commencer, je veux que tu m'aides à déclarer le fichier database.py et les fichiers unitaires pour la base de données.
+#### _Ma question:_ J'aimerais adopter une approche Test-Driven Development. Peux-tu orienter le projet en ce sens? Je ne veux pas aller trop vite. Pour le moment j'ai créé le fichier config.py avec la classe Settings. Pour commencer, je veux que tu m'aides à déclarer le fichier database.py et les fichiers unitaires pour la base de données.
 
 Oui, c’est une excellente approche pour BetterSelf. En TDD, tu écris d’abord un test qui échoue (**rouge**), puis le minimum de code pour le faire passer (**vert**), et enfin tu améliores le code sans casser les tests. Restons sur une seule étape : créer l’infrastructure de base de données, puis vérifier qu’elle fonctionne avec un test. On n’ajoutera pas encore les utilisateurs ni les routes.
 
@@ -108,7 +108,7 @@ backend/
 └── pyproject.toml
 ```
 
-## Ma réflexion
+## Analyse
 
 L'IA m'a ensuite proposé le code afin de concevoir :
 
