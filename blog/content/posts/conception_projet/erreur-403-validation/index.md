@@ -8,6 +8,7 @@ tags:
   - FastAPI
   - Pydantic
   - IA
+  - Backend
 categories:
   - Développement
 ---
@@ -18,7 +19,7 @@ alt="Preview"
 caption=""
 width="500">}}
 
-# Validation des données du modèle
+# Validation et gestion des erreurs
 
 Alors que je configurais les fonctions associées à la table `measurements`, j'ai réalisé que je devais mettre en place des balises pour distinguer les valeurs considérées comme étant **valides**, de celles que l'application devait interdire. Par exemple, lorsque l'utilisateur veut enregistrer une nouvelle mesure de poids dans l'application, je devais trancher pour décider si c'était possible de sauvegarder une mesure à une date antérieure à aujourd'hui. Le même genre de validation doit se faire également pour le poids de l'utilisateur. Il ne fait aucun sens qu'un utilisateur sauvegarde un poids de 1000 kg, puisque cette valeur va à l'encontre de l'objectif visé par cette application. Par contre, où se trouve les limites entre une mesure valide ou non? De plus, où devrait se situer cette logique au sein de l'application. Ce sont les problèmes que j'ai rencontré cette semaine.
 
@@ -78,7 +79,7 @@ Par contre, en discutant avec l'IA, celle-ci m'a suggéré une approche que je p
 src="troubleshooting-1.png"
 alt="Preview"
 caption=""
-width="500">}}
+width="800">}}
 
 À la suite de ce message d'erreur, j'essayais de comprendre l'origine de l'erreur 422 dans mon test unitaire portant sur la validation de mes données, voici notre échange :
 
@@ -154,7 +155,7 @@ Une autre situation que j'ai rencontré s'est produite avec le test unitaire `te
 src="troubleshooting-2.png"
 alt="Preview"
 caption=""
-width="500">}}
+width="800">}}
 
 ## Conversation avec l'IA
 

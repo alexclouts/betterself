@@ -3,8 +3,6 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-
-
 from betterself.users.models import User
 from betterself.core.database import get_db
 from betterself.core.config import settings

@@ -1,12 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from betterself.core.database import Base, create_db_engine, get_db
 from betterself.main import app
 from betterself.users.models import User 
 
-TEST_DATABASE_URL = "sqlite:///./test.db"
+TEST_DATABASE_URL = "sqlite://"
 
 
 """
@@ -20,13 +22,15 @@ de fournir un client de test pour effectuer des requêtes HTTP vers l'applicatio
 
 @pytest.fixture
 def test_engine():
-    engine = create_db_engine(TEST_DATABASE_URL)
+    engine = create_engine(
+        TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        )
 
     Base.metadata.create_all(bind=engine)
 
     yield engine
-
-    Base.metadata.drop_all(bind=engine)
     engine.dispose()
 
 
@@ -38,7 +42,7 @@ def test_session(test_engine):
         autoflush=False,
         expire_on_commit=False,
     )
-
+    # Crée une session de base de données pour les tests
     db = TestingSessionLocal()
 
     try:
@@ -48,40 +52,20 @@ def test_session(test_engine):
 
 
 @pytest.fixture
-def client(test_session: Session):
+def client(test_session):
     def override_get_db():
         try:
             yield test_session
         finally:
             pass
 
+    # Remplace la dépendance de base de données de l'application par la session de test
     app.dependency_overrides[get_db] = override_get_db
 
+    # Crée un client de test pour l'application FastAPI avec la session de test
     with TestClient(app) as test_client:
         yield test_client
 
+    # Réinitialise les overrides des dépendances de l'application après chaque test
     app.dependency_overrides.clear()
 
-
-
-"""
-Ici, nous définissons une fixture `registered_user` qui enregistre un utilisateur de test avant chaque test qui en a besoin.
-"""
-
-TEST_USER_EMAIL = "test@example.com"
-TEST_USER_PASSWORD = "testpassword"
-
-
-@pytest.fixture
-def registered_user(client):
-    response = client.post(
-        "/auth/register",
-        json={
-            "email": TEST_USER_EMAIL,
-            "password": TEST_USER_PASSWORD,
-        },
-    )
-
-    assert response.status_code == 201
-
-    return response.json()

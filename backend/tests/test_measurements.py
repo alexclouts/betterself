@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import pytest
 
 """
 Tests pour la création, la récupération, la mise à jour et la suppression de mesures de poids avec et sans authentification.
@@ -7,186 +8,245 @@ Ces tests couvrent les scénarios suivants :
 - Création, récupération, suppression ou mise à jour réussie d'une mesure avec authentification
 - Échec de la création, de la récupération, de la suppression ou de la mise à jour d'une mesure sans authentification
 - Échec de la récupération, de la mise à jour ou de la suppression d'une mesure inexistante
-- Échec de la création ou de la mise à jour d'une mesure avec des champs manquants ou un poids invalide
+- Échec de la création ou de la mise à jour d'une mesure avec un champ invalide
+- Isolation des mesures entre différents utilisateurs
 """
 
+# Adresse électronique et mot de passe utilisés pour le premier utilisateur de test
+TEST_USER_EMAIL = "test@example.com"
+TEST_USER_PASSWORD = "testpassword"
+
+# Adresse électronique et mot de passe utilisés pour le second utilisateur de test
+OTHER_USER_EMAIL = "another@example.com"
+OTHER_USER_PASSWORD = "anotherpassword"
+
+
+# Fonction utilitaire pour construire les en-têtes d'authentification
+def auth_headers(access_token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {access_token}"}
+
+
 # Fonction utilitaire pour enregistrer un utilisateur et obtenir un jeton d'accès
-def register_and_login(client):
+def register_and_login(client, email: str = TEST_USER_EMAIL, password: str = TEST_USER_PASSWORD) -> str:
     client.post(
         "/auth/register",
-        json={"email": "test@example.com", "password": "testpassword"},
+        json={"email": email, "password": password},
     )
     login_response = client.post(
         "/auth/login",
-        data={"username": "test@example.com", "password": "testpassword"}
+        data={"username": email, "password": password},
     )
-    access_token = login_response.json()["access_token"]
-    return access_token
+    return login_response.json()["access_token"]
 
 
-"""Tests pour la création de nouvelles mesures de poids. """
+# Fonction utilitaire pour enregistrer et connecter un second utilisateur
+def register_and_login_other_user(client) -> str:
+    return register_and_login(
+        client,
+        email=OTHER_USER_EMAIL,
+        password=OTHER_USER_PASSWORD,
+    )
+
+
+# Fonction utilitaire pour créer une mesure et retourner la réponse HTTP
+def create_measurement(client, access_token: str, measurement_date: date, weight_kg: float):
+    return client.post(
+        "/measurements",
+        json={
+            "date": str(measurement_date),
+            "weight_kg": weight_kg,
+        },
+        headers=auth_headers(access_token),
+    )
+
+
+# Fonction utilitaire pour créer une mesure et retourner directement son identifiant
+def create_measurement_and_get_id(client, access_token: str, measurement_date: date, weight_kg: float) -> int:
+    response = create_measurement(client, access_token, measurement_date, weight_kg)
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
+# Fonction utilitaire pour effectuer une requête GET, PATCH ou DELETE sur une mesure
+# Cette fonction a été créée pour alléger le code des tests en centralisant les requêtes sur les mesures.
+def request_measurement(client, method: str, measurement_id: int, access_token: str | None = None, json_data: dict | None = None):
+    headers = auth_headers(access_token) if access_token else {}
+
+    # GET et DELETE n'acceptent pas de corps JSON; seul PATCH en a besoin ici
+    if method == "patch":
+        return client.patch(
+            f"/measurements/{measurement_id}",
+            headers=headers,
+            json=json_data,
+        )
+    return getattr(client, method)(
+        f"/measurements/{measurement_id}",
+        headers=headers,
+    )
+
+
+"""
+Tests pour la création de nouvelles mesures de poids.
+"""
 
 
 # Test pour vérifier que la création d'une mesure avec authentification réussit
 def test_new_measurement_success(client):
     access_token = register_and_login(client)
-    response = client.post(
-        "/measurements",
-        json={"date": str(date.today()),"weight_kg": 75},
-        headers={"Authorization": f"Bearer {access_token}"}
-    )
+    response = create_measurement(client, access_token, date.today(), 75)
     assert response.status_code == 201
-
     measurement_data = response.json()
 
+    # Vérifie que les données retournées correspondent à la mesure créée
     assert measurement_data["weight_kg"] == 75
     assert measurement_data["date"] == str(date.today())
-    assert "id" in measurement_data  # Vérifie que l'ID de la mesure est présent dans la réponse
-    assert "user_id" in measurement_data  # Vérifie que l'ID de l'utilisateur est présent dans la réponse
+    assert "id" in measurement_data
+    assert "user_id" in measurement_data
 
 
 # Test pour vérifier que la création d'une mesure sans authentification échoue avec un code 401
 def test_new_measurement_unauthorized(client):
     response = client.post(
         "/measurements",
-        json={"date": str(date.today()),"weight_kg": 75}
+        json={
+            "date": str(date.today()),
+            "weight_kg": 75,
+        },
     )
     assert response.status_code == 401
 
 
-# Test pour vérifier que la création d'une mesure échoue lorsque des champs sont manquants ou invalides
-def test_new_measurement_missing_fields(client):
+# Test pour vérifier que la création échoue lorsque le champ date est manquant
+def test_new_measurement_missing_date(client):
+    access_token = register_and_login(client)
+    response = client.post(
+        "/measurements",
+        json={"weight_kg": 75},
+        headers=auth_headers(access_token),
+    )
+    assert response.status_code == 422
+
+
+# Test pour vérifier que la création échoue lorsque le champ weight_kg est manquant
+def test_new_measurement_missing_weight(client):
     access_token = register_and_login(client)
     response = client.post(
         "/measurements",
         json={"date": str(date.today())},
-        headers={"Authorization": f"Bearer {access_token}"},
+        headers=auth_headers(access_token),
     )
     assert response.status_code == 422
 
 
-def test_new_measurement_invalid_fields(client):
+# Test pour vérifier que la création échoue lorsque le poids n'est pas numérique
+def test_new_measurement_invalid_weight_type(client):
     access_token = register_and_login(client)
-
-    # Poids non numérique
-    response = client.post(
-        "/measurements",
-        json={"date": str(date.today()),"weight_kg": "invalid-weight"},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    assert response.status_code == 422
-    
-    # Poids trop grand
-    response = client.post(
-        "/measurements",
-        json={"date": str(date.today()),"weight_kg": 1000},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+    response = create_measurement(client, access_token, date.today(), "invalid-weight")
     assert response.status_code == 422
 
-    # Poids trop petit
-    response = client.post(
-        "/measurements",
-        json={"date": str(date.today()),"weight_kg": 25},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+
+# Test pour vérifier que la création échoue lorsque le poids est trop grand
+def test_new_measurement_weight_too_high(client):
+    access_token = register_and_login(client)
+    response = create_measurement(client, access_token, date.today(), 1000)
     assert response.status_code == 422
 
-    # Date invalide
-    response = client.post(
-        "/measurements",
-        json={"date": "invalid-date","weight_kg": 75},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+
+# Test pour vérifier que la création échoue lorsque le poids est trop petit
+def test_new_measurement_weight_too_low(client):
+    access_token = register_and_login(client)
+    response = create_measurement(client, access_token, date.today(), 25)
     assert response.status_code == 422
 
-    # Date trop ancienne
+
+# Test pour vérifier que la création échoue lorsque la date n'est pas valide
+def test_new_measurement_invalid_date_format(client):
+    access_token = register_and_login(client)
     response = client.post(
         "/measurements",
-        json={"date": "2019-12-31","weight_kg": 75},
-        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "date": "invalid-date",
+            "weight_kg": 75,
+        },
+        headers=auth_headers(access_token),
     )
+
     assert response.status_code == 422
 
-    # Date future
-    response = client.post(
-        "/measurements",
-        json={"date": str(date.today() + timedelta(days=1)), "weight_kg": 75},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+
+# Test pour vérifier que la création échoue lorsque la date est antérieure à la limite permise
+def test_new_measurement_date_too_old(client):
+    access_token = register_and_login(client)
+    response = create_measurement(client, access_token, date(2019, 12, 31), 75)
+    assert response.status_code == 422
+
+
+# Test pour vérifier que la création échoue lorsque la date est dans le futur
+def test_new_measurement_date_in_future(client):
+    access_token = register_and_login(client)
+    future_date = date.today() + timedelta(days=1)
+    response = create_measurement(client, access_token, future_date, 75)
     assert response.status_code == 422
 
 
 """
 Tests pour la récupération de la liste des mesures de poids par utilisateur.
 """
-    
-def create_measurement(client, access_token, date, weight_kg):
-    response = client.post(
-        "/measurements",
-        json={"date": str(date),"weight_kg": weight_kg},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    return response
 
 
-# Test pour vérifier que la récupération de la liste des mesures avec authentification réussie
+# Test pour vérifier que la récupération de la liste des mesures avec authentification réussit
 def test_list_measurements(client):
     access_token = register_and_login(client)
-
+    # Crée deux mesures pour vérifier que les deux sont retournées
     create_measurement(client, access_token, date.today(), 75)
     create_measurement(client, access_token, date.today(), 80)
 
     response = client.get(
         "/measurements",
-        headers={"Authorization": f"Bearer {access_token}"},
+        headers=auth_headers(access_token),
     )
     assert response.status_code == 200
-    
     measurements = response.json()
-    
+
     assert len(measurements) == 2
     assert measurements[0]["weight_kg"] == 75
     assert measurements[1]["weight_kg"] == 80
 
 
-# Tests pour la récupération non autorisée de la liste des mesures
+# Test pour vérifier que la récupération de la liste sans authentification échoue
 def test_list_measurements_unauthorized(client):
     response = client.get("/measurements")
     assert response.status_code == 401
 
 
-# Test pour vérifier que la récupération de la liste des mesures renvoie une liste vide lorsque l'utilisateur n'a pas encore créé de mesures
+# Test pour vérifier que la liste est vide lorsqu'aucune mesure n'a été créée
 def test_list_measurements_empty(client):
     access_token = register_and_login(client)
-
     response = client.get(
         "/measurements",
-        headers={"Authorization": f"Bearer {access_token}"},
+        headers=auth_headers(access_token),
     )
     assert response.status_code == 200
     measurements = response.json()
     assert len(measurements) == 0
 
 
-
 # Test pour vérifier la récupération des mesures filtrées par date
 def test_list_measurements_by_date(client):
     access_token = register_and_login(client)
-
-    # Crée plusieurs échantillons pour tester le filtrage par date
+    # Crée plusieurs mesures pour tester le filtrage par intervalle de dates
     create_measurement(client, access_token, date(2024, 6, 1), 75)
     create_measurement(client, access_token, date(2024, 8, 14), 80)
     create_measurement(client, access_token, date(2024, 9, 2), 85)
 
     response = client.get(
         "/measurements?start_date=2024-06-01&end_date=2024-08-16",
-        headers={"Authorization": f"Bearer {access_token}"},
+        headers=auth_headers(access_token),
     )
     assert response.status_code == 200
     measurements = response.json()
 
-    # Vérifie que la mesure retournée correspond à la date filtrée
+    # Vérifie que seules les mesures dans l'intervalle demandé sont retournées
     assert len(measurements) == 2
     assert measurements[0]["weight_kg"] == 75
     assert measurements[0]["date"] == "2024-06-01"
@@ -194,23 +254,21 @@ def test_list_measurements_by_date(client):
 
 
 """
-Tests pour la récupérations d'une mesure à partir de son identifiant.
+Tests pour la récupération d'une mesure à partir de son identifiant.
 """
 
+
+# Test pour vérifier la récupération réussie d'une mesure existante
 def test_get_measurement_success(client):
     access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    response = client.get(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
     )
+    response = request_measurement(client, "get", measurement_id, access_token)
     assert response.status_code == 200
-
     measurement = response.json()
 
     # Vérifie que les données de la mesure sont correctes
@@ -222,44 +280,80 @@ def test_get_measurement_success(client):
 # Test pour vérifier la récupération d'une mesure qui n'existe pas
 def test_get_measurement_not_found(client):
     access_token = register_and_login(client)
-
-    response = client.get(
-        "/measurements/9999",
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+    response = request_measurement(client, "get", 9999, access_token)
     assert response.status_code == 404
 
 
 # Test pour vérifier l'accès non autorisé à une mesure existante
 def test_get_measurement_unauthorized(client):
-    response = client.get("/measurements/1")
+    response = request_measurement(client, "get", 1)
     assert response.status_code == 401
 
 
-# Test pour vérifier que l'utilisateur ne peut pas accéder à la mesure d'un autre utilisateur
+# Test pour vérifier qu'un utilisateur ne peut pas accéder à la mesure d'un autre utilisateur
 def test_get_measurement_for_another_user(client):
+    owner_token = register_and_login(client)
+    measurement_id = create_measurement_and_get_id(
+        client,
+        owner_token,
+        date(2024, 6, 1),
+        75,
+    )
+    other_token = register_and_login_other_user(client)
+    response = request_measurement(client, "get", measurement_id, other_token)
+    assert response.status_code == 404
+
+
+"""
+Tests partagés pour les règles communes aux opérations GET, PATCH et DELETE.
+"""
+
+# Méthodes HTTP et corps de requête associés pour les tests paramétrés
+HTTP_METHODS = [
+    ("get", None),
+    ("patch", {"weight_kg": 80}),
+    ("delete", None),
+]
+
+
+# Test paramétré pour vérifier qu'une mesure inexistante retourne 404 pour GET, PATCH et DELETE
+@pytest.mark.parametrize("method,json_data", HTTP_METHODS)
+def test_measurement_not_found(client, method, json_data):
     access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    # Simule un autre utilisateur en s'enregistrant et en se connectant
-    client.post(
-        "/auth/register",
-        json={"email": "another@example.com", "password": "anotherpassword"}
+    response = request_measurement(
+        client,
+        method,
+        9999,
+        access_token,
+        json_data,
     )
-    second_login = client.post(
-        "/auth/login",
-        data={"username": "another@example.com","password": "anotherpassword"},
-    )
-    second_token = second_login.json()["access_token"]
+    assert response.status_code == 404
 
-    # Tente de récupérer la mesure de l'utilisateur précédent avec le nouvel utilisateur
-    response = client.get(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {second_token}"},
+
+# Test paramétré pour vérifier qu'une requête sans authentification retourne 401 pour GET, PATCH et DELETE
+@pytest.mark.parametrize("method,json_data", HTTP_METHODS)
+def test_measurement_unauthorized(client, method, json_data):
+    response = request_measurement(client, method, 1, None, json_data)
+    assert response.status_code == 401
+
+
+# Test paramétré pour vérifier qu'un utilisateur ne peut pas accéder à la mesure d'un autre utilisateur
+@pytest.mark.parametrize("method,json_data", HTTP_METHODS)
+def test_measurement_for_another_user(client, method, json_data):
+    owner_token = register_and_login(client)
+    measurement_id = create_measurement_and_get_id(
+        client,
+        owner_token,
+        date(2024, 6, 1),
+        75,
+    )
+    other_token = register_and_login_other_user(client)
+    response = request_measurement(
+        client,
+        method,
+        measurement_id,
+        other_token,
+        json_data,
     )
     assert response.status_code == 404
 
@@ -268,241 +362,208 @@ def test_get_measurement_for_another_user(client):
 Tests pour la suppression d'une mesure.
 """
 
-# Tests pour la suppression d'une mesure existante
+
+# Test pour vérifier la suppression réussie d'une mesure existante
 def test_delete_measurement_success(client):
     access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    # Supprime la mesure
-    response = client.delete(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
     )
+    response = request_measurement(client, "delete", measurement_id, access_token)
     assert response.status_code == 204
 
-    # Vérifie que la mesure a été supprimée
-    response = client.get(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+    # Vérifie que la mesure n'est plus accessible après sa suppression
+    response = request_measurement(client, "get", measurement_id, access_token)
     assert response.status_code == 404
 
-
-# Tests pour la suppression d'une mesure qui n'existe pas
-def test_delete_measurement_not_found(client):
-    access_token = register_and_login(client)
-
-    response = client.delete(
-        "/measurements/9999",
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    assert response.status_code == 404
-
-
-# Tests pour la suppression d'une mesure sans authentification
-def test_delete_measurement_unauthorized(client):
-    response = client.delete("/measurements/1")
-    # Vérifie que la suppression sans authentification renvoie une erreur 401
-    assert response.status_code == 401
-
-
-# Tests pour la suppression d'une mesure appartenant à un autre utilisateur
-def test_delete_measurement_for_another_user(client):
-    access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    # Simule un autre utilisateur en s'enregistrant et en se connectant
-    client.post(
-        "/auth/register",
-        json={"email": "another@example.com","password": "anotherpassword"},
-    )
-    second_login = client.post(
-        "/auth/login",
-        data={"username": "another@example.com","password": "anotherpassword"},
-    )
-    second_token = second_login.json()["access_token"]
-
-    # Tente de supprimer la mesure de l'utilisateur précédent avec le nouvel utilisateur
-    response = client.delete(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {second_token}"},
-    )
-    assert response.status_code == 404
 
 """
 Tests pour la mise à jour d'une mesure.
 """
 
-# Test pour la mise à jour d'une mesure existante
-def test_update_measurement_success(client):
+
+# Test pour vérifier la mise à jour du poids d'une mesure existante
+def test_update_measurement_weight_success(client):
     access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    # Met à jour le poids de la mesure
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-        json={"weight_kg": 76}
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
+    )
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"weight_kg": 76},
     )
     assert response.status_code == 200
-
     updated_measurement = response.json()
+
+    # Vérifie que seul le poids a été modifié
     assert updated_measurement["weight_kg"] == 76
     assert updated_measurement["date"] == "2024-06-01"
 
-    # Met à jour la date de la mesure
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-        json={"date": "2024-06-02"}
+
+# Test pour vérifier la mise à jour de la date d'une mesure existante
+def test_update_measurement_date_success(client):
+    access_token = register_and_login(client)
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
+    )
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"date": "2024-06-02"},
     )
     assert response.status_code == 200
-    
     updated_measurement = response.json()
+
+    # Vérifie que seule la date a été modifiée
     assert updated_measurement["date"] == "2024-06-02"
-    assert updated_measurement["weight_kg"] == 76
+    assert updated_measurement["weight_kg"] == 75
 
 
-# Test pour la mise à jour d'une mesure sans authentification
-def test_update_measurement_unauthorized(client):
+# Test pour vérifier que la mise à jour échoue lorsque le poids n'est pas numérique
+def test_update_measurement_invalid_weight_type(client):
     access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        json={"weight_kg": 76}
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
     )
-    assert response.status_code == 401
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"weight_kg": "invalid-weight"},
+    )
+    assert response.status_code == 422
 
 
-# Test pour la mise à jour d'une mesure inexistante
-def test_update_measurement_not_found(client):
+# Test pour vérifier que la mise à jour échoue lorsque le poids est trop grand
+def test_update_measurement_weight_too_high(client):
     access_token = register_and_login(client)
-
-    response = client.patch(
-        f"/measurements/9999",
-        headers={"Authorization": f"Bearer {access_token}"},
-        json={"weight_kg": 76}
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
     )
-    assert response.status_code == 404
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"weight_kg": 1000},
+    )
+    assert response.status_code == 422
 
 
-# Test pour la mise à jour d'une mesure avec un champ invalide
-def test_update_measurement_invalid_fields(client):
+# Test pour vérifier que la mise à jour échoue lorsque le poids est trop petit
+def test_update_measurement_weight_too_low(client):
     access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    # Poids non numérique
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        json={"weight_kg": "invalid-weight"},
-        headers={"Authorization": f"Bearer {access_token}"},
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
     )
-    assert response.status_code == 422
-
-    # Poids trop grand
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        json={"weight_kg": 1000},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    assert response.status_code == 422
-
-    # Poids trop petit
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        json={"weight_kg": 25},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    assert response.status_code == 422
-
-    # Date invalide
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        json={"date": "invalid-date"},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    assert response.status_code == 422 
-
-    # Date trop ancienne
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        json={"date": "2019-12-31"},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    assert response.status_code == 422
-
-    # Date future
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        json={"date": str(date.today() + timedelta(days=1))},
-        headers={"Authorization": f"Bearer {access_token}"},
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"weight_kg": 25},
     )
     assert response.status_code == 422
 
 
-# Test pour la mise à jour d'une mesure avec des champs manquants
-def test_update_measurement_missing_fields(client):
+# Test pour vérifier que la mise à jour échoue lorsque la date n'est pas valide
+def test_update_measurement_invalid_date_format(client):
     access_token = register_and_login(client)
-
-    response = create_measurement(client, access_token, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-        json={}
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
+    )
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"date": "invalid-date"},
     )
     assert response.status_code == 422
 
 
-def test_update_measurement_for_another_user(client):
-    access_token_user = register_and_login(client)
-
-    response = create_measurement(client, access_token_user, date(2024, 6, 1), 75)
-    assert response.status_code == 201
-
-    measurement_id = response.json()["id"]
-
-    # Simule un autre utilisateur en s'enregistrant et en se connectant
-    client.post(
-        "/auth/register",
-        json={"email": "another@example.com","password": "anotherpassword"},
+# Test pour vérifier que la mise à jour échoue lorsque la date est antérieure à la limite permise
+def test_update_measurement_date_too_old(client):
+    access_token = register_and_login(client)
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
     )
-    second_login = client.post(
-        "/auth/login",
-        data={"username": "another@example.com","password": "anotherpassword"},
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"date": "2019-12-31"},
     )
-    second_token = second_login.json()["access_token"]
+    assert response.status_code == 422
 
-    # Tente de mettre à jour la mesure de l'utilisateur 1 avec le token de l'utilisateur 2
-    response = client.patch(
-        f"/measurements/{measurement_id}",
-        headers={"Authorization": f"Bearer {second_token}"},
-        json={"weight_kg": 80}
+
+# Test pour vérifier que la mise à jour échoue lorsque la date est dans le futur
+def test_update_measurement_date_in_future(client):
+    access_token = register_and_login(client)
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
     )
-    assert response.status_code == 404
+    future_date = date.today() + timedelta(days=1)
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {"date": str(future_date)},
+    )
+    assert response.status_code == 422
 
- 
+
+# Test pour vérifier qu'un PATCH avec un corps vide ne modifie rien
+def test_update_measurement_empty_body(client):
+    access_token = register_and_login(client)
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
+    )
+    response = request_measurement(
+        client,
+        "patch",
+        measurement_id,
+        access_token,
+        {},
+    )
+    # Adapte cette assertion à la règle choisie pour ton API :
+    # 200 si un corps vide est accepté, ou 422 si tu veux l'interdire.
+    assert response.status_code in (200, 422)

@@ -4,6 +4,7 @@ from sqlalchemy import select
 from betterself.measurements.models import Measurement
 from betterself.measurements.schemas import MeasurementCreate, MeasurementUpdate
 from betterself.users.models import User
+from betterself.measurements.exceptions import MeasurementNotFound
 
 class MeasurementService:
     def __init__(self, db: Session):
@@ -16,10 +17,6 @@ class MeasurementService:
             weight_kg = data.weight_kg,
         )
 
-        # Vérifie que le poids est positif et réaliste
-        if measurement.weight_kg <= 30 or measurement.weight_kg > 500:
-            raise ValueError("Poids invalide")
-
         # Ajoute la mesure à la session de la base de données et la commit
         self.db.add(measurement)
         self.db.commit()
@@ -30,7 +27,7 @@ class MeasurementService:
     # Récupère les mesures pour un utilisateur donné, avec des filtres optionnels sur les dates
     def get_measurements_for_user(self, user: User, start_date=None, end_date=None):
         # On peut seulement récupérer les mesures appartenant à cet utilisateur
-        query =  select(Measurement).where(Measurement.user_id == user.id)
+        query =  Measurement.for_user(user.id)
 
         # Filtre les mesures à partir de la date de début et de fin si elles sont fournies
         if start_date is not None:
@@ -48,29 +45,12 @@ class MeasurementService:
 
     # Récupère une mesure spécifique par ID pour un utilisateur donné
     def get_measurement_by_id(self, user: User, measurement_id: int) -> Measurement:
-        query = select(Measurement).where(
-            Measurement.user_id == user.id,
-            Measurement.id == measurement_id
-        )
-        # Exécute la requête pour récupérer la mesure correspondant à l'ID et à l'utilisateur donné
-        measurement = self.db.scalar(query)
-
-        if measurement is None:
-            return None
-
-        return measurement
+        return self._get_measurement_or_404(user, measurement_id)
 
 
     # Supprime une mesure spécifique par ID pour un utilisateur donné
     def delete_measurement_by_id(self, user: User, measurement_id: int) -> bool:
-        query = select(Measurement).where(
-            Measurement.user_id == user.id,
-            Measurement.id == measurement_id
-        )
-        measurement = self.db.scalar(query)
-
-        if measurement is None:
-            return False
+        measurement = self._get_measurement_or_404(user, measurement_id)
 
         self.db.delete(measurement)
         self.db.commit()
@@ -78,15 +58,9 @@ class MeasurementService:
         # Une réponse 204 ne doit pas renvoyer de contenu, donc on retourne simplement True pour indiquer le succès
         return True
 
+    # Met à jour une mesure spécifique par ID pour un utilisateur donné
     def update_measurement_by_id(self, user: User, measurement_id: int, data: MeasurementUpdate) -> Measurement | None:
-        query = select(Measurement).where(
-            Measurement.user_id == user.id,
-            Measurement.id == measurement_id
-        )
-        measurement = self.db.scalar(query)
-
-        if measurement is None:
-            return None
+        measurement = self._get_measurement_or_404(user, measurement_id)
 
         if data.date is not None:
             measurement.date = data.date
@@ -96,4 +70,15 @@ class MeasurementService:
 
         self.db.commit()
         self.db.refresh(measurement)
+        return measurement
+
+
+    # Dans tous les cas où une mesure est recherchée, on génère une exception si elle n'existe pas
+    def _get_measurement_or_404(self, user: User, measurement_id: int) -> Measurement:
+        measurement = self.db.scalar(
+            Measurement.for_user(user.id).where(Measurement.id == measurement_id)
+        )
+        if measurement is None:
+            raise MeasurementNotFound()
+        
         return measurement
