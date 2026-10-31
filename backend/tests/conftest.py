@@ -10,6 +10,9 @@ from betterself.users.models import User
 
 TEST_DATABASE_URL = "sqlite://"
 
+# Adresse électronique et mot de passe utilisés pour le premier utilisateur de test
+TEST_USER_EMAIL = "test@example.com"
+TEST_USER_PASSWORD = "testpassword"
 
 """
 Pendant les tests, nous utilisons une base de données SQLite en mémoire pour isoler les tests et éviter d'affecter la base de données réelle. 
@@ -69,3 +72,16 @@ def client(test_session):
     # Réinitialise les overrides des dépendances de l'application après chaque test
     app.dependency_overrides.clear()
 
+@pytest.fixture
+def registered_user(client):
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": TEST_USER_EMAIL,
+            "password": TEST_USER_PASSWORD,
+        },
+    )
+
+    assert response.status_code == 201
+
+    return response.json()

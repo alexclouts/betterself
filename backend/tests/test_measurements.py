@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 import pytest
+from backend.tests.conftest import TEST_USER_EMAIL, TEST_USER_PASSWORD
 
 """
 Tests pour la création, la récupération, la mise à jour et la suppression de mesures de poids avec et sans authentification.
@@ -12,9 +13,7 @@ Ces tests couvrent les scénarios suivants :
 - Isolation des mesures entre différents utilisateurs
 """
 
-# Adresse électronique et mot de passe utilisés pour le premier utilisateur de test
-TEST_USER_EMAIL = "test@example.com"
-TEST_USER_PASSWORD = "testpassword"
+
 
 # Adresse électronique et mot de passe utilisés pour le second utilisateur de test
 OTHER_USER_EMAIL = "another@example.com"
