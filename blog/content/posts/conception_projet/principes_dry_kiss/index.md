@@ -1,5 +1,5 @@
 ---
-title: "Application les principes DRY/KISS"
+title: "Appliquer les principes DRY/KISS"
 header: ""
 date: 2026-10-31T00:11:55.000Z
 description: "Réflexions sur l'abrègement du code et du rôle joué par les classes service, models et schemas."
