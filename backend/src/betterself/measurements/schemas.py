@@ -2,20 +2,7 @@ from datetime import date as DateType
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-
-
-# Validation de la date pour s'assurer qu'elle est dans une plage réaliste (2020-01-01 à aujourd'hui)
-def validate_date(value: DateType) -> DateType:
-    if value > DateType.today() or value < DateType(2020, 1, 1):
-        raise ValueError("Date invalide")
-    return value
-
-# Validation du poids pour s'assurer qu'il est dans une plage réaliste (30-500 kg)
-def validate_weight(value: float) -> float:
-    if value <= 30 or value > 500:
-        raise ValueError("Le poids doit être supérieur à 30 kg et inférieur ou égal à 500 kg.")
-
-    return value
+from betterself.core.validation import validate_weight_kg, validate_date_not_future
 
 class MeasurementCreate(BaseModel):
     date: DateType
@@ -24,12 +11,12 @@ class MeasurementCreate(BaseModel):
     @field_validator("weight_kg")
     @classmethod
     def validate_weight(cls, value):
-        return validate_weight(value)
+        return validate_weight_kg(value)
 
     @field_validator("date")
     @classmethod
     def validate_date(cls, value):
-        return validate_date(value)
+        return validate_date_not_future(value)
     
     
 
@@ -48,14 +35,14 @@ class MeasurementUpdate(BaseModel):
     @field_validator("weight_kg")
     def validate_weight(cls, value):
         if value is not None:
-            return validate_weight(value)
+            return validate_weight_kg(value)
         return value
 
     
     @field_validator("date")
     def validate_date(cls, value):
         if value is not None:
-            return validate_date(value)
+            return validate_date_not_future(value)
         return value
 
     # Doit mettre à jour au moins un champ

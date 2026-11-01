@@ -4,7 +4,7 @@ from sqlalchemy import select
 from betterself.measurements.models import Measurement
 from betterself.measurements.schemas import MeasurementCreate, MeasurementUpdate
 from betterself.users.models import User
-from betterself.measurements.exceptions import MeasurementNotFound
+from betterself.core.exceptions import RecordNotFound
 
 class MeasurementService:
     def __init__(self, db: Session):
@@ -79,6 +79,6 @@ class MeasurementService:
             Measurement.for_user(user.id).where(Measurement.id == measurement_id)
         )
         if measurement is None:
-            raise MeasurementNotFound()
+            raise RecordNotFound("Mesure introuvable.")
         
         return measurement

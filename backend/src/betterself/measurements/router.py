@@ -6,7 +6,7 @@ from betterself.measurements.schemas import MeasurementUpdate, MeasurementCreate
 from betterself.measurements.service import MeasurementService
 from betterself.users.models import User
 from betterself.users.router import read_current_user
-from betterself.measurements.exceptions import MeasurementNotFound
+from betterself.core.exceptions import RecordNotFound
 
 """
 Pour l'instant, nous optons pour une structure try/except pour gérer les erreurs de type MeasurementNotFound étant
@@ -47,9 +47,10 @@ def get_measurement(
     service: MeasurementService = Depends(get_measurement_service),
     current_user: User = Depends(read_current_user)
 ):
-    try:
+    try: 
         return service.get_measurement_by_id(user=current_user, measurement_id=measurement_id)
-    except MeasurementNotFound:
+    # On catch l'exception générée par le service lorsqu'un objectif n'est pas trouvé
+    except RecordNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mesure introuvable.")
 
 
@@ -62,7 +63,7 @@ def delete_measurement(
 ):
     try:
         service.delete_measurement_by_id(user = current_user, measurement_id=measurement_id)
-    except MeasurementNotFound:
+    except RecordNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mesure introuvable.")
 
 
@@ -76,7 +77,7 @@ def update_measurement(
 ):
     try:
         measurement = service.update_measurement_by_id(user=current_user, measurement_id=measurement_id, data=data)
-    except MeasurementNotFound:
+    except RecordNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mesure introuvable.")
 
     return measurement
