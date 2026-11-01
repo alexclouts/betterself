@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 import pytest
-from backend.tests.utils import TEST_USER_EMAIL, TEST_USER_PASSWORD, auth_headers, register_and_login, register_and_login_other_user
+from tests.utils import TEST_USER_EMAIL, TEST_USER_PASSWORD, auth_headers, register_and_login, register_and_login_other_user
 
 """
 Tests pour la création, la récupération, la mise à jour et la suppression de mesures de poids avec et sans authentification.
