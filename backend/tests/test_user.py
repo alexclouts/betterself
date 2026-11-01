@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from tests.utils import registered_user
 
 """
 Tests pour l'enregistrement d'un utilisateur. Ces tests vérifient que le processus d'enregistrement fonctionne correctement pour différents scénarios,
