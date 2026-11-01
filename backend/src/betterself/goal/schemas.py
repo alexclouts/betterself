@@ -3,8 +3,8 @@ from decimal import Decimal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-from betterself.nutrition.models import GoalType
-from betterself.core.validation import validate_weight_kg, validate_date_not_future, validate_date_in_future, RangeValidationError
+from betterself.goal.models import GoalType
+from betterself.core.validation import validate_weight_kg, validate_date_not_future, validate_date_within_allowed_range
 
 
 class NutritionGoalCreate(BaseModel):
@@ -28,7 +28,7 @@ class NutritionGoalCreate(BaseModel):
     @field_validator("target_date")
     def validate_target_date(cls, value):
         if value is not None:
-            return validate_date_in_future(value)
+            return validate_date_within_allowed_range(value)
         return value
 
     @model_validator(mode="after")
@@ -38,7 +38,7 @@ class NutritionGoalCreate(BaseModel):
             and self.target_date is not None
             and self.target_date < self.start_date
         ):
-            raise RangeValidationError(
+            raise ValueError(
                 "La date cible doit être postérieure à la date de début."
             )
         return self
@@ -47,7 +47,6 @@ class NutritionGoalCreate(BaseModel):
 
 
 class NutritionGoalRead(BaseModel):
-    id: UUID
     user_id: UUID
     goal_type: GoalType
     start_weight_kg: Decimal
@@ -57,23 +56,3 @@ class NutritionGoalRead(BaseModel):
     status: str
 
     model_config = {"from_attributes": True}
-
-class GoalTargetRead(BaseModel):
-    id: UUID
-    goal_id: UUID
-    valid_from: date
-    valid_until: date | None
-    reference_weight_kg: Decimal
-    maintenance_calories_kcal: int
-    calorie_target_kcal: int
-    calorie_adjustment_kcal: int
-    protein_target_g: Decimal
-    carbs_target_g: Decimal
-    fat_target_g: Decimal
-    calculation_method: str
-
-    model_config = {"from_attributes": True}
-
-class GoalTargetRecalculate(BaseModel):
-    reference_weight_kg: Decimal = Field(gt=0)
-

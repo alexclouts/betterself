@@ -6,7 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from betterself.core.config import settings
 from betterself.users.router import router as users_router
 from betterself.measurements.router import router as measurements_router
-from betterself.nutrition.router import router as nutrition_router
+from betterself.goal.router import router as goal_router
+from betterself.targets.router import router as targets_router
+
 
 app = FastAPI(
     tittle="BetterSelf API",
@@ -29,7 +31,9 @@ app.add_middleware(
 
 app.include_router(users_router)
 app.include_router(measurements_router)
-app.include_router(nutrition_router)
+app.include_router(goal_router)
+app.include_router(targets_router)
+
 
 @app.get("/health")
 def health_check() -> dict[str, str]:

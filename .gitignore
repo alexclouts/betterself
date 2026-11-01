@@ -12,3 +12,7 @@ blog/public
 blog/node_modules
 blog/resources/_gen/
 blod/ExampleSite
+
+
+backend/src/betterself/core/config.py
+
