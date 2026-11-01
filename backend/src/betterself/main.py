@@ -8,6 +8,7 @@ from betterself.users.router import router as users_router
 from betterself.measurements.router import router as measurements_router
 from betterself.goal.router import router as goal_router
 from betterself.targets.router import router as targets_router
+from betterself.profile.router import router as profile_router
 
 
 app = FastAPI(
@@ -33,6 +34,7 @@ app.include_router(users_router)
 app.include_router(measurements_router)
 app.include_router(goal_router)
 app.include_router(targets_router)
+app.include_router(profile_router)
 
 
 @app.get("/health")

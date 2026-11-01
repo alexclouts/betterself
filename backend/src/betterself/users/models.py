@@ -3,8 +3,9 @@ from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, String, func, Uuid
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from betterself.profile.models import UserProfile
 from betterself.core.database import Base
 
 """ 
@@ -51,3 +52,11 @@ class User(Base):
         server_default=func.current_date(),
         nullable=False,
     )
+
+    # Relation vers le profil utilisateur associé. Un utilisateur peut avoir au maximum un profil.
+    profile: Mapped["UserProfile | None"] = relationship(
+    "UserProfile",
+    back_populates="user",
+    uselist=False,
+    cascade="all, delete-orphan",
+)
