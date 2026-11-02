@@ -109,17 +109,13 @@ def test_get_current_goal_success(client):
         access_token,
         valid_nutrition_goal_payload(),
     )
-
     assert creation_response.status_code == 201
 
     created_goal = creation_response.json()
-
     response = get_current_nutrition_goal(client, access_token)
-
     assert response.status_code == 200
 
     goal = response.json()
-
     assert goal["user_id"] == created_goal["user_id"]
     assert goal["goal_type"] == "lose_weight"
     assert goal["status"] == "active"
@@ -128,7 +124,6 @@ def test_get_current_goal_success(client):
 # Test pour vérifier que la récupération échoue sans authentification
 def test_get_current_goal_unauthorized(client):
     response = client.get("/nutrition-goals/current")
-
     assert response.status_code == 401
 
 
@@ -137,7 +132,6 @@ def test_get_current_goal_not_found(client):
     access_token = register_and_login(client)
 
     response = get_current_nutrition_goal(client, access_token)
-
     assert response.status_code == 404
 
 
@@ -150,13 +144,10 @@ def test_get_current_goal_isolated_between_users(client):
         owner_token,
         valid_nutrition_goal_payload(),
     )
-
     assert creation_response.status_code == 201
 
     other_token = register_and_login_other_user(client)
-
     response = get_current_nutrition_goal(client, other_token)
-
     assert response.status_code == 404
 
 
@@ -169,7 +160,6 @@ def test_update_current_goal_success(client):
         access_token,
         valid_nutrition_goal_payload(),
     )
-
     assert creation_response.status_code == 201
 
     update_payload = {
@@ -179,17 +169,14 @@ def test_update_current_goal_success(client):
         "start_date": "2026-10-01",
         "target_date": "2026-12-01",
     }
-
     response = update_current_nutrition_goal(
         client,
         access_token,
         update_payload,
     )
-
     assert response.status_code == 200
 
     goal = response.json()
-
     assert goal["goal_type"] == "maintain_weight"
     assert Decimal(goal["start_weight_kg"]) == Decimal("84.00")
     assert Decimal(goal["target_weight_kg"]) == Decimal("84.00")
@@ -202,7 +189,6 @@ def test_update_current_goal_unauthorized(client):
         "/nutrition-goals/current",
         json=valid_nutrition_goal_payload(),
     )
-
     assert response.status_code == 401
 
 
@@ -215,5 +201,4 @@ def test_update_current_goal_not_found(client):
         access_token,
         valid_nutrition_goal_payload(),
     )
-
     assert response.status_code == 404

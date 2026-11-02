@@ -63,42 +63,38 @@ def create_goal_for_user(client, access_token: str):
     )
 
     assert response.status_code == 201
-
     return response.json()
 
 
 # Test pour vérifier qu'aucune cible active n'existe avant le premier recalcul
 def test_get_current_goal_target_not_found(client):
     access_token = register_and_login(client)
+
     create_goal_for_user(client, access_token)
 
     response = get_current_goal_target(client, access_token)
-
     assert response.status_code == 404
 
 
 # Test pour vérifier que la récupération échoue sans authentification
 def test_get_current_goal_target_unauthorized(client):
     response = client.get("/nutrition-goals/current/target")
-
     assert response.status_code == 401
 
 
 # Test pour vérifier la création d'une première cible nutritionnelle
 def test_recalculate_goal_target_success(client):
     access_token = register_and_login(client)
-    create_goal_for_user(client, access_token)
 
+    create_goal_for_user(client, access_token)
     response = recalculate_current_goal_target(
         client,
         access_token,
         valid_goal_target_recalculate_payload(),
     )
-
     assert response.status_code == 201
 
     target = response.json()
-
     assert Decimal(target["reference_weight_kg"]) == Decimal("85.00")
     assert target["valid_until"] is None
     assert target["maintenance_calories_kcal"] > 0
@@ -119,11 +115,9 @@ def test_recalculate_goal_target_closes_previous_target(client):
         access_token,
         valid_goal_target_recalculate_payload(),
     )
-
     assert first_response.status_code == 201
 
     first_target = first_response.json()
-
     second_payload = valid_goal_target_recalculate_payload()
     second_payload["reference_weight_kg"] = 83
 
@@ -132,11 +126,9 @@ def test_recalculate_goal_target_closes_previous_target(client):
         access_token,
         second_payload,
     )
-
     assert second_response.status_code == 201
 
     second_target = second_response.json()
-
     # La première cible doit être fermée et la seconde doit être active.
     assert first_target["valid_until"] is None
     assert second_target["valid_until"] is None
@@ -146,6 +138,7 @@ def test_recalculate_goal_target_closes_previous_target(client):
 # Test pour vérifier qu'une seule cible active existe après plusieurs recalculs
 def test_only_one_active_goal_target_after_recalculations(client):
     access_token = register_and_login(client)
+
     create_goal_for_user(client, access_token)
 
     first_response = recalculate_current_goal_target(
@@ -175,6 +168,7 @@ def test_only_one_active_goal_target_after_recalculations(client):
 # Test pour vérifier que le recalcul échoue sans objectif nutritionnel
 def test_recalculate_goal_target_requires_goal(client):
     access_token = register_and_login(client)
+
     response = recalculate_current_goal_target(
         client,
         access_token,
@@ -195,6 +189,7 @@ def test_recalculate_goal_target_unauthorized(client):
 # Test pour vérifier que le recalcul échoue avec un poids invalide
 def test_recalculate_goal_target_invalid_weight(client):
     access_token = register_and_login(client)
+
     create_goal_for_user(client, access_token)
 
     payload = valid_goal_target_recalculate_payload()
@@ -211,6 +206,7 @@ def test_recalculate_goal_target_invalid_weight(client):
 # Test pour vérifier l'isolation des cibles entre utilisateurs
 def test_get_current_goal_target_isolated_between_users(client):
     owner_token = register_and_login(client)
+    
     create_goal_for_user(client, owner_token)
 
     owner_response = recalculate_current_goal_target(
