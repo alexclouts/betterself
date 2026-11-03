@@ -15,7 +15,7 @@ from betterself.users.models import User
 from betterself.users.utils import get_current_user
 
 router = APIRouter(
-    prefix="/nutrition-goals/current/target",
+    prefix="/nutrition-goal/current/target",
     tags=["Nutrition goal targets"],
 )
 

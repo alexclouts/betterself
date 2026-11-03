@@ -12,7 +12,7 @@ from tests.utils import (
 # Fonction utilitaire pour créer un objectif nutritionnel
 def create_nutrition_goal(client, access_token: str, payload: dict):
     return client.post(
-        "/nutrition-goals",
+        "/nutrition-goal",
         json=payload,
         headers=auth_headers(access_token),
     )
@@ -21,7 +21,7 @@ def create_nutrition_goal(client, access_token: str, payload: dict):
 # Fonction utilitaire pour récupérer l'objectif nutritionnel courant
 def get_nutrition_goal(client, access_token: str):
     return client.get(
-        "/nutrition-goals/current",
+        "/nutrition-goal/current",
         headers=auth_headers(access_token),
     )
 
@@ -29,7 +29,7 @@ def get_nutrition_goal(client, access_token: str):
 # Fonction utilitaire pour modifier l'objectif nutritionnel courant
 def update_nutrition_goal(client, access_token: str, payload: dict):
     return client.patch(
-        "/nutrition-goals/current",
+        "/nutrition-goal/current",
         json=payload,
         headers=auth_headers(access_token),
     )
@@ -98,7 +98,7 @@ def test_create_nutrition_goal_already_exists(client):
 # Test pour vérifier la création échoue sans authentification
 def test_create_nutrition_goal_unauthorized(client):
     response = client.post(
-        "/nutrition-goals",
+        "/nutrition-goal",
         json=valid_nutrition_goal_payload(),
     )
 
@@ -238,7 +238,7 @@ def test_get_nutrition_goal_success(client):
 
 # Test pour vérifier que la récupération échoue sans authentification
 def test_get_nutrition_goal_unauthorized(client):
-    response = client.get("/nutrition-goals/current")
+    response = client.get("/nutrition-goal/current")
 
     assert response.status_code == 401
 
@@ -318,7 +318,7 @@ def test_update_nutrition_goal_success(client):
 # Test pour vérifier que la modification échoue sans authentification
 def test_update_nutrition_goal_unauthorized(client):
     response = client.patch(
-        "/nutrition-goals/current",
+        "/nutrition-goal/current",
         json=valid_nutrition_goal_payload(),
     )
 
