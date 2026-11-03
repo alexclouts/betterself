@@ -78,6 +78,8 @@ class UserProfile(Base):
     )
 
     # Relation vers l'utilisateur associé. Un profil appartient à un utilisateur unique.
+    # user.profile = profile : ajout du profil à l'utilisateur
+    # back_populates relie cet attribut à User.profile
     user = relationship(
         "User",
         back_populates="profile"

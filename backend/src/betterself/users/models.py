@@ -2,9 +2,10 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, String, func, Uuid
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from betterself.recipes.models import Recipe
+from betterself.goal.models import NutritionGoal
 from betterself.profile.models import UserProfile
 from betterself.core.database import Base
 
@@ -55,8 +56,23 @@ class User(Base):
 
     # Relation vers le profil utilisateur associé. Un utilisateur peut avoir au maximum un profil.
     profile: Mapped["UserProfile | None"] = relationship(
-    "UserProfile",
-    back_populates="user",
-    uselist=False,
-    cascade="all, delete-orphan",
-)
+        "UserProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
+
+    # Relation vers l'objectif nutritionnel associé. Un utilisateur peut avoir au maximum un objectif.
+    nutrition_goal: Mapped["NutritionGoal | None"] = relationship(
+        "NutritionGoal",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+    # Relation vers les recettes associées à l'utilisateur. Un utilisateur peut avoir plusieurs recettes.
+    recipes: Mapped[list["Recipe"]] = relationship(
+        "Recipe",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

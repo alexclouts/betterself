@@ -16,20 +16,33 @@ from jose import JWTError, jwt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(
+    prefix="/auth", 
+    tags=["Authentication"]
+)
+
+def get_user_service(
+    session: Session = Depends(get_db),
+) -> UserService:
+    return UserService(session)
+
 
 # Endpoint pour l'enregistrement d'un nouvel utilisateur
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def register_user(user_create: UserCreate, db: Session=Depends(get_db)):
-    service = UserService(db)
+def register_user(
+    user_create: UserCreate, 
+    service: UserService = Depends(get_user_service),
+):
     return service.create_user(user_create)
 
 
 # Endpoint pour la connexion d'un utilisateur
 @router.post("/login", response_model=Token)
-def login_user(form_data: OAuth2PasswordRequestForm=Depends(), db: Session=Depends(get_db)):
+def login_user(
+    form_data: OAuth2PasswordRequestForm=Depends(), 
+    service: UserService = Depends(get_user_service)
+):
     # Récupère l'utilisateur par son email et vérifie le mot de passe
-    service = UserService(db)
     user = service.get_user_by_email(form_data.username)
 
     # Vérifie si l'utilisateur existe et si le mot de passe est correct
@@ -46,7 +59,10 @@ def login_user(form_data: OAuth2PasswordRequestForm=Depends(), db: Session=Depen
 
 
 # Fonction utilitaire pour récupérer l'utilisateur actuellement connecté à partir du jeton d'accès
-def read_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+def read_current_user(
+        token: str = Depends(oauth2_scheme), 
+        service: UserService = Depends(get_user_service),
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Impossible de valider les informations d'identification.",
@@ -57,13 +73,12 @@ def read_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         user_id: str = payload.get("sub")
 
-
         if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    user = UserService(db).get_user_by_id(UUID(user_id))
+    user = service.get_user_by_id(UUID(user_id))
     if user is None:
         raise credentials_exception
     return user

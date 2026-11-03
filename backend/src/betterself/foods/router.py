@@ -24,6 +24,11 @@ router = APIRouter(
     tags=["Foods"],
 )
 
+def get_food_service(
+    session: Session = Depends(get_db),
+) -> FoodService:
+    return FoodService(session)
+
 
 # Fonction pour rechercher des aliments
 @router.get("", response_model=list[FoodRead])
@@ -48,9 +53,8 @@ def search_foods(
         ge=0,
         description="Nombre de résultats à ignorer avant de retourner la page.",
     ),
-    db: Session = Depends(get_db),
+    service: FoodService = Depends(get_food_service),
 ):
-    service = FoodService(db)
 
     return service.search_foods(
         query=query,
@@ -66,9 +70,8 @@ def create_food(
     data: FoodCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    service: FoodService = Depends(get_food_service),
 ):
-    service = FoodService(db)
-
     return service.create_food(
         user=current_user,
         data=data,
@@ -82,10 +85,8 @@ def create_food(
 )
 def get_food(
     food_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    service: FoodService = Depends(get_food_service),
 ):
-    service = FoodService(db)
-
     try:
         return service.get_food_or_404(food_id)
     except RecordNotFound:
@@ -104,10 +105,8 @@ def update_food(
     food_id: uuid.UUID,
     data: FoodUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    service: FoodService = Depends(get_food_service),
 ):
-    service = FoodService(db)
-
     try:
         return service.update_food(
             user=current_user,
@@ -134,10 +133,8 @@ def update_food(
 def delete_food(
     food_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    service: FoodService = Depends(get_food_service),
 ):
-    service = FoodService(db)
-
     try:
         service.delete_food(
             user=current_user,
@@ -153,5 +150,4 @@ def delete_food(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(error),
         )
-
     return Response(status_code=status.HTTP_204_NO_CONTENT)

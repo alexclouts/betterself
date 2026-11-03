@@ -13,7 +13,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from betterself.core.database import Base
 
@@ -76,6 +76,7 @@ class NutritionGoal(Base):
         nullable=True,
     )
 
+    # TODO: Définir un Enum pour le statut de l'objectif (actif, complété)
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
@@ -95,12 +96,18 @@ class NutritionGoal(Base):
         onupdate=func.current_date(),
     )
 
+    user = relationship(
+        "User",
+        back_populates="nutrition_goal",
+    )
+
     __table_args__ = (
         # Contraintes de validation des données
         CheckConstraint(
             "target_date IS NULL OR target_date > start_date",
             name="nutrition_goals_check_target_date",
         ),
+        # Vérifie que le poids cible est soit nul, soit compris dans une plage plausible
         CheckConstraint(
             "target_weight_kg IS NULL OR (target_weight_kg > 30 AND target_weight_kg <= 500)",
             name="nutrition_goals_check_target_weight",
@@ -109,6 +116,7 @@ class NutritionGoal(Base):
             "start_weight_kg > 30 AND start_weight_kg <= 500",
             name="nutrition_goals_check_start_weight",
         ),
+
         CheckConstraint(
             "status IN ('active', 'completed', 'cancelled')",
             name="nutrition_goals_check_status",

@@ -22,7 +22,6 @@ def get_current_nutrition_goal(client, access_token: str):
     )
 
 
-
 # Fonction utilitaire pour modifier l'objectif nutritionnel actif
 def update_current_nutrition_goal(
     client,
@@ -46,6 +45,7 @@ def valid_nutrition_goal_payload() -> dict:
         "target_date": "2026-12-01",
     }
 
+
 # Test pour vérifier la création réussie de l'objectif durant le onboarding
 def test_create_goal_success(client):
     access_token = register_and_login(client)
@@ -55,9 +55,7 @@ def test_create_goal_success(client):
         access_token,
         valid_nutrition_goal_payload(),
     )
-
     assert response.status_code == 201
-
     goal = response.json()
 
     assert goal["goal_type"] == "lose_weight"

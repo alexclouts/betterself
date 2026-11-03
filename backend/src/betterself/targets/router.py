@@ -20,12 +20,18 @@ router = APIRouter(
 )
 
 
+def get_target_service(
+    session: Session = Depends(get_db),
+) -> TargetService:
+    return TargetService(session)
+
+
 @router.get(
     "",
     response_model=GoalTargetRead,
 )
 def get_current_goal_target(
-    session: Session = Depends(get_db),
+    service: TargetService = Depends(get_target_service),
     current_user: User = Depends(get_current_user),
 ) -> GoalTargetRead:
     """
@@ -34,8 +40,6 @@ def get_current_goal_target(
     Cette cible contient notamment les calories et macronutriments à
     consommer pour la période courante.
     """
-    service = TargetService(session)
-
     try:
         return service.get_active_goal_target(current_user)
     except RecordNotFound:
@@ -52,7 +56,7 @@ def get_current_goal_target(
 )
 def recalculate_current_goal_target(
     payload: GoalTargetRecalculate,
-    session: Session = Depends(get_db),
+    service: TargetService = Depends(get_target_service),
     current_user: User = Depends(get_current_user),
 ) -> GoalTargetRead:
     """
@@ -61,8 +65,6 @@ def recalculate_current_goal_target(
     La cible précédente est fermée et conservée dans l'historique. La nouvelle
     cible devient la seule cible active de l'utilisateur.
     """
-    service = TargetService(session)
-
     try:
         return service.recalculate_goal_target(
             user=current_user,

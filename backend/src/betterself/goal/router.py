@@ -9,14 +9,21 @@ from betterself.goal.schemas import (
 )
 from betterself.goal.service import (
     NutritionGoalAlreadyExistsError,
-    GoalService)
+    GoalService,
+)
 from betterself.users.models import User
 from betterself.users.utils import get_current_user
 
 router = APIRouter(
-    prefix="/nutrition-goals",
-    tags=["Nutrition goals"],
+    prefix="/nutrition-goal",
+    tags=["Nutrition goal"],
 )
+
+
+def get_goal_service(
+    session: Session = Depends(get_db),
+) -> GoalService:
+    return GoalService(session)
 
 
 @router.post(
@@ -26,7 +33,7 @@ router = APIRouter(
 )
 def create_nutrition_goal(
     payload: NutritionGoalCreate,
-    session: Session = Depends(get_db),
+    service: GoalService = Depends(get_goal_service),
     current_user: User = Depends(get_current_user),
 ) -> NutritionGoalRead:
     """
@@ -35,8 +42,6 @@ def create_nutrition_goal(
     Un utilisateur ne peut posséder qu'un seul objectif. Si un objectif existe
     déjà, la requête retourne une erreur 409 Conflict.
     """
-    service = GoalService(session)
-
     try:
         return service.create_goal(
             user=current_user,
@@ -54,7 +59,7 @@ def create_nutrition_goal(
     response_model=NutritionGoalRead,
 )
 def get_nutritional_goal(
-    session: Session = Depends(get_db),
+    service: GoalService = Depends(get_goal_service),
     current_user: User = Depends(get_current_user),
 ) -> NutritionGoalRead:
     """
@@ -63,8 +68,6 @@ def get_nutritional_goal(
     Cette route est utilisée notamment pour vérifier que l'utilisateur a
     complété l'étape de onboarding.
     """
-    service = GoalService(session)
-
     try:
         return service.get_goal_or_404(user=current_user)
     except RecordNotFound:
@@ -80,7 +83,7 @@ def get_nutritional_goal(
 )
 def update_nutrition_goal(
     payload: NutritionGoalCreate,
-    session: Session = Depends(get_db),
+    service: GoalService = Depends(get_goal_service),
     current_user: User = Depends(get_current_user),
 ) -> NutritionGoalRead:
     """
@@ -89,8 +92,6 @@ def update_nutrition_goal(
     L'utilisateur ne peut pas créer un second objectif : il modifie celui
     créé durant le onboarding.
     """
-    service = GoalService(session)
-
     try:
         return service.update_goal(
             user=current_user,

@@ -9,11 +9,16 @@ from betterself.users.models import User
 from betterself.profile.schemas import UserProfileRead, UserProfileUpdate
 from betterself.profile.service import UserProfileService
 
-
 router = APIRouter(
     prefix="/users",
     tags=["Users"],
 )
+
+
+def get_user_profile_service(
+    db: Session = Depends(get_db),
+) -> UserProfileService:
+    return UserProfileService(db)
 
 
 # Fonction pour récupérer le profil de l'utilisateur connecté
@@ -23,19 +28,15 @@ router = APIRouter(
 )
 def get_current_user_profile(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    service: UserProfileService = Depends(get_user_profile_service),
 ):
-    service = UserProfileService(db)
-
     try:
-        profile = service.get_profile_or_404(current_user)
+        return service.get_profile_or_404(current_user)
     except RecordNotFound:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Aucun profil utilisateur n'a été trouvé.",
         )
-
-    return profile
 
 
 # Fonction pour créer ou mettre à jour le profil de l'utilisateur connecté
@@ -46,9 +47,8 @@ def get_current_user_profile(
 def create_or_update_current_user_profile(
     data: UserProfileUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    service: UserProfileService = Depends(get_user_profile_service),
 ):
-    service = UserProfileService(db)
     profile, created = service.create_or_update_profile(
         user=current_user,
         data=data,
@@ -59,4 +59,5 @@ def create_or_update_current_user_profile(
             status_code=status.HTTP_201_CREATED,
             content=UserProfileRead.model_validate(profile).model_dump(mode="json"),
         )
+
     return profile
