@@ -316,6 +316,7 @@ def test_update_food_immutable_value(client):
     assert response.status_code == 200
 
     food = response.json()
+
     # La valeur envoyée doit être ignorée.
     assert food["calories_kcal"] == created_food["calories_kcal"]
     assert food["calories_kcal"] != 999
@@ -395,16 +396,13 @@ def test_update_food_unauthorized(client):
         json=valid_food_payload(),
         headers=auth_headers(register_and_login(client)),
     )
-
     assert creation_response.status_code == 201
 
     created_food = creation_response.json()
-
     response = client.patch(
         f"{FOODS_URL}/{created_food['id']}",
         json={"name": "Nom non autorisé"},
     )
-
     assert response.status_code == 401
 
 
@@ -417,7 +415,6 @@ def test_update_food_not_found(client):
         json={"name": "Aliment inexistant"},
         headers=auth_headers(access_token),
     )
-
     assert response.status_code == 404
 
 

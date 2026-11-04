@@ -69,7 +69,6 @@ class FoodCreate(BaseModel):
             raise ValueError(
                 f"Le champ {info.field_name} ne peut pas être négatif."
             )
-
         return value
 
 

@@ -1,12 +1,9 @@
 """
 Resources pour les tests, y compris les utilisateurs de test et les fonctions utilitaires pour l'authentification.
 """
-
-
-# Adresse électronique et mot de passe utilisés pour le premier utilisateur de test
 import pytest
 
-
+# Adresse électronique et mot de passe utilisés pour le premier utilisateur de test
 TEST_USER_EMAIL = "test@example.com"
 TEST_USER_PASSWORD = "testpassword"
 

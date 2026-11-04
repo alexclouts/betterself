@@ -91,14 +91,14 @@ class Recipe(Base):
     )
 
     # Attribut Python permettant de naviguer entre les recettes et leurs ingrédients
-    """
+    
     ingredients = relationship(
         "RecipeIngredient",
         back_populates="recipe",
         cascade="all, delete-orphan",
         order_by="RecipeIngredient.created_at",
     )
-    """
+    
     __table_args__ = (
         # Vérifie que le poids total de la recette est positif
         CheckConstraint(

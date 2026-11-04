@@ -67,3 +67,5 @@ def client(test_session):
 
     # Réinitialise les overrides des dépendances de l'application après chaque test
     app.dependency_overrides.clear()
+
+

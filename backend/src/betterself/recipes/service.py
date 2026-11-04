@@ -18,11 +18,10 @@ class RecipeService:
     """
     Service responsable de la logique métier liée aux recettes.
     """
-
     def __init__(self, db: Session):
         self.db = db
 
-
+    # Liste des recettes de l'utilisateur, avec pagination et option d'inclure les archivées.
     def list_recipes(
         self,
         user: User,
@@ -37,19 +36,18 @@ class RecipeService:
         query = select(Recipe).where(
             Recipe.user_id == user.id,
         )
-
+        # Filtrage des recettes archivées si nécessaire
         if not include_archived:
             query = query.where(
                 Recipe.is_archived.is_(False),
             )
-
+        # Exécution de la requête avec pagination et tri par date de création
         query = (
             query
             .order_by(Recipe.created_at.desc())
             .limit(limit)
             .offset(offset)
         )
-
         return list(
             self.db.scalars(query).all()
         )
@@ -71,7 +69,6 @@ class RecipeService:
             servings=data.servings,
             is_archived=False,
         )
-
         self.db.add(recipe)
         self.db.commit()
         self.db.refresh(recipe)
@@ -94,12 +91,11 @@ class RecipeService:
                 Recipe.user_id == user.id,
             )
         )
-
+        # Aucun résultat trouvé, levée de l'exception RecordNotFound
         if recipe is None:
             raise RecordNotFound(
                 "Aucune recette n'a été trouvée."
             )
-
         return recipe
 
 
@@ -116,11 +112,11 @@ class RecipeService:
             user=user,
             recipe_id=recipe_id,
         )
-
+        # Récupération de la recette à mettre à jour
         update_data = data.model_dump(
             exclude_unset=True,
         )
-
+        # Application des mises à jour sur la recette existante
         for field, value in update_data.items():
             setattr(recipe, field, value)
 
@@ -144,7 +140,7 @@ class RecipeService:
             user=user,
             recipe_id=recipe_id,
         )
-
+        # Mise à jour du statut d'archivage de la recette
         recipe.is_archived = data.is_archived
 
         self.db.commit()
@@ -165,6 +161,6 @@ class RecipeService:
             user=user,
             recipe_id=recipe_id,
         )
-
+        # Suppression de la recette
         self.db.delete(recipe)
         self.db.commit()

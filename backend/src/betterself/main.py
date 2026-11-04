@@ -11,6 +11,7 @@ from betterself.targets.router import router as targets_router
 from betterself.profile.router import router as profile_router
 from betterself.foods.router import router as foods_router
 from betterself.recipes.router import router as recipes_router
+from betterself.ingredients.router import router as ingredients_router
 
 
 app = FastAPI(
@@ -38,6 +39,7 @@ app.include_router(goal_router)
 app.include_router(targets_router)
 app.include_router(profile_router)
 
+app.include_router(ingredients_router)
 app.include_router(foods_router)
 app.include_router(recipes_router)
 
