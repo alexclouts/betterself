@@ -83,10 +83,10 @@ def create_recipe(
 def get_recipe(
     recipe_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
-    recipe_service: RecipeService = Depends(get_recipe_service),
+    recipe_service: RecipeService = Depends(get_recipe_service)
 ):
     try:
-        return recipe_service.get_recipe_or_404(
+        return recipe_service.get_recipe_by_id(
             user=current_user,
             recipe_id=recipe_id,
         )

@@ -7,24 +7,21 @@ from betterself.profile.models import UserProfile
 from betterself.profile.schemas import UserProfileUpdate
 
 
+"""
+Gère le profil biométrique et les préférences d'un utilisateur.
+
+Chaque utilisateur possède au plus un profil. Le premier appel à
+`create_or_update_profile` crée le profil; les appels suivants le mettent à jour.
+"""
 class UserProfileService:
-    """
-    Gère le profil biométrique et les préférences d'un utilisateur.
-
-    Chaque utilisateur possède au plus un profil. Le premier appel à
-    `create_or_update_profile` crée le profil; les appels suivants le
-    mettent à jour.
-    """
-
     def __init__(self, db: Session):
         self.db = db
 
-    # Fonction pour récupérer le profil d'un utilisateur
+    """
+    Retourne le profil de l'utilisateur ou lève une exception si
+    aucun profil n'a encore été créé.
+    """
     def get_profile_or_404(self, user: User) -> UserProfile:
-        """
-        Retourne le profil de l'utilisateur ou lève une exception si
-        aucun profil n'a encore été créé.
-        """
         profile = self.db.scalar(
             select(UserProfile).where(
                 UserProfile.user_id == user.id,
@@ -38,19 +35,17 @@ class UserProfileService:
 
         return profile
 
-    # Fonction pour créer le profil s'il n'existe pas, sinon le mettre à jour
+
+    """
+    Crée le profil de l'utilisateur s'il n'existe pas, sinon met à jour le profil existant.
+    Retourne un tuple contenant le profil et un booléen indiquant si le profil vient d'être créé.
+    """
     def create_or_update_profile(
         self,
         user: User,
         data: UserProfileUpdate,
     ) -> tuple[UserProfile, bool]:
-        """
-        Crée le profil de l'utilisateur s'il n'existe pas, sinon met à jour
-        le profil existant.
 
-        Retourne un tuple contenant le profil et un booléen indiquant si
-        le profil vient d'être créé.
-        """
         profile = self.db.scalar(
             select(UserProfile).where(
                 UserProfile.user_id == user.id,

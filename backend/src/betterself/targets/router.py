@@ -26,20 +26,15 @@ def get_target_service(
     return TargetService(session)
 
 
-@router.get(
-    "",
-    response_model=GoalTargetRead,
-)
+"""
+Retourne la cible nutritionnelle active de l'utilisateur.
+Cette cible contient notamment les calories et macronutriments à consommer pour la période courante.
+"""
+@router.get("", response_model=GoalTargetRead)
 def get_current_goal_target(
     service: TargetService = Depends(get_target_service),
     current_user: User = Depends(get_current_user),
 ) -> GoalTargetRead:
-    """
-    Retourne la cible nutritionnelle active de l'utilisateur.
-
-    Cette cible contient notamment les calories et macronutriments à
-    consommer pour la période courante.
-    """
     try:
         return service.get_active_goal_target(current_user)
     except RecordNotFound:
@@ -49,22 +44,16 @@ def get_current_goal_target(
         )
 
 
-@router.post(
-    "/recalculate",
-    response_model=GoalTargetRead,
-    status_code=status.HTTP_201_CREATED,
-)
+"""
+Recalcule la cible nutritionnelle active à partir d'un nouveau poids.
+La cible précédente est fermée et conservée dans l'historique. La nouvelle cible devient la seule cible active de l'utilisateur.
+"""
+@router.post("/recalculate", response_model=GoalTargetRead, status_code=status.HTTP_201_CREATED)
 def recalculate_current_goal_target(
     payload: GoalTargetRecalculate,
     service: TargetService = Depends(get_target_service),
     current_user: User = Depends(get_current_user),
 ) -> GoalTargetRead:
-    """
-    Recalcule la cible nutritionnelle active à partir d'un nouveau poids.
-
-    La cible précédente est fermée et conservée dans l'historique. La nouvelle
-    cible devient la seule cible active de l'utilisateur.
-    """
     try:
         return service.recalculate_goal_target(
             user=current_user,

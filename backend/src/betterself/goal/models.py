@@ -25,18 +25,19 @@ class GoalType(str, Enum):
     BODY_RECOMPOSITION = "body_recomposition"
 
 
+"""
+Objectif nutritionnel d'un utilisateur.
+
+L'objectif est créé durant le processus de onboarding. Il peut ensuite
+être modifié, mais chaque utilisateur ne peut en posséder qu'un seul.
+
+L'objectif est une extension du profil fonctionnel de l'utilisateur :
+sa clé primaire est directement `user_id`, plutôt qu'un identifiant
+autonome. Cela garantit, au niveau de la base de données, qu'un
+utilisateur ne peut avoir qu'un seul objectif.
+"""
 class NutritionGoal(Base):
-    """
-    Objectif nutritionnel d'un utilisateur.
-
-    L'objectif est créé durant le processus de onboarding. Il peut ensuite
-    être modifié, mais chaque utilisateur ne peut en posséder qu'un seul.
-
-    L'objectif est une extension du profil fonctionnel de l'utilisateur :
-    sa clé primaire est directement `user_id`, plutôt qu'un identifiant
-    autonome. Cela garantit, au niveau de la base de données, qu'un
-    utilisateur ne peut avoir qu'un seul objectif.
-    """
+ 
 
     __tablename__ = "nutrition_goals"
 

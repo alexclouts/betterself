@@ -18,15 +18,12 @@ from betterself.core.database import Base
 
 
 
+"""
+Aliment associé à une recette, avec la quantité utilisée.
+La quantité est exprimée en grammes du produit tel que consommé ou utilisé dans la recette. 
+Les valeurs nutritionnelles ne sont pas dupliquées ici : elles sont lues depuis `foods` lors du calcul.
+"""
 class RecipeIngredient(Base):
-    """
-    Aliment associé à une recette, avec la quantité utilisée.
-
-    La quantité est exprimée en grammes du produit tel que consommé ou
-    utilisé dans la recette. Les valeurs nutritionnelles ne sont pas
-    dupliquées ici : elles sont lues depuis `foods` lors du calcul.
-    """
-
     __tablename__ = "recipe_ingredients"
 
     id: Mapped[uuid.UUID] = mapped_column(

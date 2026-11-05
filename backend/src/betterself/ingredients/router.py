@@ -28,15 +28,18 @@ router = APIRouter(
 )
 
 
+"""
+Construit le service des ingrédients de recette.
+"""
 def get_recipe_ingredient_service(
     db: Session = Depends(get_db),
 ) -> RecipeIngredientService:
-    """
-    Construit le service des ingrédients de recette.
-    """
     return RecipeIngredientService(db)
 
 
+"""
+Ajoute un aliment à une recette.
+"""
 @router.post("/{recipe_id}/ingredients", response_model=RecipeIngredientRead, status_code=status.HTTP_201_CREATED,)
 def create_recipe_ingredient(
     recipe_id: uuid.UUID,
@@ -46,9 +49,6 @@ def create_recipe_ingredient(
         get_recipe_ingredient_service,
     )
 ):
-    """
-    Ajoute un aliment à une recette.
-    """
     try:
         return ingredient_service.create_ingredient(
             user=current_user,
@@ -67,6 +67,9 @@ def create_recipe_ingredient(
         )
 
 
+"""
+Retourne un ingrédient précis d'une recette.
+"""
 @router.get("/{recipe_id}/ingredients/{ingredient_id}", response_model=RecipeIngredientRead)
 def get_recipe_ingredient(
     recipe_id: uuid.UUID,
@@ -76,9 +79,6 @@ def get_recipe_ingredient(
         get_recipe_ingredient_service,
     ),
 ):
-    """
-    Retourne un ingrédient précis d'une recette.
-    """
     try:
         return ingredient_service.get_ingredient_or_404(
             user=current_user,
@@ -92,6 +92,9 @@ def get_recipe_ingredient(
         )
 
 
+"""
+Met à jour la quantité d'un ingrédient.
+"""
 @router.patch("/{recipe_id}/ingredients/{ingredient_id}", response_model=RecipeIngredientRead)
 def update_recipe_ingredient(
     recipe_id: uuid.UUID,
@@ -102,9 +105,6 @@ def update_recipe_ingredient(
         get_recipe_ingredient_service,
     ),
 ):
-    """
-    Met à jour la quantité d'un ingrédient.
-    """
     try:
         return ingredient_service.update_ingredient(
             user=current_user,
@@ -119,6 +119,9 @@ def update_recipe_ingredient(
         )
 
 
+"""
+Supprime un ingrédient d'une recette.
+"""
 @router.delete("/{recipe_id}/ingredients/{ingredient_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_recipe_ingredient(
     recipe_id: uuid.UUID,
@@ -128,9 +131,6 @@ def delete_recipe_ingredient(
         get_recipe_ingredient_service,
     ),
 ):
-    """
-    Supprime un ingrédient d'une recette.
-    """
     try:
         ingredient_service.delete_ingredient(
             user=current_user,
@@ -142,5 +142,4 @@ def delete_recipe_ingredient(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         )
-
     return Response(status_code=status.HTTP_204_NO_CONTENT)

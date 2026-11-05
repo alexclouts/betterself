@@ -7,15 +7,12 @@ from pydantic import BaseModel, Field, field_validator
 from betterself.core.validation import validate_weight_kg
 
 
+"""
+Représentation d'une cible nutritionnelle.
+Une cible est valide pour une période donnée. La cible active est celle dont `valid_until` est `None`; 
+les cibles antérieures sont conservées comme historique lorsque le poids de l'utilisateur change.
+"""
 class GoalTargetRead(BaseModel):
-    """
-    Représentation d'une cible nutritionnelle.
-
-    Une cible est valide pour une période donnée. La cible active est celle
-    dont `valid_until` est `None`; les cibles antérieures sont conservées
-    comme historique lorsque le poids de l'utilisateur change.
-    """
-
     id: UUID
     user_id: UUID
     valid_from: date
@@ -32,15 +29,12 @@ class GoalTargetRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+"""
+Payload temporaire pour le recalcul d'une cible nutritionnelle.
+TODO: Lorsque la table `user_profiles` sera implémentée, seuls `reference_weight_kg` devrait rester dans ce payload. 
+Les paramètres biométriques seront récupérés depuis le profil de l'utilisateur.
+"""
 class GoalTargetRecalculate(BaseModel):
-    """
-    Payload temporaire pour le recalcul d'une cible nutritionnelle.
-
-    TODO: Lorsque la table `user_profiles` sera implémentée, seuls
-    `reference_weight_kg` devrait rester dans ce payload. Les paramètres
-    biométriques seront récupérés depuis le profil de l'utilisateur.
-    """
-
     reference_weight_kg: Decimal = Field(
         ge=30,
         le=300,

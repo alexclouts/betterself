@@ -19,20 +19,17 @@ from sqlalchemy.orm import Mapped, mapped_column
 from betterself.core.database import Base
 
 
+"""
+Cible nutritionnelle associée à l'objectif d'un utilisateur.
+
+Une cible représente l'objectif micro à atteindre pour une période donnée :
+calories de maintien, calories cibles, ajustement calorique et macronutriments.
+
+Une seule cible peut être active à la fois. Lorsque le poids de l'utilisateur change, 
+une nouvelle cible est créée et la cible précédente est fermée en renseignant `valid_until`. 
+L'ancienne cible reste ainsi disponible dans l'historique.
+"""
 class GoalTarget(Base):
-    """
-    Cible nutritionnelle associée à l'objectif d'un utilisateur.
-
-    Une cible représente l'objectif micro à atteindre pour une période donnée :
-    calories de maintien, calories cibles, ajustement calorique et
-    macronutriments.
-
-    Une seule cible peut être active à la fois. Lorsque le poids de
-    l'utilisateur change, une nouvelle cible est créée et la cible précédente
-    est fermée en renseignant `valid_until`. L'ancienne cible reste ainsi
-    disponible dans l'historique.
-    """
-
     __tablename__ = "goal_targets"
 
     id: Mapped[uuid.UUID] = mapped_column(

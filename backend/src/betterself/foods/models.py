@@ -152,6 +152,12 @@ class Food(Base):
         foreign_keys=[created_by_user_id],
     )
 
+    food_consumptions: Mapped[list["FoodConsumption"]] = relationship(
+        "FoodConsumption",
+        back_populates="food",
+        cascade="all, delete-orphan",
+    )
+
     __table_args__ = (
         CheckConstraint(
             "reference_weight_g > 0",

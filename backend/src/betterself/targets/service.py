@@ -12,11 +12,12 @@ from betterself.targets.schemas import GoalTargetRecalculate
 from betterself.users.models import User
 
 
+"""
+Levée lorsque la cible nutritionnelle ne peut pas être calculée à partir
+des paramètres biométriques disponibles.
+"""
 class GoalTargetCalculationError(Exception):
-    """
-    Levée lorsque la cible nutritionnelle ne peut pas être calculée à partir
-    des paramètres biométriques disponibles.
-    """
+    pass
 
 
 class TargetService:
@@ -24,15 +25,12 @@ class TargetService:
         self.db = db
         self.goal_service = GoalService(db)
 
-    # Fonction pour récupérer la cible nutritionnelle active
+    """
+    Retourne la cible nutritionnelle active de l'utilisateur.
+    La cible active est la seule ligne dont `valid_until` est `None`.
+    Elle contient les calories et macronutriments que l'utilisateur doit suivre actuellement.
+    """    
     def get_active_goal_target(self, user: User) -> GoalTarget:
-        """
-        Retourne la cible nutritionnelle active de l'utilisateur.
-
-        La cible active est la seule ligne dont `valid_until` est `None`.
-        Elle contient les calories et macronutriments que l'utilisateur doit
-        suivre actuellement.
-        """
         query = (
             select(GoalTarget)
             .where(
@@ -52,7 +50,11 @@ class TargetService:
 
         return target
 
-    # Fonction pour calculer une cible à partir du poids et des paramètres biométriques
+
+    """
+    Calcule les calories et macronutriments cibles à partir du poids de référence et des paramètres biométriques de l'utilisateur.
+    Cette version utilise Mifflin-St Jeor. Les règles nutritionnelles pourront être isolées dans un module de calcul plus tard.
+    """
     def calculate_goal_target(
         self,
         goal: NutritionGoal,
@@ -63,13 +65,6 @@ class TargetService:
         height_cm: Decimal,
         activity_level: str,
     ) -> dict:
-        """
-        Calcule les calories et macronutriments cibles à partir du poids de
-        référence et des paramètres biométriques de l'utilisateur.
-
-        Cette version utilise Mifflin-St Jeor. Les règles nutritionnelles
-        pourront être isolées dans un module de calcul plus tard.
-        """
         weight = float(reference_weight_kg)
         height = float(height_cm)
         age = date.today().year - birth_year
@@ -131,19 +126,16 @@ class TargetService:
             "calculation_method": "mifflin_st_jeor_v1",
         }
 
-    # Fonction pour créer une nouvelle cible et fermer la cible active
+    """
+    Crée une nouvelle cible nutritionnelle à partir d'un nouveau poids.
+    La cible active précédente est fermée en renseignant `valid_until`.
+    La nouvelle cible devient la seule cible active, tandis que l'ancienne reste disponible dans l'historique.
+    """
     def recalculate_goal_target(
         self,
         user: User,
         data: GoalTargetRecalculate,
     ) -> GoalTarget:
-        """
-        Crée une nouvelle cible nutritionnelle à partir d'un nouveau poids.
-
-        La cible active précédente est fermée en renseignant `valid_until`.
-        La nouvelle cible devient la seule cible active, tandis que l'ancienne
-        reste disponible dans l'historique.
-        """
         # L'utilisateur doit posséder un objectif nutritionnel.
         goal = self.goal_service.get_goal_or_404(user)
 
@@ -157,6 +149,7 @@ class TargetService:
             )
         )
 
+        # Si une cible active existe, on la ferme en renseignant `valid_until`.
         if active_target is not None:
             active_target.valid_until = today
 
@@ -169,6 +162,7 @@ class TargetService:
             activity_level=data.activity_level,
         )
 
+        # Crée la nouvelle cible nutritionnelle avec les valeurs calculées.
         new_target = GoalTarget(
             user_id=user.id,
             valid_from=today,

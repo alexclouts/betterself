@@ -25,14 +25,13 @@ class ActivityLevel(str, Enum):
     MODERATE = "moderate"
     HIGH = "high"
 
+"""
+Profil biométrique et préférences d'un utilisateur.
+
+Une seule ligne de profil existe par utilisateur. Ces informations
+servent notamment au calcul du BMR et des cibles nutritionnelles.
+"""
 class UserProfile(Base):
-    """
-    Profil biométrique et préférences d'un utilisateur.
-
-    Une seule ligne de profil existe par utilisateur. Ces informations
-    servent notamment au calcul du BMR et des cibles nutritionnelles.
-    """
-
     __tablename__ = "user_profiles"
 
     user_id: Mapped[uuid.UUID] = mapped_column(

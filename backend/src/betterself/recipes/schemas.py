@@ -6,15 +6,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 """
 RecipeCreate n’accepte pas user_id, is_archived, created_at ou updated_at : ces valeurs sont définies par le serveur.
+
+Données nécessaires pour créer une recette.
+Les ingrédients seront gérés séparément dans `RecipeIngredientCreate` lorsque la table `recipe_ingredients` sera intégrée.
 """
-
 class RecipeCreate(BaseModel):
-    """
-    Données nécessaires pour créer une recette.
-    Les ingrédients seront gérés séparément dans `RecipeIngredientCreate`
-    lorsque la table `recipe_ingredients` sera intégrée.
-    """
-
     name: str = Field(
         min_length=1,
         max_length=255,
@@ -65,12 +61,11 @@ class RecipeCreate(BaseModel):
         return value or None
 
 
+"""
+Données permettant de mettre à jour partiellement une recette.
+Les champs non fournis conservent leur valeur actuelle.
+"""
 class RecipeUpdate(BaseModel):
-    """
-    Données permettant de mettre à jour partiellement une recette.
-    Les champs non fournis conservent leur valeur actuelle.
-    """
-
     name: str | None = Field(
         default=None,
         min_length=1,
@@ -119,11 +114,10 @@ class RecipeUpdate(BaseModel):
         return value or None
 
 
+"""
+Représentation d'une recette renvoyée par l'API.
+"""
 class RecipeRead(BaseModel):
-    """
-    Représentation d'une recette renvoyée par l'API.
-    """
-
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
@@ -137,8 +131,8 @@ class RecipeRead(BaseModel):
     updated_at: datetime
 
 
+"""
+Données permettant d'archiver ou de désarchiver une recette.
+"""
 class RecipeArchiveUpdate(BaseModel):
-    """
-    Données permettant d'archiver ou de désarchiver une recette.
-    """
     is_archived: bool

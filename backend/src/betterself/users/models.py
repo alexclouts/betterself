@@ -76,3 +76,10 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+
+    # Relation vers les consommations alimentaires associées à l'utilisateur. Un utilisateur peut avoir plusieurs consommations.
+    food_consumptions: Mapped[list["FoodConsumption"]] = relationship(
+        "FoodConsumption",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

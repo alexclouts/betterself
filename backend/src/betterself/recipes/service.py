@@ -1,11 +1,10 @@
 import uuid
-from decimal import Decimal
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from betterself.core.exceptions import RecordNotFound
 from betterself.recipes.models import Recipe
+from betterself.recipes.queries import get_recipe_or_404
 from betterself.recipes.schemas import (
     RecipeArchiveUpdate,
     RecipeCreate,
@@ -14,14 +13,17 @@ from betterself.recipes.schemas import (
 from betterself.users.models import User
 
 
+"""
+Service responsable de la logique métier liée aux recettes.
+"""
 class RecipeService:
-    """
-    Service responsable de la logique métier liée aux recettes.
-    """
     def __init__(self, db: Session):
         self.db = db
 
-    # Liste des recettes de l'utilisateur, avec pagination et option d'inclure les archivées.
+
+    """
+    Retourne les recettes de l'utilisateur, paginées. Par défaut, les recettes archivées sont exclues.
+    """
     def list_recipes(
         self,
         user: User,
@@ -30,9 +32,7 @@ class RecipeService:
         limit: int = 20,
         offset: int = 0,
     ) -> list[Recipe]:
-        """
-        Retourne les recettes de l'utilisateur, paginées. Par défaut, les recettes archivées sont exclues.
-        """
+
         query = select(Recipe).where(
             Recipe.user_id == user.id,
         )
@@ -52,15 +52,15 @@ class RecipeService:
             self.db.scalars(query).all()
         )
 
-
+    """
+    Crée une nouvelle recette pour l'utilisateur authentifié.
+    """
     def create_recipe(
         self,
         user: User,
         data: RecipeCreate,
     ) -> Recipe:
-        """
-        Crée une nouvelle recette pour l'utilisateur authentifié.
-        """
+
         recipe = Recipe(
             user_id=user.id,
             name=data.name,
@@ -76,41 +76,19 @@ class RecipeService:
         return recipe
 
 
-    def get_recipe_or_404(
-        self,
-        user: User,
-        recipe_id: uuid.UUID,
-    ) -> Recipe:
-        """
-        Retourne une recette appartenant à l'utilisateur.
-        Lève `RecordNotFound` si la recette n'existe pas ou n'appartient pas à l'utilisateur.
-        """
-        recipe = self.db.scalar(
-            select(Recipe).where(
-                Recipe.id == recipe_id,
-                Recipe.user_id == user.id,
-            )
-        )
-        # Aucun résultat trouvé, levée de l'exception RecordNotFound
-        if recipe is None:
-            raise RecordNotFound(
-                "Aucune recette n'a été trouvée."
-            )
-        return recipe
-
-
+    """
+    Met à jour partiellement une recette. Seuls les champs fournis dans `data` sont modifiés.
+    """
     def update_recipe(
         self,
         user: User,
         recipe_id: uuid.UUID,
         data: RecipeUpdate,
     ) -> Recipe:
-        """
-        Met à jour partiellement une recette. Seuls les champs fournis dans `data` sont modifiés.
-        """
-        recipe = self.get_recipe_or_404(
-            user=user,
+
+        recipe = self.get_recipe_by_id(
             recipe_id=recipe_id,
+            user=user,
         )
         # Récupération de la recette à mettre à jour
         update_data = data.model_dump(
@@ -126,19 +104,20 @@ class RecipeService:
         return recipe
 
 
+    """
+    Archive ou désarchive une recette.
+    L'archivage retire la recette des ajouts rapides, sans la supprimer.
+    """
     def update_archive_status(
         self,
         user: User,
         recipe_id: uuid.UUID,
         data: RecipeArchiveUpdate,
     ) -> Recipe:
-        """
-        Archive ou désarchive une recette.
-        L'archivage retire la recette des ajouts rapides, sans la supprimer.
-        """
-        recipe = self.get_recipe_or_404(
-            user=user,
+
+        recipe = self.get_recipe_by_id(
             recipe_id=recipe_id,
+            user=user
         )
         # Mise à jour du statut d'archivage de la recette
         recipe.is_archived = data.is_archived
@@ -149,18 +128,33 @@ class RecipeService:
         return recipe
 
 
+    """
+    Supprime définitivement une recette appartenant à l'utilisateur.
+    """
     def delete_recipe(
         self,
-        user: User,
         recipe_id: uuid.UUID,
+        user: User,
     ) -> None:
-        """
-        Supprime définitivement une recette appartenant à l'utilisateur.
-        """
-        recipe = self.get_recipe_or_404(
-            user=user,
+
+        recipe = self.get_recipe_by_id(
             recipe_id=recipe_id,
+            user=user,
         )
         # Suppression de la recette
         self.db.delete(recipe)
         self.db.commit()
+
+
+
+    # FOnction utilisée par le routeur
+    def get_recipe_by_id(
+        self,
+        user: User,
+        recipe_id: uuid.UUID,
+    ) -> Recipe:
+        return get_recipe_or_404(
+            self=self,
+            user=user,
+            recipe_id=recipe_id,
+        )

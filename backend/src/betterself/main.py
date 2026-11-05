@@ -12,12 +12,13 @@ from betterself.profile.router import router as profile_router
 from betterself.foods.router import router as foods_router
 from betterself.recipes.router import router as recipes_router
 from betterself.ingredients.router import router as ingredients_router
+from betterself.consumptions.router import router as consumptions_router
 
 
 app = FastAPI(
     tittle="BetterSelf API",
     version="0.1.0",
-    description="API for BetterSelf project"
+    description="API for BetterSelf project"#
 )
 
 allowed_origins = os.getenv(
@@ -42,6 +43,7 @@ app.include_router(profile_router)
 app.include_router(ingredients_router)
 app.include_router(foods_router)
 app.include_router(recipes_router)
+app.include_router(consumptions_router)
 
 
 @app.get("/health")

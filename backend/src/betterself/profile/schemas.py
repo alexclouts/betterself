@@ -7,11 +7,10 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from betterself.profile.models import ActivityLevel
 
 
+"""
+Représentation d'un profil utilisateur renvoyée par l'API.
+"""
 class UserProfileRead(BaseModel):
-    """
-    Représentation d'un profil utilisateur renvoyée par l'API.
-    """
-
     model_config = ConfigDict(from_attributes=True)
 
     user_id: UUID

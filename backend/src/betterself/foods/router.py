@@ -79,16 +79,13 @@ def create_food(
 
 
 # Fonction pour récupérer un aliment par son identifiant
-@router.get(
-    "/{food_id}",
-    response_model=FoodRead,
-)
+@router.get("/{food_id}", response_model=FoodRead)
 def get_food(
     food_id: uuid.UUID,
     service: FoodService = Depends(get_food_service),
 ):
     try:
-        return service.get_food_or_404(food_id)
+        return service.get_food_by_id(food_id)
     except RecordNotFound:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
