@@ -4,8 +4,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
-from betterself.core.validation import validate_weight_kg
-
 
 """
 Représentation d'une cible nutritionnelle.

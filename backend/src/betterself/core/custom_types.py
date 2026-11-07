@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import BeforeValidator, StringConstraints
 
@@ -24,12 +24,16 @@ NonEmptyText = Annotated[
 
 
 OptionalText = Annotated[
-    str | None,
+    Optional[
+        Annotated[
+            str,
+            StringConstraints(
+                strip_whitespace=True,
+                max_length=255,
+            ),
+        ]
+    ],
     BeforeValidator(empty_string_to_none),
-    StringConstraints(
-        strip_whitespace=True,
-        max_length=255,
-    ),
 ]
 
 

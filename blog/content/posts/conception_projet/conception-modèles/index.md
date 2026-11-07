@@ -1,7 +1,7 @@
 ---
 title: "Conception des modèles de données SQL"
 header: ""
-date: 2026-11-06T00:109:02.000Z
+date: 2026-11-06T00:09:02.000Z
 description: "Défis et apprentissages rencontrés lors de la conception des modèles de données."
 tags:
   - FastAPI
