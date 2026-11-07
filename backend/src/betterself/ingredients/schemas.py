@@ -5,10 +5,10 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 
+"""
+Données nécessaires pour ajouter un aliment à une recette.
+"""
 class RecipeIngredientCreate(BaseModel):
-    """
-    Données nécessaires pour ajouter un aliment à une recette.
-    """
     food_id: UUID
     recipe_id: UUID
     quantity_g: Decimal = Field(
@@ -19,10 +19,10 @@ class RecipeIngredientCreate(BaseModel):
     )
 
 
+"""
+Données permettant de mettre à jour la quantité d'un ingrédient.
+"""
 class RecipeIngredientUpdate(BaseModel):
-    """
-    Données permettant de mettre à jour la quantité d'un ingrédient.
-    """
     quantity_g: Decimal = Field(
         gt=0,
         le=100000,
@@ -30,10 +30,10 @@ class RecipeIngredientUpdate(BaseModel):
     )
 
 
+"""
+Représentation d'un ingrédient de recette renvoyé par l'API.
+"""
 class RecipeIngredientRead(BaseModel):
-    """
-    Représentation d'un ingrédient de recette renvoyé par l'API.
-    """
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID

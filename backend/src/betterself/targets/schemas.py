@@ -37,7 +37,7 @@ Les paramètres biométriques seront récupérés depuis le profil de l'utilisat
 class GoalTargetRecalculate(BaseModel):
     reference_weight_kg: Decimal = Field(
         ge=30,
-        le=300,
+        le=500,
         examples=[85],
     )
 
@@ -60,8 +60,3 @@ class GoalTargetRecalculate(BaseModel):
         examples=["moderate"],
         description="Niveau d'activité physique.",
     )
-
-    @field_validator("reference_weight_kg")
-    @classmethod
-    def validate_weight(cls, value: Decimal) -> Decimal:
-        return validate_weight_kg(value)

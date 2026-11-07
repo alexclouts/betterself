@@ -1,0 +1,33 @@
+# Workflow pour détecter le code dupliqué dans le dépôt
+name: Duplicated Code Detection
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  jscpd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect duplicated code
+        uses: kucherenko/jscpd@v5
+        with:
+          threshold: 5
+          path: src/
+          pattern: "**/*.py"
+          min-tokens: 40
+          reporters: "consoleFull,html,json"
+          output: "reports/jscpd"
+
+      - name: Upload duplication report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jscpd-report
+          path: reports/jscpd/
+          retention-days: 14

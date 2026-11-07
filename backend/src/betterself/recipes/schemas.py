@@ -2,26 +2,27 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
+
+from betterself.core.custom_types import (
+    NonEmptyText,
+    OptionalLongText,
+)
+
 
 """
-RecipeCreate n’accepte pas user_id, is_archived, created_at ou updated_at : ces valeurs sont définies par le serveur.
-
 Données nécessaires pour créer une recette.
 Les ingrédients seront gérés séparément dans `RecipeIngredientCreate` lorsque la table `recipe_ingredients` sera intégrée.
 """
 class RecipeCreate(BaseModel):
-    name: str = Field(
-        min_length=1,
-        max_length=255,
+    name: NonEmptyText = Field(
         examples=["Bol de poulet et riz"],
     )
 
-    description: str | None = Field(
+    description: OptionalLongText = Field(
         default=None,
-        max_length=5000,
         examples=[
-            "Faire cuire le riz, puis ajouter le poulet et les légumes."
+            "Faire cuire le riz, puis ajouter le poulet et les légumes.",
         ],
     )
 
@@ -38,45 +39,18 @@ class RecipeCreate(BaseModel):
         examples=[6],
     )
 
-    # Validateur pour le nom de la recette lors de la création
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, value: str) -> str:
-        value = value.strip()
-
-        if not value:
-            raise ValueError(
-                "Le nom de la recette ne peut pas être vide."
-            )
-        return value
-
-    # Validateur pour la description de la recette lors de la création
-    @field_validator("description")
-    @classmethod
-    def validate_description(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-
-        value = value.strip()
-        return value or None
-
 
 """
 Données permettant de mettre à jour partiellement une recette.
 Les champs non fournis conservent leur valeur actuelle.
 """
 class RecipeUpdate(BaseModel):
-    name: str | None = Field(
+    name: NonEmptyText | None = Field(
         default=None,
-        min_length=1,
-        max_length=255,
         examples=["Bol de poulet et riz v2"],
     )
 
-    description: str | None = Field(
-        default=None,
-        max_length=5000,
-    )
+    description: OptionalLongText = None
 
     total_weight_g: Decimal | None = Field(
         default=None,
@@ -89,29 +63,6 @@ class RecipeUpdate(BaseModel):
         gt=0,
         le=1000,
     )
-
-    # Validateur pour le nom de la recette lors de la mise à jour
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, value: str | None) -> str | None:
-        value = value.strip()
-
-        if not value:
-            raise ValueError(
-                "Le nom de la recette ne peut pas être vide."
-            )
-        return value
-
-
-    # Validateur pour la description de la recette lors de la mise à jour
-    @field_validator("description")
-    @classmethod
-    def validate_description(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-
-        value = value.strip()
-        return value or None
 
 
 """

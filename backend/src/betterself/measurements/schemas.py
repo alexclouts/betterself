@@ -2,16 +2,11 @@ from datetime import date as DateType
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-from betterself.core.validation import validate_weight_kg, validate_date_not_future
+from betterself.core.validation import validate_date_not_future
 
 class MeasurementCreate(BaseModel):
     date: DateType
-    weight_kg: float = Field(gt=0)
-
-    @field_validator("weight_kg")
-    @classmethod
-    def validate_weight(cls, value):
-        return validate_weight_kg(value)
+    weight_kg: float = Field(gt=30, le=500)
 
     @field_validator("date")
     @classmethod
@@ -28,16 +23,10 @@ class MeasurementRead(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class MeasurementUpdate(BaseModel):
     date: DateType | None = None
-    weight_kg: float | None = Field(default=None, gt=0)
-
-    @field_validator("weight_kg")
-    def validate_weight(cls, value):
-        if value is not None:
-            return validate_weight_kg(value)
-        return value
-
+    weight_kg: float | None = Field(default=None, gt=30, le=500)
     
     @field_validator("date")
     def validate_date(cls, value):

@@ -4,17 +4,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from betterself.goal.models import GoalType
-from betterself.core.validation import validate_weight_kg, validate_date_not_future, validate_date_within_allowed_range
-
+from betterself.core.validation import validate_date_not_future, validate_date_within_allowed_range
+    
 
 class NutritionGoalCreate(BaseModel):
     goal_type: GoalType = Field(example="lose_weight")
-    start_weight_kg: Decimal = Field(gt=0)
-    target_weight_kg: Decimal = Field(gt=0)
-
-    @field_validator("start_weight_kg", "target_weight_kg")
-    def validate_weight(cls, value):
-        return validate_weight_kg(value)
+    
+    start_weight_kg: Decimal = Field(gt=30, le=500)
+    target_weight_kg: Decimal = Field(gt=30, le=500)
 
     
     start_date: date
