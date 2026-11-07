@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
 from decimal import Decimal
 
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
+from tests.api_helpers import create_food, create_recipe
 
 
 FOODS_URL = "/foods"
@@ -12,50 +12,7 @@ CONSUMPTIONS_URL = "/food-consumptions"
 # Crée un utilisateur, le connecte et retourne ses en-têtes d'authentification
 def get_auth_headers(client) -> dict:
     access_token = register_and_login(client)
-
     return auth_headers(access_token)
-
-
-# Crée un aliment et retourne sa représentation JSON
-def create_food(client, headers: dict) -> dict:
-    response = client.post(
-        FOODS_URL,
-        json={
-            "name": "Yogourt grec nature",
-            "brand": "Leclerc",
-            "category": "dairy",
-            "reference_weight_g": 100,
-            "calories_kcal": 370,
-            "protein_g": 20,
-            "carbohydrates_g": 50,
-            "fat_g": 10,
-            "source": "manual",
-            "external_reference_id": None,
-        },
-        headers=headers,
-    )
-
-    assert response.status_code == 201
-
-    return response.json()
-
-
-# Crée une recette et retourne sa représentation JSON
-def create_recipe(client, headers: dict) -> dict:
-    response = client.post(
-        RECIPES_URL,
-        json={
-            "name": "Bol de poulet et riz",
-            "description": "Recette de test.",
-            "total_weight_g": 800,
-            "servings": 6,
-        },
-        headers=headers,
-    )
-
-    assert response.status_code == 201
-
-    return response.json()
 
 
 # URL d'une consommation précise
@@ -84,7 +41,6 @@ def recipe_consumption_payload(recipe_id: str) -> dict:
 # Test pour vérifier l'ajout d'un aliment au journal
 def test_create_food_consumption_success(client):
     headers = get_auth_headers(client)
-
     food = create_food(client, headers)
 
     response = client.post(
@@ -92,11 +48,9 @@ def test_create_food_consumption_success(client):
         json=food_consumption_payload(food["id"]),
         headers=headers,
     )
-
     assert response.status_code == 201
 
     consumption = response.json()
-
     assert consumption["food_id"] == food["id"]
     assert consumption["recipe_id"] is None
     assert consumption["item_name_snapshot"] == food["name"]
@@ -112,7 +66,6 @@ def test_create_food_consumption_success(client):
 # Test pour vérifier l'ajout d'une recette au journal
 def test_create_recipe_consumption_success(client):
     headers = get_auth_headers(client)
-
     recipe = create_recipe(client, headers)
 
     response = client.post(
@@ -120,11 +73,9 @@ def test_create_recipe_consumption_success(client):
         json=recipe_consumption_payload(recipe["id"]),
         headers=headers,
     )
-
-    assert response.status_code == 201
+    assert response.status_code == 201, response.text
 
     consumption = response.json()
-
     assert consumption["recipe_id"] == recipe["id"]
     assert consumption["food_id"] is None
     assert consumption["item_name_snapshot"] == recipe["name"]
@@ -134,21 +85,18 @@ def test_create_recipe_consumption_success(client):
 # Test pour vérifier que la création échoue sans authentification
 def test_create_food_consumption_unauthorized(client):
     headers = get_auth_headers(client)
-
     food = create_food(client, headers)
 
     response = client.post(
         CONSUMPTIONS_URL,
         json=food_consumption_payload(food["id"]),
     )
-
     assert response.status_code == 401
 
 
 # Test pour vérifier que food_id et recipe_id ne peuvent pas coexister
 def test_create_consumption_rejects_food_and_recipe(client):
     headers = get_auth_headers(client)
-
     food = create_food(client, headers)
     recipe = create_recipe(client, headers)
 
@@ -160,70 +108,59 @@ def test_create_consumption_rejects_food_and_recipe(client):
         json=payload,
         headers=headers,
     )
-
     assert response.status_code == 422
 
 
 # Test pour vérifier qu'une source est obligatoire
 def test_create_consumption_rejects_missing_source(client):
     headers = get_auth_headers(client)
-
     payload = {
         "quantity_g": 100,
         "meal_type": "breakfast",
     }
-
     response = client.post(
         CONSUMPTIONS_URL,
         json=payload,
         headers=headers,
     )
-
     assert response.status_code == 422
 
 
 # Test pour vérifier qu'un aliment inexistant est refusé
 def test_create_food_consumption_rejects_unknown_food(client):
     headers = get_auth_headers(client)
-
     payload = {
         "food_id": "00000000-0000-0000-0000-000000000999",
         "quantity_g": 100,
         "meal_type": "breakfast",
     }
-
     response = client.post(
         CONSUMPTIONS_URL,
         json=payload,
         headers=headers,
     )
-
     assert response.status_code == 404
 
 
 # Test pour vérifier qu'une recette inexistante est refusée
 def test_create_recipe_consumption_rejects_unknown_recipe(client):
     headers = get_auth_headers(client)
-
     payload = {
         "recipe_id": "00000000-0000-0000-0000-000000000999",
         "quantity_g": 200,
         "meal_type": "lunch",
     }
-
     response = client.post(
         CONSUMPTIONS_URL,
         json=payload,
         headers=headers,
     )
-
     assert response.status_code == 404
 
 
 # Test pour vérifier qu'une quantité nulle est refusée
 def test_create_consumption_rejects_zero_quantity(client):
     headers = get_auth_headers(client)
-
     food = create_food(client, headers)
 
     payload = food_consumption_payload(food["id"])
@@ -234,16 +171,14 @@ def test_create_consumption_rejects_zero_quantity(client):
         json=payload,
         headers=headers,
     )
-
     assert response.status_code == 422
 
 
 # Test pour vérifier qu'une quantité négative est refusée
 def test_create_consumption_rejects_negative_quantity(client):
     headers = get_auth_headers(client)
-
     food = create_food(client, headers)
-
+    # Crée une consommation alimentaire avec une quantité négative pour le test
     payload = food_consumption_payload(food["id"])
     payload["quantity_g"] = -50
 
@@ -252,16 +187,14 @@ def test_create_consumption_rejects_negative_quantity(client):
         json=payload,
         headers=headers,
     )
-
     assert response.status_code == 422
 
 
 # Test pour vérifier que la nutrition est proportionnelle à la quantité
 def test_create_food_consumption_calculates_scaled_nutrition(client):
     headers = get_auth_headers(client)
-
     food = create_food(client, headers)
-
+    # Crée une consommation alimentaire avec une quantité spécifique
     payload = food_consumption_payload(food["id"])
     payload["quantity_g"] = 50
 
@@ -270,12 +203,11 @@ def test_create_food_consumption_calculates_scaled_nutrition(client):
         json=payload,
         headers=headers,
     )
-
     assert response.status_code == 201
 
     consumption = response.json()
-
     # 50 g représentent la moitié du poids de référence de 100 g.
+    # Les valeurs nutritionnelles doivent être proportionnelles à la quantité (50 g sur 100 g)
     assert Decimal(consumption["calories_kcal"]) == Decimal("185.00")
     assert Decimal(consumption["protein_g"]) == Decimal("10.00")
     assert Decimal(consumption["carbohydrates_g"]) == Decimal("25.00")
@@ -331,7 +263,7 @@ def test_get_food_consumption_forbidden_for_other_user(client):
     created_consumption = creation_response.json()
     other_token = register_and_login_other_user(client)
     other_headers = auth_headers(other_token)
-
+    # Essaie de récupérer la consommation créée avec un autre utilisateur
     response = client.get(
         consumption_url(created_consumption["id"]),
         headers=other_headers,
@@ -344,20 +276,20 @@ def test_list_food_consumptions(client):
     headers = get_auth_headers(client)
     food = create_food(client, headers)
 
+    # Crée deux consommations alimentaires pour le test de liste
     first_response = client.post(
         CONSUMPTIONS_URL,
         json=food_consumption_payload(food["id"]),
         headers=headers,
     )
-    assert first_response.status_code == 201
-
     second_response = client.post(
         CONSUMPTIONS_URL,
         json=food_consumption_payload(food["id"]),
         headers=headers,
     )
+    assert first_response.status_code == 201
     assert second_response.status_code == 201
-
+    # Récupère la liste des consommations pour l'utilisateur courant
     response = client.get(
         CONSUMPTIONS_URL,
         headers=headers,
@@ -380,7 +312,7 @@ def test_list_food_consumptions_isolated_between_users(client):
 
     other_token = register_and_login_other_user(client)
     other_headers = auth_headers(other_token)
-
+    # Essaie de récupérer la liste des consommations avec un autre utilisateur
     response = client.get(
         CONSUMPTIONS_URL,
         headers=other_headers,
@@ -402,13 +334,14 @@ def test_update_food_consumption_recalculates_nutrition(client):
     assert creation_response.status_code == 201
 
     created_consumption = creation_response.json()
+    # Met à jour la quantité de la consommation créée
     response = client.patch(
         consumption_url(created_consumption["id"]),
         json={"quantity_g": 50},
         headers=headers,
     )
     assert response.status_code == 200
-
+    # Vérifie que la réponse contient les nouvelles valeurs nutritionnelles recalculées
     consumption = response.json()
     assert Decimal(consumption["quantity_g"]) == Decimal("50.00")
     assert Decimal(consumption["calories_kcal"]) == Decimal("185.00")
@@ -430,6 +363,7 @@ def test_update_food_consumption_meal_type(client):
     assert creation_response.status_code == 201
 
     created_consumption = creation_response.json()
+    # Met à jour le type de repas de la consommation créée
     response = client.patch(
         consumption_url(created_consumption["id"]),
         json={"meal_type": "lunch"},
@@ -457,7 +391,7 @@ def test_update_food_consumption_forbidden_for_other_user(client):
     created_consumption = creation_response.json()
     other_token = register_and_login_other_user(client)
     other_headers = auth_headers(other_token)
-
+    # Essaie de mettre à jour la consommation avec un autre utilisateur
     response = client.patch(
         consumption_url(created_consumption["id"]),
         json={"quantity_g": 50},
@@ -470,7 +404,7 @@ def test_update_food_consumption_forbidden_for_other_user(client):
 def test_delete_food_consumption_success(client):
     headers = get_auth_headers(client)
     food = create_food(client, headers)
-
+    # Crée une consommation alimentaire pour le test de suppression
     creation_response = client.post(
         CONSUMPTIONS_URL,
         json=food_consumption_payload(food["id"]),
@@ -479,12 +413,13 @@ def test_delete_food_consumption_success(client):
     assert creation_response.status_code == 201
 
     created_consumption = creation_response.json()
+    # Supprime la consommation créée
     delete_response = client.delete(
         consumption_url(created_consumption["id"]),
         headers=headers,
     )
     assert delete_response.status_code == 204
-
+    # Vérifie que la consommation a bien été supprimée en essayant de la récupérer
     get_response = client.get(
         consumption_url(created_consumption["id"]),
         headers=headers,

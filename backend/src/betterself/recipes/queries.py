@@ -22,7 +22,7 @@ def get_recipe_or_404(
             Recipe.id == recipe_id,
             Recipe.user_id == user.id,
        )
-        )
+    )
     # Aucun résultat trouvé, levée de l'exception RecordNotFound
     if recipe is None:
         raise RecordNotFound(

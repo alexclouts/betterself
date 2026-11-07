@@ -19,15 +19,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from betterself.core.database import Base
 
+"""
+Recette créée par un utilisateur.
+
+Une recette est un assemblage d'aliments. Elle n'est pas traitée
+comme un aliment : ses valeurs nutritionnelles sont calculées à partir
+de sa composition au moment où elle est ajoutée au journal alimentaire.
+"""
 
 class Recipe(Base):
-    """
-    Recette créée par un utilisateur.
-
-    Une recette est un assemblage d'aliments. Elle n'est pas traitée
-    comme un aliment : ses valeurs nutritionnelles sont calculées à partir
-    de sa composition au moment où elle est ajoutée au journal alimentaire.
-    """
 
     __tablename__ = "recipes"
 

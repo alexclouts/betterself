@@ -1,13 +1,16 @@
+from decimal import Decimal
 import uuid
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from betterself.ingredients.schemas import RecipeIngredientRead
 from betterself.recipes.models import Recipe
 from betterself.recipes.queries import get_recipe_or_404
 from betterself.recipes.schemas import (
     RecipeArchiveUpdate,
     RecipeCreate,
+    RecipeRead,
     RecipeUpdate,
 )
 from betterself.users.models import User
@@ -73,7 +76,10 @@ class RecipeService:
         self.db.commit()
         self.db.refresh(recipe)
 
-        return recipe
+        return self.get_recipe_by_id(
+            recipe_id=recipe.id,
+            user=user
+        )
 
 
     """
@@ -146,15 +152,77 @@ class RecipeService:
         self.db.commit()
 
 
+    """
+    Calcule les valeurs nutritionnelles d'une recette.
+    """
+    def _calculate_recipe_nutrition(
+        self,
+        recipe: Recipe,
+    ) -> dict:
+        total_calories = Decimal("0")
+        total_protein = Decimal("0")
+        total_carbohydrates = Decimal("0")
+        total_fat = Decimal("0")
 
-    # FOnction utilisée par le routeur
+        # Pour chaque ingrédient, on calcule sa contribution aux valeurs nutritionnelles totales de la recette.
+        for ingredient in recipe.ingredients:
+            food = ingredient.food
+            reference_weight = food.reference_weight_g
+
+            if reference_weight <= 0:
+                continue
+
+            factor = ingredient.quantity_g / reference_weight
+            # Calcul des valeurs nutritionnelles de l'ingrédient en fonction de sa quantité.
+            total_calories += food.calories_kcal * factor
+            total_protein += food.protein_g * factor
+            total_carbohydrates += food.carbohydrates_g * factor
+            total_fat += food.fat_g * factor
+
+        return {
+            "calories_kcal": total_calories,
+            "protein_g": total_protein,
+            "carbohydrates_g": total_carbohydrates,
+            "fat_g": total_fat
+        }
+
+
+    """
+    Fonction utilisée par le routeur pour récupérer une recette et ses valeurs nutritionnelles.
+    RecipeRead comprend les informations nutritionnelles qui ne sont pas stockées directement dans la recette.
+    RecipeRead comprend l'addition de plusieurs sources de données qui sont retournées par l'API.
+    """
     def get_recipe_by_id(
         self,
         user: User,
         recipe_id: uuid.UUID,
-    ) -> Recipe:
-        return get_recipe_or_404(
+    ) -> RecipeRead:
+        # Récupération de la recette depuis la base de données.
+        recipe = get_recipe_or_404(
             self=self,
             user=user,
             recipe_id=recipe_id,
+        )
+        # Calcul des valeurs nutritionnelles de la recette.
+        nutrition = self._calculate_recipe_nutrition(recipe)
+
+        return RecipeRead(
+            id=recipe.id,
+            user_id=recipe.user_id,
+            name=recipe.name,
+            description=recipe.description,
+            total_weight_g=recipe.total_weight_g,
+            servings=recipe.servings,
+            is_archived=recipe.is_archived,
+            created_at=recipe.created_at,
+            updated_at=recipe.updated_at,
+            ingredients=[RecipeIngredientRead(
+                id=ingredient.id,
+                food_id=ingredient.food_id,
+                recipe_id=recipe_id,
+                quantity_g=ingredient.quantity_g,
+                created_at=ingredient.created_at,
+                updated_at=ingredient.updated_at,
+            ) for ingredient in recipe.ingredients],
+            nutrition=nutrition
         )

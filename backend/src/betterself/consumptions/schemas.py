@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from uuid import UUID
 
@@ -16,7 +16,7 @@ class FoodConsumptionCreate(BaseModel):
 
     quantity_g: Decimal = Field(
         gt=0,
-        le=100000,
+        le=5000,
         examples=[150],
     )
 
@@ -102,3 +102,14 @@ class FoodConsumptionRead(BaseModel):
     notes: str | None
     created_at: datetime
     updated_at: datetime
+
+
+"""
+Résumé nutritionnel agrégé pour une journée.
+"""
+class DailyNutritionSummaryRead(BaseModel):
+    date: date
+    calories_kcal: Decimal
+    protein_g: Decimal
+    carbohydrates_g: Decimal
+    fat_g: Decimal

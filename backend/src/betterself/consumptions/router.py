@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from fastapi import (
     APIRouter,
@@ -11,9 +11,11 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from betterself.users.router import read_current_user
 from betterself.core.database import get_db
 from betterself.core.exceptions import RecordNotFound
 from betterself.consumptions.schemas import (
+    DailyNutritionSummaryRead,
     FoodConsumptionCreate,
     FoodConsumptionRead,
     FoodConsumptionUpdate,
@@ -105,6 +107,25 @@ def list_food_consumptions(
         meal_type=meal_type,
         limit=limit,
         offset=offset,
+    )
+
+"""
+Retourne les calories et macronutriments consommés
+par l'utilisateur pour une journée donnée.
+"""
+@router.get("/summary", response_model=DailyNutritionSummaryRead, status_code=200)
+def get_daily_summary(
+    date: date = Query(
+        ...,
+        description="Date du résumé nutritionnel, au format YYYY-MM-DD.",
+    ),
+    current_user: User = Depends(read_current_user),
+    service: FoodConsumptionService = Depends(get_food_consumption_service),
+) -> DailyNutritionSummaryRead:
+
+    return service.get_daily_summary(
+        user=current_user,
+        summary_date=date,
     )
 
 """

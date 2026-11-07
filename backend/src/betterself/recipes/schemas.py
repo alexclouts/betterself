@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from betterself.ingredients.schemas import RecipeIngredientRead
 from betterself.core.custom_types import (
     NonEmptyText,
     OptionalLongText,
@@ -80,6 +81,13 @@ class RecipeRead(BaseModel):
     is_archived: bool
     created_at: datetime
     updated_at: datetime
+    ingredients: list[RecipeIngredientRead] = Field(
+        default_factory=list,
+        description="Liste des ingrédients de la recette.",
+    )
+    nutrition: RecipeNutritionRead = Field(
+        description="Valeurs nutritionnelles de la recette.",
+    )
 
 
 """
@@ -87,3 +95,14 @@ Données permettant d'archiver ou de désarchiver une recette.
 """
 class RecipeArchiveUpdate(BaseModel):
     is_archived: bool
+
+
+"""
+Représentation des valeurs nutritionnelles d'une recette.
+"""
+class RecipeNutritionRead(BaseModel):
+    calories_kcal: Decimal
+    protein_g: Decimal
+    carbohydrates_g: Decimal
+    fat_g: Decimal
+

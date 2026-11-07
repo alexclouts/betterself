@@ -19,7 +19,7 @@ def valid_food_payload() -> dict:
         "carbohydrates_g": 50,
         "fat_g": 10,
         "source": "manual",
-        "external_reference_id": None,
+        "external_reference_id": None
     }
 
 

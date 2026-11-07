@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from betterself.core.exceptions import RecordNotFound
@@ -14,6 +14,7 @@ from betterself.foods.queries import get_food_or_404
 from betterself.recipes.queries import get_recipe_or_404
 
 from betterself.consumptions.schemas import (
+    DailyNutritionSummaryRead,
     FoodConsumptionCreate,
     FoodConsumptionUpdate,
 )
@@ -329,6 +330,56 @@ class FoodConsumptionService:
             user=user,
             consumption_id=consumption_id,
         )
-
         self.db.delete(consumption)
-        self.db.commit()    
+        self.db.commit()
+
+
+    """
+    Retourne les totaux nutritionnels consommés par l'utilisateur
+    pour une journée civile donnée.
+    """
+    def get_daily_summary(
+        self,
+        user: User,
+        summary_date: date,
+    ) -> DailyNutritionSummaryRead:
+        # Définir l'intervalle de temps pour la journée civile donnée.
+        start = datetime.combine(
+            summary_date,
+            time.min,
+            tzinfo=timezone.utc,
+        )
+        end = start + timedelta(days=1)
+        # Construire la requête pour agréger les totaux nutritionnels.
+        query = select(
+            func.coalesce(
+                func.sum(FoodConsumption.calories_kcal),
+                0,
+            ).label("calories_kcal"),
+            func.coalesce(
+                func.sum(FoodConsumption.protein_g),
+                0,
+            ).label("protein_g"),
+            func.coalesce(
+                func.sum(FoodConsumption.carbohydrates_g),
+                0,
+            ).label("carbohydrates_g"),
+            func.coalesce(
+                func.sum(FoodConsumption.fat_g),
+                0,
+            ).label("fat_g"),
+        ).where(
+            FoodConsumption.user_id == user.id,
+            FoodConsumption.consumed_at >= start,
+            FoodConsumption.consumed_at < end,
+        )
+        # Exécuter la requête et récupérer le résultat.
+        result = self.db.execute(query).one()
+
+        return DailyNutritionSummaryRead(
+            date=summary_date,
+            calories_kcal=result.calories_kcal,
+            protein_g=result.protein_g,
+            carbohydrates_g=result.carbohydrates_g,
+            fat_g=result.fat_g,
+        )

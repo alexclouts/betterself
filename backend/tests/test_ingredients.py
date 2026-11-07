@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
-
+from tests.api_helpers import create_food, create_recipe
 
 RECIPES_URL = "/recipes"
 FOODS_URL = "/foods"
@@ -12,43 +12,6 @@ def get_auth_headers(client) -> dict:
     access_token = register_and_login(client)
     return auth_headers(access_token)
 
-
-# Crée une recette et retourne sa représentation JSON
-def create_recipe(client, headers: dict) -> dict:
-    response = client.post(
-        RECIPES_URL,
-        json={
-            "name": "Bol de poulet et riz",
-            "description": "Recette de test.",
-            "total_weight_g": 800,
-            "servings": 6,
-        },
-        headers=headers,
-    )
-    assert response.status_code == 201
-    return response.json()
-
-
-# Crée un aliment et retourne sa représentation JSON
-def create_food(client, headers: dict) -> dict:
-    response = client.post(
-        FOODS_URL,
-        json={
-            "name": "Yogourt grec nature",
-            "brand": "Leclerc",
-            "category": "dairy",
-            "reference_weight_g": 100,
-            "calories_kcal": 370,
-            "protein_g": 20,
-            "carbohydrates_g": 50,
-            "fat_g": 10,
-            "source": "manual",
-            "external_reference_id": None,
-        },
-        headers=headers,
-    )
-    assert response.status_code == 201
-    return response.json()
 
 
 # URL des ingrédients d'une recette
