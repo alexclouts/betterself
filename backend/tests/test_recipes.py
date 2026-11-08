@@ -1,9 +1,7 @@
 from decimal import Decimal
 
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
-
-
-RECIPES_URL = "/recipes"
+from tests.api_helpers import RECIPES_URL
 
 
 # Données valides pour créer une recette

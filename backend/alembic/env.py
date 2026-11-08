@@ -12,8 +12,8 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from betterself.core.config import settings
 from betterself.core.database import Base
-from betterself.users.models import User
-from betterself.measurements.models import Measurement
+from betterself.models.user_models import User
+from betterself.models.measurement_models import Measurement
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

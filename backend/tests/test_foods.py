@@ -1,10 +1,7 @@
 from decimal import Decimal
 
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
-
-
-FOODS_URL = "/foods"
-
+from tests.api_helpers import FOODS_URL, USERS_URL
 
 # Données valides pour créer un aliment manuellement.
 # Calories cohérentes : 20 * 4 + 50 * 4 + 10 * 9 = 250 kcal.

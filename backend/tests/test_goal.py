@@ -6,10 +6,12 @@ from tests.utils import (
     register_and_login_other_user
 )
 
+from tests.api_helpers import NUTRITION_GOAL_URL
+
 # Fonction utilitaire pour créer l'objectif nutritionnel de l'utilisateur.
 def create_nutrition_goal(client, access_token: str, payload: dict):
     return client.post(
-        "/nutrition-goal",
+        NUTRITION_GOAL_URL,
         json=payload,
         headers=auth_headers(access_token),
     )
@@ -17,7 +19,7 @@ def create_nutrition_goal(client, access_token: str, payload: dict):
 # Fonction utilitaire pour récupérer l'objectif nutritionnel actif
 def get_current_nutrition_goal(client, access_token: str):
     return client.get(
-        "/nutrition-goal/current",
+        f"{NUTRITION_GOAL_URL}/current",
         headers=auth_headers(access_token),
     )
 
@@ -29,7 +31,7 @@ def update_current_nutrition_goal(
     payload: dict,
 ):
     return client.patch(
-        "/nutrition-goal/current",
+        f"{NUTRITION_GOAL_URL}/current",
         json=payload,
         headers=auth_headers(access_token),
     )
@@ -91,7 +93,7 @@ def test_create_goal_already_exists(client):
 # Test pour vérifier que la création échoue sans authentification
 def test_create_goal_unauthorized(client):
     response = client.post(
-        "/nutrition-goal",
+        NUTRITION_GOAL_URL,
         json=valid_nutrition_goal_payload(),
     )
 
@@ -121,7 +123,7 @@ def test_get_current_goal_success(client):
 
 # Test pour vérifier que la récupération échoue sans authentification
 def test_get_current_goal_unauthorized(client):
-    response = client.get("/nutrition-goal/current")
+    response = client.get(f"{NUTRITION_GOAL_URL}/current")
     assert response.status_code == 401
 
 
@@ -184,7 +186,7 @@ def test_update_current_goal_success(client):
 # Test pour vérifier que la modification échoue sans authentification
 def test_update_current_goal_unauthorized(client):
     response = client.patch(
-        "/nutrition-goal/current",
+        f"{NUTRITION_GOAL_URL}/current",
         json=valid_nutrition_goal_payload(),
     )
     assert response.status_code == 401

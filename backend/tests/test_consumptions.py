@@ -1,12 +1,7 @@
 from decimal import Decimal
 
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
-from tests.api_helpers import create_food, create_recipe
-
-
-FOODS_URL = "/foods"
-RECIPES_URL = "/recipes"
-CONSUMPTIONS_URL = "/food-consumptions"
+from tests.api_helpers import create_food, create_recipe, CONSUMPTIONS_URL
 
 
 # Crée un utilisateur, le connecte et retourne ses en-têtes d'authentification

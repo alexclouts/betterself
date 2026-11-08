@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from betterself.core.database import Base, create_db_engine, get_db
 from betterself.main import app
-from betterself.users.models import User 
+from betterself.models.user_models import User 
 
 TEST_DATABASE_URL = "sqlite://"
 

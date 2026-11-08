@@ -1,13 +1,14 @@
 from decimal import Decimal
 
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
+from tests.api_helpers import NUTRITION_GOAL_URL, TARGET_URL
 
 
 # Fonction utilitaire pour créer l'objectif nutritionnel de l'utilisateur.
 # Un objectif doit exister avant de pouvoir créer ou recalculer une cible.
 def create_nutrition_goal(client, access_token: str, payload: dict):
     return client.post(
-        "/nutrition-goal",
+        NUTRITION_GOAL_URL,
         json=payload,
         headers=auth_headers(access_token),
     )
@@ -16,7 +17,7 @@ def create_nutrition_goal(client, access_token: str, payload: dict):
 # Fonction utilitaire pour récupérer la cible nutritionnelle active
 def get_current_goal_target(client, access_token: str):
     return client.get(
-        "/nutrition-goal/current/target",
+        TARGET_URL,
         headers=auth_headers(access_token),
     )
 
@@ -29,7 +30,7 @@ def recalculate_current_goal_target(
     payload: dict,
 ):
     return client.post(
-        "/nutrition-goal/current/target/recalculate",
+        f"{TARGET_URL}/recalculate",
         json=payload,
         headers=auth_headers(access_token),
     )
@@ -61,7 +62,6 @@ def create_goal_for_user(client, access_token: str):
             "target_date": "2026-12-01",
         },
     )
-
     assert response.status_code == 201
     return response.json()
 
@@ -78,7 +78,7 @@ def test_get_current_goal_target_not_found(client):
 
 # Test pour vérifier que la récupération échoue sans authentification
 def test_get_current_goal_target_unauthorized(client):
-    response = client.get("/nutrition-goal/current/target")
+    response = client.get(f"{TARGET_URL}")
     assert response.status_code == 401
 
 
@@ -180,7 +180,7 @@ def test_recalculate_goal_target_requires_goal(client):
 # Test pour vérifier que le recalcul échoue sans authentification
 def test_recalculate_goal_target_unauthorized(client):
     response = client.post(
-        "/nutrition-goal/current/target/recalculate",
+        f"{TARGET_URL}/recalculate",
         json=valid_goal_target_recalculate_payload(),
     )
     assert response.status_code == 401

@@ -1,0 +1,8 @@
+FOODS_URL = "/foods"
+RECIPES_URL = "/recipes"
+CONSUMPTIONS_URL = "/food-consumptions"
+NUTRITION_GOAL_URL = "/nutrition-goal"
+MEASUREMENTS_URL = "/measurements"
+AUTH_URL = "/auth"
+USERS_URL = "/users"
+TARGET_URL = "/current/target"

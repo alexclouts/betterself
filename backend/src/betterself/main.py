@@ -4,15 +4,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from betterself.core.config import settings
-from betterself.users.router import router as users_router
-from betterself.measurements.router import router as measurements_router
-from betterself.goal.router import router as goal_router
-from betterself.targets.router import router as targets_router
-from betterself.profile.router import router as profile_router
-from betterself.foods.router import router as foods_router
-from betterself.recipes.router import router as recipes_router
-from betterself.ingredients.router import router as ingredients_router
-from betterself.consumptions.router import router as consumptions_router
+from betterself.routers.auth_router import router as auth_router
+from betterself.routers.users_router import router as users_router
+from betterself.routers.measurement_router import router as measurements_router
+from betterself.routers.goal_router import router as goal_router
+from betterself.routers.food_router import router as foods_router
+from betterself.routers.recipe_router import router as recipes_router
+from betterself.routers.consumption_router import router as consumptions_router
 
 
 app = FastAPI(
@@ -34,13 +32,11 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(measurements_router)
 app.include_router(goal_router)
-app.include_router(targets_router)
-app.include_router(profile_router)
 
-app.include_router(ingredients_router)
 app.include_router(foods_router)
 app.include_router(recipes_router)
 app.include_router(consumptions_router)

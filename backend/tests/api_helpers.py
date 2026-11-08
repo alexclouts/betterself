@@ -1,7 +1,16 @@
 
+"""
+Helpers pour les tests d'intégration de l'API.
+"""
+
 FOODS_URL = "/foods"
 RECIPES_URL = "/recipes"
 CONSUMPTIONS_URL = "/food-consumptions"
+NUTRITION_GOAL_URL = "/nutrition-goal"
+MEASUREMENTS_URL = "/measurements"
+AUTH_URL = "/auth"
+USERS_URL = "/users"
+TARGET_URL = "/nutrition-goal/current/target"
 
 
 """
@@ -78,5 +87,52 @@ def create_recipe_ingredient(
         headers=headers
     )
     assert response.status_code == 201, response.text
+    return response.json()
+
+
+"""
+Crée un objectif nutritionnel et retourne sa représentation JSON.
+"""
+def create_nutrition_goal(client, headers: dict) -> dict:
+    response = client.post(
+        NUTRITION_GOAL_URL,
+        json={
+            "goal_type": "lose_weight",
+            "start_weight_kg": 85,
+            "target_weight_kg": 75,
+            "start_date": "2026-11-01",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def recalculate_target(
+    client,
+    headers: dict,
+    reference_weight_kg: float,
+) -> dict:
+    response = client.post(
+        f"{NUTRITION_GOAL_URL}/current/target/recalculate",
+        json={
+            "reference_weight_kg": reference_weight_kg,
+            "sex": "M",
+            "birth_year": 1990,
+            "height_cm": 180,
+            "activity_level": "moderate",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def get_active_target(client, headers: dict) -> dict:
+    response = client.get(
+        f"{NUTRITION_GOAL_URL}/current/target",
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
     return response.json()
 
