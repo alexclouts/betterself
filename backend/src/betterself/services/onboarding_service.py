@@ -29,20 +29,17 @@ class OnboardingService:
             "nutrition_goal": has_goal,
             "goal_target": has_target,
         }
-
         missing_steps = [
             step
             for step, completed in steps.items()
             if not completed
         ]
-
         return {
             "is_complete": not missing_steps,
             "missing_steps": missing_steps,
             "steps": steps,
         }
 
-    
     # Vérifie si l'utilisateur a un profil.
     def _has_profile(self, user: User) -> bool:
         profile = self.db.scalar(

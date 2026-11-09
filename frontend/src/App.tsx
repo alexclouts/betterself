@@ -1,21 +1,18 @@
-import { useEffect, useState } from "react";
-import { checkApiHealth } from "./services/apiClient";
+import Button from "./components/ui/Button";
+import Card from "./components/ui/Card";
+import Input from "./components/ui/Input";
+import { Routes, Route } from "react-router-dom";
+import { LoginPage } from "./features/auth/LoginPage";
 
+// Composant principal de l'application BetterSelf.
 function App() {
-  const [status, setStatus] = useState<string>("Connexion au backend...");
-
-  useEffect(() => {
-    checkApiHealth()
-      .then((data) => setStatus(`Backend : ${data.status}`))
-      .catch(() => setStatus("Backend indisponible."));
-  }, []);
-
   return (
-    <main>
-      <h1>BetterSelf</h1>
-      <p>{status}</p>
-    </main>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="*" element={<LoginPage />} />
+    </Routes>
   );
 }
+
 
 export default App;

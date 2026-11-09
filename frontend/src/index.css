@@ -1,15 +1,47 @@
+/* src/index.css */
+@import "tailwindcss";
+
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-light: var(--secondary-light);
+
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+
+}
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --text: #374151;
+  --text-h: #000000;
+  --muted: #535353;
+  --foreground: #000000;
+  --bg: #F6F6F6;
+  --border: #B9B9B9;
+  --surface: #ffffff;
+  --surface-raised: #F2F2F2;
+  --surface-overlay: #ffffff;
+
+  --primary: #10b981;
+  --primary-dark: #059669;
+  --primary-light: #d1fae5;
+
+  --secondary: #6366f1;
+  --secondary-dark: #4f46e5;
+  --secondary-light: #e0e7ff;
+
+  --danger: #dc2626;
+  --warning: #d97706;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -32,10 +64,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
+    --text: #E8E8E8;
+    --text-h: #F0F0F0;
+    --muted: #9A9A9A;
+    --foreground: #F0F0F0;
+    --bg: #161616;
+    --surface: #282828;
+    --surface-raised: #353535;
+    --surface-overlay: #262626;
+    --border: #525252;
     --code-bg: #1f2028;
     --accent: #c084fc;
     --accent-bg: rgba(192, 132, 252, 0.15);
@@ -43,6 +80,10 @@
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+
+    --primary: #06a472;
+    --primary-dark: #059669;
+    --primary-light: #d1fae5;
   }
 
   #social .button-icon {
@@ -55,7 +96,7 @@
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
+  align-items: center;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
