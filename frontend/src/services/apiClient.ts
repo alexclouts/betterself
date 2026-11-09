@@ -1,11 +1,26 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
+import { useAuthStore } from "../stores/authStore";
 
-export async function checkApiHealth(): Promise<{ status: string }> {
-  const response = await fetch(`${API_URL}/health`);
+const API_URL = import.meta.env.VITE_API_URL;
 
-  if (!response.ok) {
-    throw new Error("Le backend n’est pas disponible.");
+export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = useAuthStore.getState().accessToken;
+
+  const response = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (response.status === 401) {
+    useAuthStore.getState().clearAuth();
+    throw new Error("UNAUTHENTICATED");
   }
 
-  return response.json();
+  if (!response.ok) {
+    throw new Error(`API_ERROR_${response.status}`);
+  }
+
+  return (await response.json()) as T;
 }

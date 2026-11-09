@@ -91,6 +91,8 @@
   }
 }
 
+html,
+body,
 #root {
   width: 1126px;
   max-width: 100%;
@@ -101,6 +103,7 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  background-color: var(--bg);
 }
 
 body {
@@ -115,7 +118,7 @@ h2 {
 }
 
 h1 {
-  font-size: 56px;
+  font-size: 42px;
   letter-spacing: -1.68px;
   margin: 32px 0;
   @media (max-width: 1024px) {
