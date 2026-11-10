@@ -1,5 +1,13 @@
+{{< img
+src="preview.png"
+alt="Preview"
+caption=""
+width="500">}}
+
 1. Parler des tests d'intégration.
-2. Service de On Boarding pour vérifier que l'utilisateur l'a terminé
+2. Service de On Boarding pour vérifier que l'utilisateur l'a terminé et mettre a jour les données dans les tables.
+3. L'enjeu de travailler avec l'IA: Exemple de contre-vérification du code - screenshot1
+4. Gestion de l'opération commit() dans ma base de données.
 
 #### _Question :_ Je crois avoir fait le tour des fonctionnalités principales. Maintenant j'ai un questionnement concernant le processus end-to-end de l'application. Une des vérifications qui pourrait être fait pour valider que l'utilisateur a bien complété le processus de on boarding en entier est de valider que l'utilisateur a une entrée dans la table nutrition-goal. Maintenant, de quelle façon me suggères-tu d'effectuer cette vérification?
 
@@ -85,3 +93,89 @@ Pour éviter une refonte importante maintenant :
 1. Crée `OnboardingService` comme un service distinct, sans le fusionner avec `UserService`.
 
 Le nom `Service` n’est pas incorrect; il est simplement moins précis lorsque la classe ne fait que du CRUD. Dans ton cas, `OnboardingService`, `TargetService`, `RecipeService` et `ConsumptionService` méritent bien ce nom.
+
+# Les erreurs contextuelles de l'IA
+
+Je me suis rendu compte que l'IA me génère du travail puisqu'elle oublie les conversations précédentes. Ce genre de problème est ce qui rend important mon rôle de contre-vérificateur du code qu'elle propose. Par exemple, c'est le cas pour l'implémentation suivante qui m'a été suggéré. Bien que l'IA m'ait aidé à concevoir la table `measurements`, elle assume qu'un paramètre `height_cm` s'y trouve alors que ce n'est pas le cas, ce qui va générer un message d'erreur lors de la compilation.
+
+{{< img
+src="screenshot1.png"
+alt="Screenshot"
+caption=""
+width="800">}}
+
+# La gestion des opérations commit
+
+En analysant le code que l'IA m'a suggéré pour l'implémentation du service de Onboarding, j'ai réalisé que l'opération `commit()` n'était pas présente dans les fonctions visant à sauvegarder les données transmises par le frontend. En discutant avec l'IA, elle a offert un raisonnement intéressant :
+
+## Conversation avec l'IA
+
+#### _Question :_ Un autre questionnement que j'ai concerne le commit. Actuellement, aucun commit() n'est fait dans la base de données par les fonctions appelées dans le service Onboarding. Pourquoi?
+
+C’est normal — et même souhaitable — que `add()` ne fasse pas de `commit()`. Dans une architecture repository + service, le repository **prépare** les changements; la transaction est validée une seule fois à la fin de l’opération métier, idéalement dans `get_db`.
+
+```python
+def add(self, measurement: Measurement) -> Measurement:
+    self.db.add(measurement)
+    return measurement
+```
+
+`self.db.add(measurement)` enregistre l’objet dans la session SQLAlchemy, mais ne l’écrit pas encore durablement dans la base. Les modifications sont conservées dans la transaction en cours jusqu’à un `commit()`. Pour l’onboarding, tu veux que **profil, mesure, objectif nutritionnel et cible** soient enregistrés ensemble ou pas du tout. Le meilleur endroit est donc la dépendance `get_db`, qui encadre toute la requête HTTP.
+
+Ainsi :
+
+- Si `save_onboarding` réussit, les quatre enregistrements sont validés par un seul `commit()`.
+- Si une erreur survient après la création du profil, tout est annulé par `rollback()`.
+- Les repositories restent simples et ne connaissent pas la politique transactionnelle.
+
+### À quelle fréquence
+
+get_db fait **un seul** `commit()` **par requête HTTP réussie**, après que le routeur a terminé et que FastAPI a produit la réponse. Ce n’est donc pas un commit par appel de repository, ni par objet ajouté.
+
+```
+Requête HTTP arrive
+        ↓
+get_db() crée la session
+        ↓
+yield db → FastAPI injecte db dans le routeur
+        ↓
+Routeur appelle OnboardingService
+        ↓
+Repositories font add() / modifications
+        ↓
+Routeur retourne une réponse
+        ↓
+get_db() reprend après yield
+        ↓
+db.commit() une seule fois
+        ↓
+db.close()
+```
+
+## Analyse
+
+Mon implémentation actuelle effectue les opérations `commit` directement dans les fonctions de repositories. J'ai donc apporté les modifications pour refléter ce changement.
+
+### Le rôle de `flush`
+
+En exécutant mes tests unitaires, je me suis rendu compte que des erreurs étaient générées :
+
+```
+E               fastapi.exceptions.ResponseValidationError: 2 validation errors:
+E                 {'type': 'uuid_type', 'loc': ('response', 'id'), 'msg': 'UUID input should be a string, bytes or UUID object', 'input': None}
+E                 {'type': 'bool_type', 'loc': ('response', 'is_active'), 'msg': 'Input should be a valid boolean', 'input': None}
+E
+E                 File "/home/alex/Documents/betterself/backend/src/betterself/routers/auth_router.py", line 35, in register_user
+E                   POST /auth/register
+```
+
+#### Les explications de l'IA
+
+Avec `flush()`, SQLAlchemy applique les valeurs par défaut Python — `generate_uuid` et `True` — puis envoie l’`INSERT` dans la transaction. L’objet `user` possède donc immédiatement :
+
+```
+user.id        # UUID valide
+user.is_active # True
+```
+
+Le `commit()` reste toutefois responsable de rendre l’insertion permanente.

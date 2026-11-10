@@ -101,12 +101,7 @@ class RecipeService:
         for field, value in update_data.items():
             setattr(recipe, field, value)
 
-        self.recipe_repository.save(recipe)
-
-        return self.get_recipe_by_id(
-            user=user,
-            recipe_id=recipe.id,
-        )
+        return self._to_recipe_read(recipe)
 
 
     # Met à jour le statut d'archivage d'une recette pour l'utilisateur connecté.
@@ -121,12 +116,9 @@ class RecipeService:
             recipe_id=recipe_id,
         )
         recipe.is_archived = data.is_archived
-        self.recipe_repository.save(recipe)
+        
+        return self._to_recipe_read(recipe)
 
-        return self.get_recipe_by_id(
-            user=user,
-            recipe_id=recipe.id,
-        )
 
 
     # Supprime une recette pour l'utilisateur connecté.
@@ -203,7 +195,7 @@ class RecipeService:
             ingredient_id=ingredient_id,
         )
         ingredient.quantity_g = data.quantity_g
-        return self.recipe_repository.save_ingredient(ingredient)
+        return ingredient
 
 
     # Supprime un ingrédient d'une recette pour l'utilisateur connecté.
@@ -315,5 +307,5 @@ class RecipeService:
                 )
                 for ingredient in recipe.ingredients
             ],
-            nutrition=self._calculate_recipe_nutrition(recipe),
+            nutrition=self._calculate_recipe_nutrition(recipe)
         )

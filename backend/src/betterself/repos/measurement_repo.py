@@ -16,10 +16,10 @@ class MeasurementRepository:
             weight_kg = data.weight_kg,
         )
 
-        # Ajoute la mesure à la session de la base de données et la commit
+        # Ajoute la mesure à la session de la base de données et la flush
         self.db.add(measurement)
-        self.db.commit()
-        self.db.refresh(measurement)
+        self.db.flush()
+
         return measurement
 
 
@@ -37,8 +37,6 @@ class MeasurementRepository:
 
         # Trie les mesures par date décroissante
         query = query.order_by(Measurement.date.asc())
-
-
         return list(self.db.scalars(query))
 
 
@@ -52,7 +50,7 @@ class MeasurementRepository:
         measurement = self._get_measurement_or_404(user, measurement_id)
 
         self.db.delete(measurement)
-        self.db.commit()
+        self.db.flush()
 
         # Une réponse 204 ne doit pas renvoyer de contenu, donc on retourne simplement True pour indiquer le succès
         return True
@@ -66,9 +64,7 @@ class MeasurementRepository:
 
         if data.weight_kg is not None:
             measurement.weight_kg = data.weight_kg
-
-        self.db.commit()
-        self.db.refresh(measurement)
+            
         return measurement
 
 
@@ -79,5 +75,12 @@ class MeasurementRepository:
         )
         if measurement is None:
             raise RecordNotFound("Mesure introuvable.")
+        
+        return measurement
+
+    # Ajoute une nouvelle mesure à la base de données pour un utilisateur donné.
+    def add(self, measurement: Measurement) -> Measurement:
+        self.db.add(measurement)
+        self.db.flush()
         
         return measurement

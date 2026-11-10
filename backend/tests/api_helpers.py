@@ -117,10 +117,10 @@ def recalculate_target(
         f"{NUTRITION_GOAL_URL}/current/target/recalculate",
         json={
             "reference_weight_kg": reference_weight_kg,
-            "sex": "M",
+            "sex": "male",
             "birth_year": 1990,
             "height_cm": 180,
-            "activity_level": "moderate",
+            "activity_level": "lightly_active",
         },
         headers=headers,
     )

@@ -16,7 +16,6 @@ def test_register_user_success(client: TestClient):
     assert response.status_code == 201
 
     body = response.json()
-
     # Vérification que la réponse contient les informations attendues
     assert "id" in body
     assert body["email"] == "test@example.com"

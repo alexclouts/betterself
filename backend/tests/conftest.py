@@ -38,7 +38,7 @@ def test_session(test_engine):
     TestingSessionLocal = sessionmaker(
         bind=test_engine,
         autocommit=False,
-        autoflush=False,
+        autoflush=True,
         expire_on_commit=False,
     )
     # Crée une session de base de données pour les tests

@@ -14,16 +14,11 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from betterself.schemas.profile_schemas import Sex, ActivityLevel
+
 from betterself.core.database import Base
 
-from enum import Enum
 from sqlalchemy import Enum as SAEnum
-
-
-class ActivityLevel(str, Enum):
-    LOW = "low"
-    MODERATE = "moderate"
-    HIGH = "high"
 
 """
 Profil biométrique et préférences d'un utilisateur.
@@ -50,8 +45,12 @@ class UserProfile(Base):
         nullable=False,
     )
 
-    sex: Mapped[str] = mapped_column(
-        String(1),
+    sex: Mapped[Sex] = mapped_column(
+        SAEnum(
+            Sex,
+            name="sex",
+            values_callable=lambda enum: [item.value for item in enum],
+        ),
         nullable=False,
     )
 
@@ -87,7 +86,7 @@ class UserProfile(Base):
     __table_args__ = (
         # Le sexe doit correspondre aux valeurs attendues par le calcul BMR.
         CheckConstraint(
-            "sex IN ('M', 'F', 'X')",
+            "sex IN ('male', 'female', 'other')",
             name="user_profiles_check_sex",
         ),
 
@@ -102,5 +101,9 @@ class UserProfile(Base):
         CheckConstraint(
                 "year_of_birth >= 1900",
                 name="user_profiles_check_year_of_birth_minimum",
-            )
+            ),
+        CheckConstraint(
+            "activity_level IN ('sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extremely_active')",
+            name="user_profiles_check_activity_level",
+        ),
     )

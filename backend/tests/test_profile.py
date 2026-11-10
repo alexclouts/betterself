@@ -11,9 +11,9 @@ def valid_user_profile_payload() -> dict:
     return {
         "first_name": "Alex",
         "year_of_birth": 1996,
-        "sex": "M",
+        "sex": "male",
         "height_cm": 175,
-        "activity_level": "moderate",
+        "activity_level": "moderately_active",
     }
 
 
@@ -47,9 +47,9 @@ def test_create_user_profile_success(client):
     profile = response.json()
     assert profile["first_name"] == "Alex"
     assert profile["year_of_birth"] == 1996
-    assert profile["sex"] == "M"
-    assert profile["height_cm"] == "175.00"
-    assert profile["activity_level"] == "moderate"
+    assert profile["sex"] == "male"
+    assert profile["height_cm"] == "175"
+    assert profile["activity_level"] == "moderately_active"
     assert profile["user_id"]
 
 
@@ -99,9 +99,9 @@ def test_update_user_profile_success(client):
     update_payload = {
         "first_name": "Marie-Claire",
         "year_of_birth": 1990,
-        "sex": "F",
+        "sex": "female",
         "height_cm": 168,
-        "activity_level": "high",
+        "activity_level": "lightly_active",
     }
     response = client.put(
         PROFILE_URL,
@@ -113,9 +113,9 @@ def test_update_user_profile_success(client):
     profile = response.json()
     assert profile["first_name"] == "Marie-Claire"
     assert profile["year_of_birth"] == 1990
-    assert profile["sex"] == "F"
-    assert profile["height_cm"] == "168.00"
-    assert profile["activity_level"] == "high"
+    assert profile["sex"] == "female"
+    assert profile["height_cm"] == "168"
+    assert profile["activity_level"] == "lightly_active"
 
 
 # Test pour vérifier que la modification échoue sans authentification
@@ -149,6 +149,7 @@ def test_user_profile_accepts_valid_first_names(client):
             json=payload,
             headers=auth_headers(access_token),
         )
+        print("Response: ", response.json())
         assert response.status_code in (200, 201)
         assert response.json()["first_name"] == first_name
 

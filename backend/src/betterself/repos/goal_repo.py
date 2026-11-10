@@ -27,16 +27,12 @@ class GoalRepository:
         goal: NutritionGoal,
     ) -> NutritionGoal:
         self.db.add(goal)
-        self.db.commit()
-        self.db.refresh(goal)
+        self.db.flush()
         return goal
 
 
-    # Sauvegarde les modifications apportées à un objectif nutritionnel existant.
-    def save(
-        self,
-        goal: NutritionGoal,
-    ) -> NutritionGoal:
-        self.db.commit()
-        self.db.refresh(goal)
+    # Ajoute un objectif nutritionnel à la session de la base de données sans le commit.
+    def add(self, goal: NutritionGoal) -> NutritionGoal:
+        self.db.add(goal)
+        self.db.flush()
         return goal

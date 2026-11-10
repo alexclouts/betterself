@@ -80,9 +80,7 @@ class FoodRepository:
             created_by_user_id=user.id,
         )
         self.db.add(food)
-        self.db.commit()
-        self.db.refresh(food)
-
+        self.db.flush()
         return food
 
 
@@ -117,8 +115,7 @@ class FoodRepository:
                 if field in ALLOWED_UPDATE_FIELDS:
                     setattr(food, field, value)
 
-        self.db.commit()
-        self.db.refresh(food)
+        self.db.flush()
         return food
 
     """
@@ -143,9 +140,8 @@ class FoodRepository:
             raise PermissionError(
                 "Vous n'êtes pas autorisé à supprimer cet aliment."
             )
-
         self.db.delete(food)
-        self.db.commit()
+        self.db.flush()
 
 
     """

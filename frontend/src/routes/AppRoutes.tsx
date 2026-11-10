@@ -1,9 +1,9 @@
 // src/routes/AppRoutes.tsx
 import { Route, Routes } from "react-router-dom";
-import { LoginPage } from "../features/auth/LoginPage";
-import { RegisterPage } from "../features/auth/RegisterPage";
+import { LoginPage } from "../pages/auth/LoginPage";
+import { RegisterPage } from "../pages/auth/RegisterPage";
 import { ProtectedRoute } from "./ProtectedRoute";
-import { HomePage } from "../features/home/HomePage";
+import { HomePage } from "../pages/home/HomePage";
 
 export function AppRoutes() {
     return (

@@ -42,10 +42,10 @@ def recalculate_current_goal_target(
 def valid_goal_target_recalculate_payload() -> dict:
     return {
         "reference_weight_kg": 85,
-        "sex": "M",
+        "sex": "male",
         "birth_year": 1996,
         "height_cm": 175,
-        "activity_level": "moderate",
+        "activity_level": "lightly_active",
     }
 
 

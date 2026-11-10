@@ -2,23 +2,21 @@ const API_URL = import.meta.env.VITE_API_URL;
 const TOKEN_KEY = "access_token";
 
 type RegisterPayload = {
-  email: string;
-  password: string;
+    email: string;
+    password: string;
 };
 
 
 export const authService = {
-  getToken() {
-    return localStorage.getItem(TOKEN_KEY);
-  },
-
-  setToken(token: string) {
-    localStorage.setItem(TOKEN_KEY, token);
-  },
-
-  logout() {
-    localStorage.removeItem(TOKEN_KEY);
-  },
+    getToken() {
+        return localStorage.getItem(TOKEN_KEY);
+    },
+    setToken(token: string) {
+        localStorage.setItem(TOKEN_KEY, token);
+    },
+    logout() {
+        localStorage.removeItem(TOKEN_KEY);
+    }
 };
 
 // Réalise l'appel à l'API pour l'inscription

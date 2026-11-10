@@ -84,6 +84,10 @@
     --primary: #06a472;
     --primary-dark: #059669;
     --primary-light: #d1fae5;
+
+    --secondary: #e95320;
+    --secondary-dark: #e95320;
+    --secondary-light: #e0e7ff;
   }
 
   #social .button-icon {

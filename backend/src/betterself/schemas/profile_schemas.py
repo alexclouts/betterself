@@ -1,11 +1,24 @@
+from enum import Enum
 import re
 from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from betterself.models.profile_models import ActivityLevel
 
+# Enum représentant le sexe d'un utilisateur.
+class Sex(str, Enum):
+    male = "male"
+    female = "female"
+    other = "other"
+
+class ActivityLevel(str, Enum):
+    SEDENTARY = "sedentary"
+    LIGHTLY_ACTIVE = "lightly_active"
+    MODERATELY_ACTIVE = "moderately_active"
+    VERY_ACTIVE = "very_active"
+    EXTREMELY_ACTIVE = "extremely_active"
+    
 
 """
 Représentation d'un profil utilisateur renvoyée par l'API.
@@ -16,7 +29,7 @@ class UserProfileRead(BaseModel):
     user_id: UUID
     first_name: str | None
     year_of_birth: int
-    sex: str
+    sex: Sex
     height_cm: Decimal
     activity_level: ActivityLevel
     updated_at: datetime
@@ -35,9 +48,8 @@ class UserProfileUpdate(BaseModel):
         examples=[1996],
     )
 
-    sex: str = Field(
-        pattern="^[MFX]$",
-        examples=["M"],
+    sex: Sex = Field(
+        examples=["male"],
     )
 
     height_cm: Decimal = Field(
@@ -47,7 +59,7 @@ class UserProfileUpdate(BaseModel):
     )
 
     activity_level: ActivityLevel = Field(
-        examples=["moderate"],
+        examples=["moderately_active"],
     )
 
 

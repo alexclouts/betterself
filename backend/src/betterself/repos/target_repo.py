@@ -35,8 +35,7 @@ class TargetRepository:
         target: GoalTarget,
     ) -> GoalTarget:
         self.db.add(target)
-        self.db.commit()
-        self.db.refresh(target)
+        self.db.flush()
         return target
 
 
@@ -47,5 +46,5 @@ class TargetRepository:
         closed_at: date,
     ) -> GoalTarget:
         target.valid_until = closed_at
-        self.db.commit()
+        self.db.flush()
         return target

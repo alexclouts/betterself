@@ -94,7 +94,7 @@ class GoalService:
         goal.start_date = data.start_date
         goal.target_date = data.target_date
 
-        return self.goal_repository.save(goal)
+        return goal
 
 
     # Récupère la cible nutritionnelle active pour un utilisateur donné.
@@ -136,9 +136,11 @@ class GoalService:
             bmr = (10 * weight + 6.25 * height - 5 * age)
 
         activity_multipliers = {
-            "low": 1.2,
-            "moderate": 1.55,
-            "high": 1.725,
+            "sedentary": 1.2,
+            "lightly_active": 1.375,
+            "moderately_active": 1.55,
+            "very_active": 1.725,
+            "extra_active": 1.9,
         }
         # Vérifie que le niveau d'activité physique est valide.
         if activity_level not in activity_multipliers:
@@ -155,23 +157,23 @@ class GoalService:
             "body_recomposition": 0,
         }
         # Ajuste les calories en fonction de l'objectif nutritionnel.
-        calorie_adjustment = calorie_adjustments[goal.goal_type.value]
-        calories_target = (maintenance_calories + calorie_adjustment)
+        calories_adjustment_kcal = calorie_adjustments[goal.goal_type.value]
+        calories_target_kcal = (maintenance_calories + calories_adjustment_kcal)
 
-        if calories_target <= 0:
+        if calories_target_kcal <= 0:
             raise GoalTargetCalculationError(
                 "La cible calorique calculée est invalide."
             )
 
         # Calcul des macronutriments cibles en fonction des calories cibles.
         protein_target = round(weight * 1.8)
-        fat_target = round((calories_target * 0.25) / 9)
-        carbs_target = max(round((calories_target - protein_target * 4 - fat_target * 9) / 4), 0,)
+        fat_target = round((calories_target_kcal * 0.25) / 9)
+        carbs_target = max(round((calories_target_kcal - protein_target * 4 - fat_target * 9) / 4), 0,)
 
         return {
             "maintenance_calories_kcal": maintenance_calories,
-            "calories_target_kcal": calories_target,
-            "calories_adjustment_kcal": calorie_adjustment,
+            "calories_target_kcal": calories_target_kcal,
+            "calories_adjustment_kcal": calories_adjustment_kcal,
             "protein_target_g": protein_target,
             "carbs_target_g": carbs_target,
             "fat_target_g": fat_target,

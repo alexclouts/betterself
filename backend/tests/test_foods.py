@@ -284,11 +284,11 @@ def test_update_food_success(client):
     assert food["description"] == "Description mise à jour"
 
     # Les valeurs nutritionnelles doivent rester immuables.
-    assert food["reference_weight_g"] == created_food["reference_weight_g"]
-    assert food["calories_kcal"] == created_food["calories_kcal"]
-    assert food["protein_g"] == created_food["protein_g"]
-    assert food["carbohydrates_g"] == created_food["carbohydrates_g"]
-    assert food["fat_g"] == created_food["fat_g"]
+    assert Decimal(food["reference_weight_g"]) == Decimal(created_food["reference_weight_g"])
+    assert Decimal(food["calories_kcal"]) == Decimal(created_food["calories_kcal"])
+    assert Decimal(food["protein_g"]) == Decimal(created_food["protein_g"])
+    assert Decimal(food["carbohydrates_g"]) == Decimal(created_food["carbohydrates_g"])
+    assert Decimal(food["fat_g"]) == Decimal(created_food["fat_g"])
 
 
 # Test pour vérifier qu'une valeur nutritionnelle non modifiable est ignorée
@@ -315,8 +315,8 @@ def test_update_food_immutable_value(client):
     food = response.json()
 
     # La valeur envoyée doit être ignorée.
-    assert food["calories_kcal"] == created_food["calories_kcal"]
-    assert food["calories_kcal"] != 999
+    assert Decimal(food["calories_kcal"]) == Decimal(created_food["calories_kcal"])
+    assert Decimal(food["calories_kcal"]) != 999
 
 
 # Test pour vérifier que le nom ne peut pas être vide

@@ -11,7 +11,7 @@ from betterself.core.dependencies import get_current_user
 from betterself.models.user_models import User
 from betterself.schemas.profile_schemas import UserProfileRead, UserProfileUpdate
 from betterself.repos.profile_repo import UserProfileRepository
-from betterself.prefix import USERS_URL
+from betterself.prefix import USERS_URL, PROFILE_URL
 
 router = APIRouter(
     prefix=USERS_URL,
@@ -30,13 +30,6 @@ def read_current_user(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
-@router.get("/me/onboarding-status", response_model=OnboardingStatusRead)
-def get_onboarding_status(
-    current_user: User = Depends(get_current_user),
-    service: OnboardingService = Depends(get_onboarding_service),
-) -> OnboardingStatusRead:
-    return service.get_status(current_user)
-
 def get_user_profile_repository(
     db: Session = Depends(get_db),
 ) -> UserProfileRepository:
@@ -45,7 +38,7 @@ def get_user_profile_repository(
 
 # Fonction pour récupérer le profil de l'utilisateur connecté
 @router.get(
-    "/me/profile",
+    PROFILE_URL,
     response_model=UserProfileRead,
 )
 def get_current_user_profile(
@@ -62,10 +55,7 @@ def get_current_user_profile(
 
 
 # Fonction pour créer ou mettre à jour le profil de l'utilisateur connecté
-@router.put(
-    "/me/profile",
-    response_model=UserProfileRead,
-)
+@router.put(PROFILE_URL, response_model=UserProfileRead)
 def create_or_update_current_user_profile(
     data: UserProfileUpdate,
     current_user: User = Depends(get_current_user),
@@ -73,9 +63,8 @@ def create_or_update_current_user_profile(
 ):
     profile, created = service.create_or_update_profile(
         user=current_user,
-        data=data,
+        data=data
     )
-
     if created:
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,

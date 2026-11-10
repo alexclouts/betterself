@@ -94,9 +94,10 @@ class RecipeRepository:
     # Ajoute une nouvelle recette à la base de données.
     def add(self, recipe: Recipe) -> Recipe:
         self.db.add(recipe)
-        self.db.commit()
-        self.db.refresh(recipe)
+        self.db.flush()
         return recipe
+
+    
 
 
     # Ajoute un nouvel ingrédient à la base de données.
@@ -105,32 +106,14 @@ class RecipeRepository:
         ingredient: RecipeIngredient,
     ) -> RecipeIngredient:
         self.db.add(ingredient)
-        self.db.commit()
-        self.db.refresh(ingredient)
-        return ingredient
-
-
-    # Sauvegarde les modifications apportées à une recette existante.
-    def save(self, recipe: Recipe) -> Recipe:
-        self.db.commit()
-        self.db.refresh(recipe)
-        return recipe
-
-
-    # Sauvegarde les modifications apportées à un ingrédient existant.
-    def save_ingredient(
-        self,
-        ingredient: RecipeIngredient,
-    ) -> RecipeIngredient:
-        self.db.commit()
-        self.db.refresh(ingredient)
+        self.db.flush()
         return ingredient
 
 
     # Supprime une recette de la base de données.
     def delete(self, recipe: Recipe) -> None:
         self.db.delete(recipe)
-        self.db.commit()
+        self.db.flush()
 
 
     # Supprime un ingrédient de la base de données.
@@ -139,7 +122,7 @@ class RecipeRepository:
         ingredient: RecipeIngredient,
     ) -> None:
         self.db.delete(ingredient)
-        self.db.commit()
+        self.db.flush()
 
     """
     Retourne une recette appartenant à l'utilisateur.

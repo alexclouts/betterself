@@ -201,11 +201,9 @@ class FoodConsumptionService:
             user=user,
             data=data,
         )
-
         self.db.add(consumption)
-        self.db.commit()
-        self.db.refresh(consumption)
-
+        self.db.flush()
+        
         return consumption
     
 
@@ -250,7 +248,6 @@ class FoodConsumptionService:
             .limit(limit)
             .offset(offset)
         )
-
         return list(
             self.db.scalars(query).all()
         )
@@ -271,7 +268,6 @@ class FoodConsumptionService:
             user=user,
             consumption_id=consumption_id,
         )
-
         update_data = data.model_dump(
             exclude_unset=True,
         )
@@ -310,9 +306,6 @@ class FoodConsumptionService:
         for field, value in update_data.items():
             setattr(consumption, field, value)
 
-        self.db.commit()
-        self.db.refresh(consumption)
-
         return consumption
 
 
@@ -329,7 +322,7 @@ class FoodConsumptionService:
             consumption_id=consumption_id,
         )
         self.db.delete(consumption)
-        self.db.commit()
+        self.db.flush()
 
 
     """

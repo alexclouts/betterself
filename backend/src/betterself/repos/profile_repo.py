@@ -27,12 +27,10 @@ class UserProfileRepository:
                 UserProfile.user_id == user.id,
             )
         )
-
         if profile is None:
             raise RecordNotFound(
                 "Aucun profil utilisateur n'a été trouvé."
             )
-
         return profile
 
 
@@ -66,7 +64,5 @@ class UserProfileRepository:
         profile.height_cm = data.height_cm
         profile.activity_level = data.activity_level
 
-        self.db.commit()
-        self.db.refresh(profile)
-
+        self.db.flush()
         return profile, created

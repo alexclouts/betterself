@@ -26,8 +26,7 @@ class UserRepository:
     # Ajoute un nouvel utilisateur à la base de données.
     def add(self,user: User) -> User:
         self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        self.db.flush()
         return user
 
 

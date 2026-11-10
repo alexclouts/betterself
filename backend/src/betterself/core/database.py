@@ -29,7 +29,7 @@ engine = create_db_engine(settings.database_url)
 SessionLocal = sessionmaker(
     bind=engine,
     autocommit=False,
-    autoflush=False,
+    autoflush=True,
     expire_on_commit=False
 )
 
@@ -45,5 +45,9 @@ def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
+        db.commit()
+    except:
+        db.rollback()
+        raise
     finally:
         db.close()

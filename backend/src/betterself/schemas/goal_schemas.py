@@ -12,8 +12,6 @@ class NutritionGoalCreate(BaseModel):
     
     start_weight_kg: Decimal = Field(gt=30, le=500)
     target_weight_kg: Decimal = Field(gt=30, le=500)
-
-    
     start_date: date
     target_date: date | None = None
     

@@ -1,6 +1,8 @@
 
 from decimal import Decimal
 
+from betterself.prefix import ONBOARDING_URL
+
 from tests.api_helpers import (
     CONSUMPTIONS_URL,
     NUTRITION_GOAL_URL, 
@@ -355,10 +357,12 @@ def test_onboarding_status_incomplete_then_complete(client):
 
     # Après l'inscription, l'onboarding n'est pas terminé.
     initial_response = client.get(
-        f"{USERS_URL}/me/onboarding-status",
+        f"{ONBOARDING_URL}/status",
         headers=headers,
     )
     assert initial_response.status_code == 200, initial_response.text
+
+    print("Initial onboarding status:", initial_response.json())
 
     initial_status = initial_response.json()
     assert initial_status["is_complete"] is False
@@ -373,9 +377,9 @@ def test_onboarding_status_incomplete_then_complete(client):
         json={
             "first_name": "Alex",
             "year_of_birth": 1990,
-            "sex": "M",
+            "sex": "male",
             "height_cm": "180",
-            "activity_level": "moderate",
+            "activity_level": "lightly_active",
         },
         headers=headers,
     )
@@ -410,10 +414,10 @@ def test_onboarding_status_incomplete_then_complete(client):
         f"{TARGET_URL}/recalculate",
         json={
             "reference_weight_kg": 85,
-            "sex": "M",
+            "sex": "male",
             "birth_year": 1990,
-            "height_cm": "180",
-            "activity_level": "moderate",
+            "height_cm": 180,
+            "activity_level": "lightly_active",
         },
         headers=headers,
     )
@@ -421,7 +425,7 @@ def test_onboarding_status_incomplete_then_complete(client):
 
     # L'onboarding est maintenant complet.
     final_response = client.get(
-        f"{USERS_URL}/me/onboarding-status",
+        f"{ONBOARDING_URL}/status",
         headers=headers,
     )
     assert final_response.status_code == 200, final_response.text
