@@ -1,75 +1,256 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 
-/**
- * Contexte pour gérer l'état de l'onboarding de l'utilisateur.
- */
+import { api } from "@/lib/api";
 
-// Types pour les objectifs et les données d'onboarding.
-export type Goal = "lose_weight" | "maintain_weight" | "gain_muscle";
-export type ActivityLevel = "sedentary" | "lightly_active" | "moderately_active" | "very_active" | "extremely_active" | ""; 
+// Types et contexte pour la gestion de l'onboarding utilisateur.
+export type Goal =
+  | "lose_weight"
+  | "maintain_weight"
+  | "gain_muscle";
 
+export type ActivityLevel =
+  | "sedentary"
+  | "lightly_active"
+  | "moderately_active"
+  | "very_active"
+  | "extremely_active";
+
+export type Sex = "male" | "female" | "other";
+
+export type OnboardingStep =
+  | "profile"
+  | "goal"
+  | "review";
+
+// Réponse de l'API pour le statut de l'onboarding.
+export type OnboardingStatusResponse = {
+    is_complete: boolean;
+    missing_steps: string[];
+};
+
+
+// Données collectées lors de l'onboarding utilisateur.
 export type OnboardingData = {
-  goal: Goal | "";
-  name: string;
-  birthYear: string;
-  sex: "male" | "female" | "other" | "";
-  heightCm: string;
-  weightKg: string;
-  activityLevel: ActivityLevel | ""; 
+    goal: Goal | "";
+    name: string;
+    birthYear: string;
+    sex: Sex | "";
+    heightCm: string;
+    weightKg: string;
+    activityLevel: ActivityLevel | "";
 };
 
+// Statut de l'onboarding utilisateur.
+export type OnboardingStatus = {
+    isComplete: boolean;
+    missingSteps: string[];
+};
+
+// Contexte et fonctions pour gérer l'onboarding utilisateur.
 type OnboardingContextValue = {
-  data: OnboardingData;
-  updateData: (patch: Partial<OnboardingData>) => void;
-  resetOnboarding: () => void;
+    data: OnboardingData;
+    status: OnboardingStatus | null;
+    currentStep: OnboardingStep;
+    isLoadingStatus: boolean;
+    isSubmitting: boolean;
+    error: string | null;
+
+    updateData: (patch: Partial<OnboardingData>) => void;
+    setCurrentStep: (step: OnboardingStep) => void;
+    refreshStatus: () => Promise<OnboardingStatus>;
+    submitProfile: () => Promise<boolean>;
+    submitGoal: () => Promise<boolean>;
+    completeOnboarding: () => Promise<boolean>;
+    resetOnboarding: () => void;
 };
 
+// Valeurs initiales pour l'onboarding utilisateur.
 const initialData: OnboardingData = {
-  goal: "",
-  name: "",
-  birthYear: "",
-  sex: "",
-  heightCm: "",
-  weightKg: "",
-  activityLevel: "",
+    goal: "",
+    name: "",
+    birthYear: "",
+    sex: "",
+    heightCm: "",
+    weightKg: "",
+    activityLevel: "",
 };
 
-// Création du contexte d'onboarding.
+const initialStep: OnboardingStep = "profile";
+
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
-export function OnboardingProvider({ children }: { children: ReactNode }) {
-    // État local pour stocker les données d'onboarding.
-    const [data, setData] = useState<OnboardingData>(initialData);
+/*
+ * Fournit le contexte et le fournisseur pour l'onboarding utilisateur.
+ */
+export function OnboardingProvider({
+  children,
+}: {
+    children: ReactNode;
+    }) {
+        // États locaux pour l'onboarding utilisateur.
+        const [data, setData] = useState<OnboardingData>(initialData);
+        const [status, setStatus] = useState<OnboardingStatus | null>(null);
+        const [currentStep, setCurrentStep] = useState<OnboardingStep>(initialStep);
+        const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+        const [isSubmitting, setIsSubmitting] = useState(false);
+        const [error, setError] = useState<string | null>(null);
 
-    function updateData(patch: Partial<OnboardingData>) {
-        setData((current) => ({
-        ...current,
-        ...patch,
-        }));
-    }
+        // Met à jour les données d'onboarding avec un patch partiel.
+        const updateData = useCallback((patch: Partial<OnboardingData>) => {
+            setData((current) => ({
+                ...current,
+                ...patch,
+            }));
+        },
+        []
+    );
 
-    function resetOnboarding() {
+    // Rafraîchit le statut de l'onboarding utilisateur.
+    const refreshStatus = useCallback(async (): Promise<OnboardingStatus> => {
+        setIsLoadingStatus(true);
+        setError(null);
+
+        try {
+            const response = await api.get<OnboardingStatusResponse>("/onboarding/status");
+
+            const nextStatus: OnboardingStatus = {
+                isComplete: response.data.is_complete,
+                missingSteps: response.data.missing_steps
+            };
+
+            setStatus(nextStatus);
+            return nextStatus;
+
+        } catch (error) {
+            setError("Impossible de récupérer le statut de l’onboarding.");
+            throw error;
+        } finally {
+            setIsLoadingStatus(false);
+        }
+    }, []);
+
+    // Soumet les informations du profil utilisateur.
+    const submitProfile = useCallback(async () => {
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            await api.post("/profiles", {
+                first_name: data.name,
+                year_of_birth: Number(data.birthYear),
+                sex: data.sex,
+                height_cm: Number(data.heightCm),
+                activity_level: data.activityLevel,
+            });
+
+            await refreshStatus();
+
+            return true;
+        } catch {
+            setError("Impossible d'enregistrer votre profil.");
+            return false;
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [data, refreshStatus]);
+
+    // Soumet l'objectif nutritionnel de l'utilisateur.
+    const submitGoal = useCallback(async () => {
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            await api.post("/goal-targets/recalculate", {
+                reference_weight_kg: Number(data.weightKg),
+                sex: data.sex,
+                birth_year: Number(data.birthYear),
+                height_cm: Number(data.heightCm),
+                activity_level: data.activityLevel,
+            });
+            await refreshStatus();
+            return true;
+
+        } catch {
+            setError("Impossible de calculer votre objectif nutritionnel.");
+            return false;
+            
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [data, refreshStatus]);
+
+    // Marque l'onboarding comme complet.
+    const completeOnboarding = useCallback(async () => {
+        await refreshStatus();
+        return status?.isComplete ?? false;
+    }, [refreshStatus, status]);
+
+    // Réinitialise l'onboarding utilisateur.
+    const resetOnboarding = useCallback(() => {
         setData(initialData);
-    }
+        setStatus(null);
+        setCurrentStep(initialStep);
+        setError(null);
+    }, []);
+
+    // Valeur du contexte pour l'onboarding utilisateur.
+    const value = useMemo(
+        () => ({
+        data,
+        status,
+        currentStep,
+        isLoadingStatus,
+        isSubmitting,
+        error,
+
+        updateData,
+        setCurrentStep,
+        refreshStatus,
+        submitProfile,
+        submitGoal,
+        completeOnboarding,
+        resetOnboarding,
+        }),
+        [
+        data,
+        status,
+        currentStep,
+        isLoadingStatus,
+        isSubmitting,
+        error,
+
+        updateData,
+        refreshStatus,
+        submitProfile,
+        submitGoal,
+        completeOnboarding,
+        resetOnboarding,
+        ]
+    );
 
     return (
-        <OnboardingContext.Provider
-        value={{ data, updateData, resetOnboarding }}
-        >
+        <OnboardingContext.Provider value={value}>
         {children}
         </OnboardingContext.Provider>
     );
 }
 
-// Hook personnalisé pour accéder au contexte d'onboarding.
+// Hook pour accéder au contexte d'onboarding utilisateur.
 export function useOnboarding() {
-    const context = useContext(OnboardingContext);
+  const context = useContext(OnboardingContext);
 
-    if (!context) {
-        throw new Error(
-        "useOnboarding doit être utilisé dans un OnboardingProvider."
-        );
-    }
-    return context;
+  if (!context) {
+    throw new Error(
+      "useOnboarding doit être utilisé dans un OnboardingProvider."
+    );
+  }
+
+  return context;
 }

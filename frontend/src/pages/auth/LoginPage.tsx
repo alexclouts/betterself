@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../services/authService";
 import { useAuthStore } from "../../stores/authStore";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
@@ -12,6 +13,7 @@ export function LoginPage() {
     const navigate = useNavigate();
     const setAuth = useAuthStore((state) => state.setAuth);
 
+    
     // États du formulaire
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -19,6 +21,9 @@ export function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Récupère la fonction pour rafraîchir le statut de l'onboarding utilisateur.
+    const { refreshStatus } = useOnboarding();
 
     async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -29,11 +34,22 @@ export function LoginPage() {
             const response = await login({ email, password });
             setAuth(response.access_token);
 
-            navigate("/", { replace: true });
+            try {
+                const onboardingStatus = await refreshStatus();
+                // Redirige l'utilisateur en fonction de l'état de l'onboarding.
+                navigate(
+                    onboardingStatus.isComplete ? "/" : "/onboarding",
+                    { replace: true }
+                );
+            } catch {
+                // Si la vérification du statut de l'onboarding échoue, on affiche un message d'erreur.
+                setError(
+                    "Connexion réussie, mais impossible de vérifier votre onboarding. Réessayez."
+                );
+            }
         } catch {
-            setError(
-                "Le courriel ou le mot de passe est invalide."
-            );
+            // Si la connexion échoue, on affiche un message d'erreur.
+            setError("Impossible de vous connecter. Vérifiez vos identifiants.");
         } finally {
             setIsSubmitting(false);
         }
