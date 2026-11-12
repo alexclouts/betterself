@@ -1,16 +1,33 @@
+---
+title: "Finaliser le backend"
+header: ""
+date: 2026-11-11T00:22:44.000Z
+description: "Réflexions sur la structure du projet et début de conception du frontend."
+tags:
+  - Architecture
+  - IA
+  - Backend
+  - Frontend
+  - Alembic
+  - Onboarding
+  - Vidéo
+categories:
+  - Développement
+---
+
 {{< img
 src="preview.png"
 alt="Preview"
 caption=""
 width="500">}}
 
-1. Parler des tests d'intégration.
-2. Service de On Boarding pour vérifier que l'utilisateur l'a terminé et mettre a jour les données dans les tables.
-3. L'enjeu de travailler avec l'IA: Exemple de contre-vérification du code - screenshot1
-4. Gestion de l'opération commit() dans ma base de données.
-5. Erreur lors de la migration de la base de données avec Alembic.
+# Finaliser le backend
 
-#### _Question :_ Je crois avoir fait le tour des fonctionnalités principales. Maintenant j'ai un questionnement concernant le processus end-to-end de l'application. Une des vérifications qui pourrait être fait pour valider que l'utilisateur a bien complété le processus de on boarding en entier est de valider que l'utilisateur a une entrée dans la table nutrition-goal. Maintenant, de quelle façon me suggères-tu d'effectuer cette vérification?
+Je suis maintenant rendu à finaliser les dernières composantes du backend. Celles-ci concernent surtout le processus de _Onboarding_ dans l'application. J'envisage, par exemple, de quelle manière nous allons vérifier que l'utilisateur a bien réussi son processus de Onboarding? Je suggère alors mon idée à l'IA pour qu'elle m'aide à identifier la meilleure approche pour la suite.
+
+## Conversation avec l'IA
+
+#### _Question :_ Je crois avoir fait le tour des fonctionnalités principales. Maintenant j'ai un questionnement concernant le processus end-to-end de l'application. Une des vérifications qui pourrait être fait pour valider que l'utilisateur a bien complété le processus de Onboarding en entier est de valider que l'utilisateur a une entrée dans la table nutrition-goal. Maintenant, de quelle façon me suggères-tu d'effectuer cette vérification?
 
 Ne vérifie pas l’onboarding uniquement par la présence d’une ligne dans `nutrition_goals`. Cette table prouve seulement qu’un objectif a été créé; elle ne garantit pas que le profil, la première mesure et la cible nutritionnelle existent aussi. La meilleure approche est un **statut d’onboarding calculé** à partir des prérequis réels.
 
@@ -50,9 +67,13 @@ Il retourne un objet simple, calculé à la volée :
 
 C’est preferable à un booléen stocké dans la base, car l’état peut changer : l’utilisateur peut supprimer une mesure, archiver un objectif ou modifier son profil.
 
+## Analyse
+
+J'ai donc orienté mon approche à partir de cette rétroaction. C'est de cette façon que j'ai construit le service de Onboarding.
+
 # Restructuration des fichiers
 
-En travaillant sur le service de _OnBoarding_, je me suis mis à reconsidérer certains aspects de mon architecture. Je trouvais que l'utilisation du mot `service` était peut-être inapproprié pour certains cas d'usage. J'ai donc voulu corriger cette confusion avant d'aller plus loin dans le projet.
+D'ailleurs, en travaillant sur le service de _OnBoarding_, je me suis mis à reconsidérer certains aspects de mon architecture. Pas plus tard que dans le dernier article, j'ai réitéré que je n'allais pas ajouter un fichier _repository_ pour l'instant. Par contre, je trouvais que l'utilisation du mot `service` était peut-être inapproprié pour certains cas d'usage. J'ai donc voulu corriger cette confusion avant d'aller plus loin dans le projet.
 
 #### _Question :_ Mon questionnement à présent concerne l'appelation de "service" pour les classes responsables de chaque objet associé à un modèle dans la base de données. Pour moi, un service est exactement ce que fait OnBoardingService ici, c'est-à-dire qu'il a une responsabilité isolé dans l'application qui a une utilité pour le frontend. Y aurait-il une meilleure appelation que Service pour, par exemple, Measurement ou NutritionGoal?
 
@@ -95,9 +116,13 @@ Pour éviter une refonte importante maintenant :
 
 Le nom `Service` n’est pas incorrect; il est simplement moins précis lorsque la classe ne fait que du CRUD. Dans ton cas, `OnboardingService`, `TargetService`, `RecipeService` et `ConsumptionService` méritent bien ce nom.
 
+## Analyse
+
+J'ai donc orienté mon code en conséquence. Des _repositories_ ont été créé pour les modèles avec seulement quelques opérations CRUD simples, et les services s'occupent des fonctions de logique. Cette refonte a été longue, mais c'était une itération nécessaire pour poursuivre sur de bonnes bases.
+
 # Les erreurs contextuelles de l'IA
 
-Je me suis rendu compte que l'IA me génère du travail puisqu'elle oublie les conversations précédentes. Ce genre de problème est ce qui rend important mon rôle de contre-vérificateur du code qu'elle propose. Par exemple, c'est le cas pour l'implémentation suivante qui m'a été suggéré. Bien que l'IA m'ait aidé à concevoir la table `measurements`, elle assume qu'un paramètre `height_cm` s'y trouve alors que ce n'est pas le cas, ce qui va générer un message d'erreur lors de la compilation.
+Je me suis rendu compte également que l'une des raisons pour laquelle c'est important de réviser le code est que l'IA oublie les conversations précédentes. Ce genre de problème est ce qui rend important notre rôle de contre-vérificateur. Par exemple, un exemple simple peut se trouver c'est le code qui m'a été suggéré :
 
 {{< img
 src="screenshot1.png"
@@ -105,9 +130,11 @@ alt="Screenshot"
 caption=""
 width="800">}}
 
+Bien que l'IA m'ait aidé à concevoir la table `measurements`, elle assume qu'un paramètre `height_cm` s'y trouve alors que ce n'est pas le cas, ce qui va générer un message d'erreur lors de la compilation.
+
 # La gestion des opérations commit
 
-En analysant le code que l'IA m'a suggéré pour l'implémentation du service de Onboarding, j'ai réalisé que l'opération `commit()` n'était pas présente dans les fonctions visant à sauvegarder les données transmises par le frontend. En discutant avec l'IA, elle a offert un raisonnement intéressant :
+C'est une découverte que j'ai fait en analysant le code de l'IA.Pour l'implémentation du service de Onboarding, j'ai réalisé que l'opération `commit()` n'était pas présente dans les fonctions visant à sauvegarder les données transmises par le frontend. En discutant avec l'IA, elle a offert un raisonnement intéressant :
 
 ## Conversation avec l'IA
 
@@ -133,6 +160,8 @@ Ainsi :
 
 get_db fait **un seul** `commit()` **par requête HTTP réussie**, après que le routeur a terminé et que FastAPI a produit la réponse. Ce n’est donc pas un commit par appel de repository, ni par objet ajouté.
 
+### Chemin logique
+
 ```
 Requête HTTP arrive
         ↓
@@ -155,11 +184,11 @@ db.close()
 
 ## Analyse
 
-Mon implémentation actuelle effectue les opérations `commit` directement dans les fonctions de repositories. J'ai donc apporté les modifications pour refléter ce changement.
+Mon implémentation actuelle effectue les opérations `commit` directement dans les fonctions de repositories. J'ai donc apporté les modifications pour refléter ce changement, ce qui a généré un paquet d'erreur lorsque j'ai voulu exécuter à nouveau les tests unitaires.
 
-### Le rôle de `flush`
+# Le rôle de `flush`
 
-En exécutant mes tests unitaires, je me suis rendu compte que des erreurs étaient générées :
+Assez rapidement, je me suis rendu compte que des erreurs étaient générées :
 
 ```
 E               fastapi.exceptions.ResponseValidationError: 2 validation errors:
@@ -170,7 +199,7 @@ E                 File "/home/alex/Documents/betterself/backend/src/betterself/r
 E                   POST /auth/register
 ```
 
-#### Les explications de l'IA
+## Les explications de l'IA
 
 Avec `flush()`, SQLAlchemy applique les valeurs par défaut Python — `generate_uuid` et `True` — puis envoie l’`INSERT` dans la transaction. L’objet `user` possède donc immédiatement :
 
@@ -181,9 +210,21 @@ user.is_active # True
 
 Le `commit()` reste toutefois responsable de rendre l’insertion permanente.
 
+## Analyse
+
+Cette distinction m'a permis de structurer ma base de données autour de cette idée. L'ajout permanent des entrées dans la base de données se fera uniquement lorsque l'utilisateur confirmera ses choix.
+
+# On s'attaque au frontend
+
+C'est ici que je commence à construire mon frontend.
+
+{{< alert info >}}
+J'ai plus tard appris que plusieurs fonctionnalités du backend par rapport au service de _Onboarding_ étaient manquantes, donc j'ai dû faire quelques modifications au backend après avoir configuré les premières interfaces, mais on y reviendra !
+{{< /alert >}}
+
 # Erreur de migration Alembic
 
-En testant les fonctionnalités de l'application, j'ai voulu me créer un compte, mais une erreur SQL s'est affiché quand j'ai tenté de m'inscrire.
+Il s'agit d'un cas de _troubleshooting_ que j'ai rencontré en testant les fonctionnalités de l'application. En essayant de me créer un compte, une erreur SQL s'est affiché quand j'ai tenté de m'inscrire.
 
 {{< img
 src="screenshot2.png"
@@ -195,7 +236,7 @@ Cette fonctionnalité avait déjà été testé auparavant lorsque j'ai dévelop
 
 #### _Question :_ Voici une erreur qui s'affiche lorsque je tente de me créer un compte dans l'application [...]. Ce genre d'erreur ne devrait pas s'afficher à l'utilisateur en production.
 
-L'IA m'a expliqué que l'erreur était certainement dû au fait que la table `users` n'existe pas dans la base SQLIte utilisée par l'application. Elle m'a donc suggéré de vérifier que la base était créée au démarrage avec _Alembic_. En voulant effectuer la migration, j'ai été exposé à ce problème :
+L'IA m'a expliqué que l'erreur était certainement dû au fait que la table `users` n'existe pas dans la base SQLite utilisée par l'application. Elle m'a donc suggéré de vérifier que la base était créée au démarrage avec _Alembic_. En voulant effectuer la migration, j'ai été exposé à ce problème :
 
 {{< img
 src="screenshot3.png"
@@ -254,3 +295,7 @@ async def database_exception_handler(
         },
     )
 ```
+
+Voilà pour cette partie du projet. Vous pouvez consulter la [Vidéo 4: Processus du Onboarding](https://www.youtube.com/watch?v=sD8Af65OU6c) pour les explications en lien avec la structure du frontend.
+
+Les prochains articles s'attarderont à la suite du développement du frontend, où je configure Axios pour les services d'API et où j'automatise la synchronisation des endpoints entre le backend et le frontend avec OpenAPI et Orval.
