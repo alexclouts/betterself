@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from betterself.prefix import MEASUREMENTS_URL
 import pytest
 from tests.utils import TEST_USER_EMAIL, TEST_USER_PASSWORD, auth_headers, register_and_login, register_and_login_other_user
 
@@ -85,7 +86,7 @@ def test_new_measurement_unauthorized(client):
 def test_new_measurement_missing_date(client):
     access_token = register_and_login(client)
     response = client.post(
-        "/measurements",
+        MEASUREMENTS_URL,
         json={"weight_kg": 75},
         headers=auth_headers(access_token),
     )
@@ -96,7 +97,7 @@ def test_new_measurement_missing_date(client):
 def test_new_measurement_missing_weight(client):
     access_token = register_and_login(client)
     response = client.post(
-        "/measurements",
+        MEASUREMENTS_URL,
         json={"date": str(date.today())},
         headers=auth_headers(access_token),
     )
@@ -128,7 +129,7 @@ def test_new_measurement_weight_too_low(client):
 def test_new_measurement_invalid_date_format(client):
     access_token = register_and_login(client)
     response = client.post(
-        "/measurements",
+        MEASUREMENTS_URL,
         json={
             "date": "invalid-date",
             "weight_kg": 75,
@@ -167,7 +168,7 @@ def test_list_measurements(client):
     create_measurement(client, access_token, date.today(), 80)
 
     response = client.get(
-        "/measurements",
+        MEASUREMENTS_URL,
         headers=auth_headers(access_token),
     )
     assert response.status_code == 200
@@ -180,7 +181,7 @@ def test_list_measurements(client):
 
 # Test pour vérifier que la récupération de la liste sans authentification échoue
 def test_list_measurements_unauthorized(client):
-    response = client.get("/measurements")
+    response = client.get(MEASUREMENTS_URL)
     assert response.status_code == 401
 
 
@@ -188,7 +189,7 @@ def test_list_measurements_unauthorized(client):
 def test_list_measurements_empty(client):
     access_token = register_and_login(client)
     response = client.get(
-        "/measurements",
+        MEASUREMENTS_URL,
         headers=auth_headers(access_token),
     )
     assert response.status_code == 200
@@ -205,7 +206,7 @@ def test_list_measurements_by_date(client):
     create_measurement(client, access_token, date(2024, 9, 2), 85)
 
     response = client.get(
-        "/measurements?start_date=2024-06-01&end_date=2024-08-16",
+        f"{MEASUREMENTS_URL}?start_date=2024-06-01&end_date=2024-08-16",
         headers=auth_headers(access_token),
     )
     assert response.status_code == 200
@@ -327,7 +328,6 @@ def test_measurement_for_another_user(client, method, json_data):
 Tests pour la suppression d'une mesure.
 """
 
-
 # Test pour vérifier la suppression réussie d'une mesure existante
 def test_delete_measurement_success(client):
     access_token = register_and_login(client)
@@ -348,7 +348,6 @@ def test_delete_measurement_success(client):
 """
 Tests pour la mise à jour d'une mesure.
 """
-
 
 # Test pour vérifier la mise à jour du poids d'une mesure existante
 def test_update_measurement_weight_success(client):

@@ -1,12 +1,11 @@
 from betterself.core.database import get_db
 from betterself.core.dependencies import get_current_user
 from betterself.models.user_models import User
-from betterself.services.goal_service import GoalService
 from betterself.services.onboarding_service import OnboardingService
 from betterself.prefix import ONBOARDING_URL
 from betterself.routers.users_router import get_onboarding_service
 from fastapi import APIRouter, Depends, status
-from betterself.schemas.onboarding_schemas import OnboardingCreate, OnboardingStatusRead
+from betterself.schemas.onboarding_schemas import OnboardingCreate, OnboardingStatusRead, GoalPreviewRead
 
 router = APIRouter(prefix=ONBOARDING_URL, tags=["Onboarding"])
 
@@ -33,11 +32,20 @@ def complete_onboarding(
         "name": onboarding_data.name,
         "birthYear": onboarding_data.birth_year,
         "sex": onboarding_data.sex,
-        "goal": onboarding_data.goal,
+        "goal": onboarding_data.goal_type,
         "heightCm": onboarding_data.height_cm,
-        "weightKg": onboarding_data.weight_kg,
+        "currentWeightKg": onboarding_data.current_weight_kg,
+        "targetWeightKg": onboarding_data.target_weight_kg,
         "activityLevel": onboarding_data.activity_level,
     }
     service.save_onboarding(current_user, payload)
 
     return {"status": "onboarding_completed"}
+
+
+@router.post("/preview", response_model=GoalPreviewRead)
+def preview_goal(
+    payload: OnboardingCreate,
+    service: OnboardingService = Depends(get_onboarding_service),
+) -> GoalPreviewRead:
+    return service.preview_goal(goal_data=payload)

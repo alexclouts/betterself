@@ -1,9 +1,10 @@
 from datetime import date
 from decimal import Decimal
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-from betterself.models.goal_models import GoalType
+from betterself.models.goal_models import GoalType, GoalPace
 from betterself.core.validation import validate_date_not_future, validate_date_within_allowed_range
     
 

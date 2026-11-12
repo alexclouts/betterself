@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 from betterself.core.exceptions import RecordNotFound
-from betterself.models.goal_models import NutritionGoal
+from betterself.models.goal_models import GoalType, NutritionGoal
 from betterself.models.target_models import GoalTarget
 from betterself.repos.goal_repo import GoalRepository
 from betterself.repos.target_repo import TargetRepository
@@ -22,7 +22,6 @@ class GoalTargetCalculationError(Exception):
 Service pour la gestion des objectifs nutritionnels et des cibles associées.
 Fournit des méthodes pour récupérer, créer, mettre à jour et recalculer les objectifs et cibles nutritionnels.
 """
-
 class GoalService:
     def __init__(
         self,
@@ -115,7 +114,7 @@ class GoalService:
     # Calcule la cible nutritionnelle pour un objectif donné en fonction du poids de référence et des paramètres personnels.
     def calculate_goal_target(
         self,
-        goal: NutritionGoal,
+        goal_type: GoalType,
         reference_weight_kg: Decimal,
         *,
         sex: str,
@@ -128,9 +127,9 @@ class GoalService:
         age = date.today().year - birth_year
 
         # Calcul du métabolisme de base (BMR) en utilisant la formule de Mifflin-St Jeor.
-        if sex == "M":
+        if sex == "male":
             bmr = (10 * weight + 6.25 * height - 5 * age + 5)
-        elif sex == "F":
+        elif sex == "female":
             bmr = (10 * weight + 6.25 * height - 5 * age - 161)
         else:
             bmr = (10 * weight + 6.25 * height - 5 * age)
@@ -157,7 +156,7 @@ class GoalService:
             "body_recomposition": 0,
         }
         # Ajuste les calories en fonction de l'objectif nutritionnel.
-        calories_adjustment_kcal = calorie_adjustments[goal.goal_type.value]
+        calories_adjustment_kcal = calorie_adjustments[goal_type.value]
         calories_target_kcal = (maintenance_calories + calories_adjustment_kcal)
 
         if calories_target_kcal <= 0:
@@ -168,8 +167,7 @@ class GoalService:
         # Calcul des macronutriments cibles en fonction des calories cibles.
         protein_target = round(weight * 1.8)
         fat_target = round((calories_target_kcal * 0.25) / 9)
-        carbs_target = max(round((calories_target_kcal - protein_target * 4 - fat_target * 9) / 4), 0,)
-
+        carbs_target = max(round((calories_target_kcal - protein_target * 4 - fat_target * 9) / 4), 0)
         return {
             "maintenance_calories_kcal": maintenance_calories,
             "calories_target_kcal": calories_target_kcal,
@@ -190,7 +188,7 @@ class GoalService:
         goal = self.get_goal_or_404(user)
         today = date.today()
         # Récupère la cible active actuelle de l'utilisateur, le cas échéant.
-        active_target = self.target_repository.get_active_for_user(user)
+        active_target = self.target_repository.get_active_for_user(user.id)
 
         if active_target is not None:
             # Ferme la cible active actuelle avant de créer une nouvelle cible.
@@ -200,14 +198,13 @@ class GoalService:
             )
         # Calcule les nouvelles valeurs cibles en fonction des données fournies.
         calculated_values = self.calculate_goal_target(
-            goal=goal,
+            goal_type=goal.goal_type,
             reference_weight_kg=data.reference_weight_kg,
             sex=data.sex,
             birth_year=data.birth_year,
             height_cm=data.height_cm,
             activity_level=data.activity_level,
         )
-
         new_target = GoalTarget(
             user_id=user.id,
             valid_from=today,

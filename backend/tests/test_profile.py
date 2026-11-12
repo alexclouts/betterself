@@ -23,7 +23,7 @@ def test_get_user_profile_not_found(client):
 
     response = client.get(
         PROFILE_URL,
-        headers=auth_headers(access_token),
+        headers=auth_headers(access_token)
     )
     assert response.status_code == 404
 

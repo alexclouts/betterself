@@ -11,6 +11,8 @@ MEASUREMENTS_URL = "/measurements"
 AUTH_URL = "/auth"
 USERS_URL = "/users"
 TARGET_URL = "/nutrition-goal/current/target"
+ONBOARDING_URL = "/onboarding"
+PROFILE_URL = "/users/me/profile"
 
 
 """

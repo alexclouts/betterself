@@ -1,6 +1,10 @@
 from datetime import date, timedelta
-
+from decimal import ROUND_HALF_UP, Decimal
+from betterself.schemas.onboarding_schemas import GoalPreviewRead, GoalTimeline
+from betterself.schemas.onboarding_schemas import OnboardingCreate
 from betterself.services.goal_service import GoalService
+from fastapi import HTTPException
+from opentelemetry.trace import Status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from betterself.repos.profile_repo import UserProfileRepository
@@ -9,7 +13,7 @@ from betterself.repos.goal_repo import GoalRepository
 from betterself.repos.target_repo import TargetRepository
 
 from betterself.models.measurement_models import Measurement
-from betterself.models.goal_models import NutritionGoal
+from betterself.models.goal_models import GoalPace, GoalType, NutritionGoal
 from betterself.models.target_models import GoalTarget
 from betterself.models.user_models import User, UserProfile
 
@@ -173,7 +177,7 @@ class OnboardingService:
 
         # Récupère les calculs de la cible d'objectif en fonction des données d'onboarding.
         calculation = self.goal_service.calculate_goal_target(
-            goal=nutrition_goal,
+            goal_type=nutrition_goal,
             reference_weight_kg=onboarding_data["weightKg"],
             sex=onboarding_data["sex"],
             birth_year=onboarding_data["birthYear"],
@@ -190,3 +194,87 @@ class OnboardingService:
         goal_target.carbs_target_g = calculation["carbs_target_g"]
         goal_target.fat_target_g = calculation["fat_target_g"]
         goal_target.calculation_method = calculation["calculation_method"]
+
+
+    
+
+    """
+    Prévisualise l'objectif nutritionnel de l'utilisateur en fonction des données fournies.
+    """
+    def preview_goal(
+        self,
+        *,
+        goal_data: OnboardingCreate,
+    ) -> GoalPreviewRead:
+        # Calcule la timeline estimée pour l'objectif en fonction des données d'onboarding.
+        timeline = self.calculate_goal_timeline(onboarding=goal_data)
+
+        # Calcule la cible d'objectif nutritionnel
+        goal_target = self.goal_service.calculate_goal_target(
+            goal_type=goal_data.goal_type,
+            reference_weight_kg=goal_data.current_weight_kg,
+            sex=goal_data.sex,
+            birth_year=goal_data.birth_year,
+            height_cm=goal_data.height_cm,
+            activity_level=goal_data.activity_level,
+        )
+        return GoalPreviewRead(
+            goal_type=goal_data.goal_type,
+            current_weight_kg=goal_data.current_weight_kg,
+            target_weight_kg=goal_data.target_weight_kg,
+            pace=goal_data.pace,
+            estimated_weeks=timeline.estimated_weeks,
+            estimated_completion_date=timeline.target_date,
+            first_target_calories_kcal=goal_target["calories_target_kcal"],
+        )
+
+
+    """
+    Calcule la chronologie de l'objectif nutritionnel de l'utilisateur en fonction des données fournies.
+    """
+    def calculate_goal_timeline(
+        self,
+        onboarding: OnboardingCreate,
+        start_date: date | None = None,
+    ) -> GoalTimeline:
+        # Si l'objectif est de maintenir le poids, il n'y a pas de chronologie à calculer.
+        if onboarding.goal_type == GoalType.MAINTAIN_WEIGHT:
+            return GoalTimeline(
+                estimated_weeks=None,
+                target_date=None,
+            )
+
+        # Normalement vérifié par le validateur du schéma OnboardingCreate, mais on le re-vérifie ici pour la sécurité.
+        if onboarding.pace is None:
+            raise ValueError(
+                "Un rythme est requis pour les objectifs de perte de poids ou de gain musculaire."
+            )
+
+        start = start_date or date.today()
+
+        # Convertir les poids en Decimal pour des calculs précis.
+        starting_weight = Decimal(str(onboarding.current_weight_kg))
+        target_weight = Decimal(str(onboarding.target_weight_kg))
+
+        weight_difference = abs(target_weight - starting_weight)
+        weekly_change = WEEKLY_WEIGHT_CHANGE_KG[onboarding.pace]
+
+        # Calculer le nombre de semaines estimé pour atteindre l'objectif.
+        estimated_weeks = (weight_difference / weekly_change).quantize(
+            Decimal("0.1"),
+            rounding=ROUND_HALF_UP,
+        )
+        days = int((estimated_weeks * Decimal("7")).to_integral_value(rounding=ROUND_HALF_UP))
+        target_date = start + timedelta(days=days)
+
+        return GoalTimeline(
+            estimated_weeks=estimated_weeks,
+            target_date=target_date,
+        )
+
+# Dictionnaire des changements de poids hebdomadaires en fonction du rythme de l'objectif.
+WEEKLY_WEIGHT_CHANGE_KG = {
+    GoalPace.SLOW: Decimal("0.226796"),       # 0.5 lb / semaine
+    GoalPace.MODERATE: Decimal("0.453592"),   # 1 lb / semaine
+    GoalPace.AGGRESSIVE: Decimal("0.680389"), # 1.5 lb / semaine
+}

@@ -24,6 +24,12 @@ class GoalType(str, Enum):
     GAIN_MUSCLE = "gain_muscle"
     BODY_RECOMPOSITION = "body_recomposition"
 
+
+class GoalPace(str, Enum):
+    SLOW = "slow"
+    MODERATE = "moderate"
+    AGGRESSIVE = "aggressive"
+
 """
 Objectif nutritionnel d'un utilisateur.
 
