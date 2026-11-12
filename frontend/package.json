@@ -7,10 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:api": "orval --config ./orval.config.ts",
+    "api:export": "cd ../backend/src/betterself && python scripts/export_openapi.py",
+    "api:sync": "npm run api:export && npm run generate:api"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.107.1",
+    "axios": "^1.21.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.5",
@@ -27,6 +31,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17.12.0",
+    "orval": "^8.47.0",
     "tailwindcss": "^4.3.5",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.69.0",

@@ -1,7 +1,12 @@
+import logging
 import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 
 from betterself.core.config import settings
 from betterself.routers.auth_router import router as auth_router
@@ -13,6 +18,7 @@ from betterself.routers.recipe_router import router as recipes_router
 from betterself.routers.consumption_router import router as consumptions_router
 from betterself.routers.onboarding_router import router as onboarding_router
 
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     tittle="BetterSelf API",
@@ -25,13 +31,12 @@ allowed_origins = os.getenv(
     "http://localhost:8080,http://127.0.0.1:8080",
 ).split(",")
 
-print("CORS origins réellement utilisées :", allowed_origins)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -49,3 +54,23 @@ app.include_router(consumptions_router)
 @app.get("/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+"""
+@app.exception_handler(SQLAlchemyError)
+async def database_exception_handler(
+    request: Request,
+    exc: SQLAlchemyError,
+) -> JSONResponse:
+    logger.exception(
+        "Database error while handling %s %s",
+        request.method,
+        request.url.path,
+    )
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Une erreur interne est survenue. Réessayez plus tard."
+        },
+    )
+"""

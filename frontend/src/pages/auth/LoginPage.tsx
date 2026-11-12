@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../services/authService";
 import { useAuthStore } from "../../stores/authStore";
-import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useOnboarding } from "../../context/OnboardingContext";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";

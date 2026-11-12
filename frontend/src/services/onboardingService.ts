@@ -1,3 +1,8 @@
+import type { GoalPace, OnboardingStatusResponse } from "../context/OnboardingContext";
+import { getOnboarding } from "../api/generated/onboarding/onboarding";
+import { getErrorMessage } from "../api/axios";
+import type { GoalType } from "../api/generated/goalType";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 /**
@@ -6,30 +11,30 @@ const API_URL = import.meta.env.VITE_API_URL;
 export const onboardingService = {
     // Complète l'onboarding de l'utilisateur avec les informations fournies.
     async completeOnboarding(payload: {
-        goal: string;
+        goal: GoalType;
+        pace: GoalPace;
         name: string;
         birthYear: string;
         sex: string;
         heightCm: number;
-        weightKg: number;
+        currentWeightKg: number;
+        targetWeightKg: number;
     }) {
-        const token = localStorage.getItem("access_token");
-
-        // Fait parvenir les données d'onboarding à l'API.
-        const response = await fetch(`${API_URL}/onboarding`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const data = await response.json().catch(() => null);
-            throw new Error(data?.detail ?? `Erreur ${response.status}`);
+        try {
+            const { completeOnboardingOnboardingPost } = getOnboarding();
+            await completeOnboardingOnboardingPost(payload);
         }
-        return response.json();
-    },
+        catch (error) {
+            throw new Error(getErrorMessage(error, "Impossible de compléter l’onboarding."));
+        }
+    }
 };
+
+export async function getOnboardingStatus(): Promise<OnboardingStatusResponse> {
+    try {
+        const { getOnboardingStatusOnboardingStatusGet } = getOnboarding();
+        return await getOnboardingStatusOnboardingStatusGet();
+    } catch (error) {
+        throw new Error(getErrorMessage(error, "Impossible de récupérer le statut d’onboarding."));
+    }
+}

@@ -24,7 +24,6 @@ class GoalType(str, Enum):
     GAIN_MUSCLE = "gain_muscle"
     BODY_RECOMPOSITION = "body_recomposition"
 
-
 """
 Objectif nutritionnel d'un utilisateur.
 

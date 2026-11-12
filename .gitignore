@@ -15,5 +15,8 @@ blod/ExampleSite
 
 
 backend/src/betterself/core/config.py
-
 backend/reports/
+backend/node_modules
+
+# Ignorer les fichiers générés par Orval (client API)
+frontend/src/api/generated/

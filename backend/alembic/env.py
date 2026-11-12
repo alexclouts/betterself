@@ -14,6 +14,12 @@ from betterself.core.config import settings
 from betterself.core.database import Base
 from betterself.models.user_models import User
 from betterself.models.measurement_models import Measurement
+from betterself.models.goal_models import NutritionGoal
+from betterself.models.food_models import Food
+from betterself.models.recipe_models import Recipe
+from betterself.models.consumption_models import FoodConsumption
+from betterself.models.target_models import GoalTarget
+from betterself.models.profile_models import UserProfile
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -54,6 +60,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        render_as_batch=True,
         dialect_opts={"paramstyle": "named"},
     )
 

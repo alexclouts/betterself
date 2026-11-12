@@ -7,13 +7,21 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 
-import { api } from "@/lib/api";
+import { useAuthStore } from "../stores/authStore";
+import { getOnboardingStatus } from "../services/onboardingService";    
+import { api } from "../api/axios";
 
-// Types et contexte pour la gestion de l'onboarding utilisateur.
-export type Goal =
+
+// Types et contexte pour la gestion de l'onboarding utilisateur.a
+export type GoalType =
   | "lose_weight"
   | "maintain_weight"
   | "gain_muscle";
+
+export type GoalPace =
+  | "slow"
+  | "moderate"
+  | "aggressive";
 
 export type ActivityLevel =
   | "sedentary"
@@ -38,12 +46,14 @@ export type OnboardingStatusResponse = {
 
 // Données collectées lors de l'onboarding utilisateur.
 export type OnboardingData = {
-    goal: Goal | "";
-    name: string;
+    goal: GoalType | "";
+    pace: GoalPace | "";
+    firstName: string;
     birthYear: string;
     sex: Sex | "";
     heightCm: string;
-    weightKg: string;
+    currentWeightKg: string;
+    targetWeightKg: string;
     activityLevel: ActivityLevel | "";
 };
 
@@ -74,11 +84,13 @@ type OnboardingContextValue = {
 // Valeurs initiales pour l'onboarding utilisateur.
 const initialData: OnboardingData = {
     goal: "",
-    name: "",
+    pace: "",
+    firstName: "",
     birthYear: "",
     sex: "",
     heightCm: "",
-    weightKg: "",
+    currentWeightKg: "",
+    targetWeightKg: "",
     activityLevel: "",
 };
 
@@ -112,29 +124,43 @@ export function OnboardingProvider({
         []
     );
 
-    // Rafraîchit le statut de l'onboarding utilisateur.
+        // Rafraîchit le statut de l'onboarding utilisateur.
     const refreshStatus = useCallback(async (): Promise<OnboardingStatus> => {
+        const accessToken = useAuthStore.getState().accessToken;
+
+        if (!accessToken) {
+            throw new Error("Utilisateur non authentifié.");
+        }
+
         setIsLoadingStatus(true);
         setError(null);
 
         try {
-            const response = await api.get<OnboardingStatusResponse>("/onboarding/status");
+            const response = await getOnboardingStatus(accessToken);
 
             const nextStatus: OnboardingStatus = {
-                isComplete: response.data.is_complete,
-                missingSteps: response.data.missing_steps
-            };
+                isComplete: response.is_complete,
+                missingSteps: response.missing_steps,
+        };
 
-            setStatus(nextStatus);
-            return nextStatus;
+        setStatus(nextStatus);
 
+        return nextStatus;
         } catch (error) {
-            setError("Impossible de récupérer le statut de l’onboarding.");
+            setError(
+                error instanceof Error
+                ? error.message
+                : "Impossible de récupérer l'état de l'onboarding."
+            );
+
             throw error;
         } finally {
             setIsLoadingStatus(false);
         }
-    }, []);
+        },
+  []
+);
+
 
     // Soumet les informations du profil utilisateur.
     const submitProfile = useCallback(async () => {
@@ -143,15 +169,13 @@ export function OnboardingProvider({
 
         try {
             await api.post("/profiles", {
-                first_name: data.name,
+                first_name: data.firstName,
                 year_of_birth: Number(data.birthYear),
                 sex: data.sex,
                 height_cm: Number(data.heightCm),
                 activity_level: data.activityLevel,
             });
-
             await refreshStatus();
-
             return true;
         } catch {
             setError("Impossible d'enregistrer votre profil.");

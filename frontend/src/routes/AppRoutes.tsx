@@ -2,8 +2,9 @@
 import { Route, Routes } from "react-router-dom";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
-import { ProtectedRoute } from "./ProtectedRoute";
+import { ProtectedRoute } from "../routes/ProtectedRoutes";
 import { HomePage } from "../pages/home/HomePage";
+import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 
 export function AppRoutes() {
     return (
@@ -15,6 +16,7 @@ export function AppRoutes() {
             {/* Routes protégées nécessitant une authentification */}
             <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
             </Route>
         </Routes>
     );

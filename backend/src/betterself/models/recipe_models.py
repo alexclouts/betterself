@@ -19,6 +19,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from betterself.core.database import Base
+from betterself.models.food_models import Food
 
 """
 Recette créée par un utilisateur.

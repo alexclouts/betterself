@@ -1,5 +1,6 @@
 // src/stores/authStore.ts
 import { create } from "zustand";
+import { setAccessToken, clearAccessToken, getAccessToken } from "../lib/auth";
 
 // Store pour gérer l'authentification de l'utilisateur (token d'accès).
 type AuthState = {
@@ -10,15 +11,15 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>((set) => ({
     // On initialise le token d'accès à partir du localStorage si disponible.
-    accessToken: localStorage.getItem("betterSelf.accessToken"),
+    accessToken: getAccessToken(),
 
     // Méthode pour définir le token d'accès et le stocker dans le localStorage.
     setAuth: (token) => {
-        localStorage.setItem("betterSelf.accessToken", token);
+        setAccessToken(token);
         set({ accessToken: token });
     },
     clearAuth: () => {
-        localStorage.removeItem("betterSelf.accessToken");
+        clearAccessToken();
         set({ accessToken: null });
     },
 }));

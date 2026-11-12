@@ -8,6 +8,7 @@ width="500">}}
 2. Service de On Boarding pour vérifier que l'utilisateur l'a terminé et mettre a jour les données dans les tables.
 3. L'enjeu de travailler avec l'IA: Exemple de contre-vérification du code - screenshot1
 4. Gestion de l'opération commit() dans ma base de données.
+5. Erreur lors de la migration de la base de données avec Alembic.
 
 #### _Question :_ Je crois avoir fait le tour des fonctionnalités principales. Maintenant j'ai un questionnement concernant le processus end-to-end de l'application. Une des vérifications qui pourrait être fait pour valider que l'utilisateur a bien complété le processus de on boarding en entier est de valider que l'utilisateur a une entrée dans la table nutrition-goal. Maintenant, de quelle façon me suggères-tu d'effectuer cette vérification?
 
@@ -179,3 +180,77 @@ user.is_active # True
 ```
 
 Le `commit()` reste toutefois responsable de rendre l’insertion permanente.
+
+# Erreur de migration Alembic
+
+En testant les fonctionnalités de l'application, j'ai voulu me créer un compte, mais une erreur SQL s'est affiché quand j'ai tenté de m'inscrire.
+
+{{< img
+src="screenshot2.png"
+alt="Screenshot"
+caption=""
+width="500">}}
+
+Cette fonctionnalité avait déjà été testé auparavant lorsque j'ai développé les premières pages du frontend, donc j'ai questionné l'IA afin de comprendre ce qui était la cause possible. De plus, afficher publiquement une erreur SQL est une faille de sécurité que je devrai adresser lorsque le problème sera résolu.
+
+#### _Question :_ Voici une erreur qui s'affiche lorsque je tente de me créer un compte dans l'application [...]. Ce genre d'erreur ne devrait pas s'afficher à l'utilisateur en production.
+
+L'IA m'a expliqué que l'erreur était certainement dû au fait que la table `users` n'existe pas dans la base SQLIte utilisée par l'application. Elle m'a donc suggéré de vérifier que la base était créée au démarrage avec _Alembic_. En voulant effectuer la migration, j'ai été exposé à ce problème :
+
+{{< img
+src="screenshot3.png"
+alt="Screenshot"
+caption=""
+width="800">}}
+
+## Conversation avec l'IA
+
+L’erreur vient de SQLite : il ne supporte pas `ALTER TABLE ... ALTER COLUMN ... TYPE UUID`. Alembic a généré une migration PostgreSQL-style, mais ta base de développement est SQLite; il faut utiliser le mode **batch** d’Alembic, qui recrée la table plutôt que de tenter un `ALTER COLUMN`. Le mode batch recrée la table avec la nouvelle définition, copie les données, puis supprime l’ancienne table. C’est la méthode recommandée par Alembic pour SQLite.
+
+### Si la base est de développement
+
+Comme il s’agit d’une base SQLite locale et probablement sans données importantes, la solution la plus simple est souvent de repartir d’une base propre :
+
+```bash
+rm -f betterself.db
+rm -rf alembic/versions/*
+uv run alembic revision --autogenerate -m "V1_database_mvp"
+uv run alembic upgrade head
+```
+
+Attention : cette dernière commande supprime l’historique de migrations. Ne le fais que sur une base de développement, jamais en production sans sauvegarde.
+
+## Analyse
+
+Étant donné que ma base de donnée n'avait pas encore été migré depuis que tous les modèles sont construits, j'ai opté pour la solution la plus simple, soit de supprimer les versions _Alembic_ pour repartir à neuf.
+Par exemple, j'ai à nouveau rencontré un problème en voulant `commit` mes tables.
+
+```
+sqlalchemy.exc.NoReferencedTableError: Foreign key associated with column 'recipe_ingredients.food_id' could not find table 'foods' with which to generate a foreign keyto target column 'id'
+```
+
+### Solution
+
+Finalement, la solution à mon problème était que le modèle de `Food` n'était pas importé dans mon fichier `recipe_models.py`. Cet ajout m'a permis d'effectuer la migration de la base de données sans rencontrer d'erreur.
+
+De plus, j'ai ajouté une fonction afin de gérer les exceptions lancées par la base de données SQL lorsqu'elle rencontre une erreur interne au lieu d'exposer des informations sensibles sur la table :
+
+```python
+@app.exception_handler(SQLAlchemyError)
+async def database_exception_handler(
+    request: Request,
+    exc: SQLAlchemyError,
+) -> JSONResponse:
+    logger.exception(
+        "Database error while handling %s %s",
+        request.method,
+        request.url.path,
+    )
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Une erreur interne est survenue. Réessayez plus tard."
+        },
+    )
+```

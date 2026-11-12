@@ -36,8 +36,8 @@
   --primary-dark: #059669;
   --primary-light: #d1fae5;
 
-  --secondary: #ed6e44;
-  --secondary-dark: #e95320;
+  --secondary: #f0683a;
+  --secondary-dark: #d65930;
   --secondary-light: #e0e7ff;
 
   --danger: #dc2626;
@@ -81,12 +81,12 @@
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
-    --primary: #06a472;
+    --primary: #02ac77;
     --primary-dark: #059669;
     --primary-light: #d1fae5;
 
-    --secondary: #e95320;
-    --secondary-dark: #e95320;
+    --secondary: #e95c2d;
+    --secondary-dark: #cc4a1f;
     --secondary-light: #e0e7ff;
   }
 
@@ -131,10 +131,10 @@ h1 {
   }
 }
 h2 {
-  font-size: 24px;
+  font-size: 32px;
   line-height: 118%;
   letter-spacing: -0.24px;
-  margin: 0 0 8px;
+  margin: 16px 0;
   @media (max-width: 1024px) {
     font-size: 20px;
   }
