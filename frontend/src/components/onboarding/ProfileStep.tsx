@@ -12,16 +12,16 @@ export function ProfileStep({
   onNext,
   isSubmitting = false,
 }: ProfileStepProps) {
-  const { data, updateData } = useOnboarding();
+  const { form, updateForm } = useOnboarding();
 
   const isFormValid =
-    data.firstName.trim().length > 0 &&
-    data.birthYear !== "" &&
-    data.sex !== "" &&
-    data.heightCm !== "" &&
-    data.activityLevel !== "";
+    form.firstName.trim().length > 0 &&
+    form.birthYear !== "" &&
+    form.sex !== "" &&
+    form.heightCm !== "" &&
+    form.activityLevel !== "";
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!isFormValid || isSubmitting) {
@@ -51,9 +51,9 @@ export function ProfileStep({
         <Input
           id="firstName"
           name="firstName"
-          value={data.firstName}
+          value={form.firstName}
           onChange={(e) =>
-            updateData({
+            updateForm({
               firstName: e.target.value,
             })
           }
@@ -75,9 +75,9 @@ export function ProfileStep({
           type="number"
           min={1900}
           max={new Date().getFullYear()}
-          value={data.birthYear}
+          value={form.birthYear}
           onChange={(e) =>
-            updateData({
+            updateForm({
               birthYear: e.target.value,
             })
           }
@@ -96,10 +96,10 @@ export function ProfileStep({
         <Select
           id="sex"
           name="sex"
-          value={data.sex}
+          value={form.sex}
           onChange={(e) =>
-            updateData({
-              sex: e.target.value as typeof data.sex,
+            updateForm({
+              sex: e.target.value as typeof form.sex,
             })
           }
           required
@@ -136,9 +136,9 @@ export function ProfileStep({
           type="number"
           min={100}
           max={250}
-          value={data.heightCm}
+          value={form.heightCm}
           onChange={(e) =>
-            updateData({
+            updateForm({
               heightCm: e.target.value,
             })
           }
@@ -157,10 +157,10 @@ export function ProfileStep({
         <Select
           id="activityLevel"
           name="activityLevel"
-          value={data.activityLevel}
+          value={form.activityLevel}
           onChange={(e) =>
-            updateData({
-              activityLevel: e.target.value as typeof data.activityLevel,
+            updateForm({
+              activityLevel: e.target.value as typeof form.activityLevel,
             })
           }
           required

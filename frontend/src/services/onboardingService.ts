@@ -14,7 +14,7 @@ export async function getOnboardingStatus(): Promise<OnboardingStatusRead> {
   try {
         const { getOnboardingStatusOnboardingStatusGet } = getOnboarding();
         const response = await getOnboardingStatusOnboardingStatusGet();
-    return response.data;
+    return response;
   } catch (error) {
     throw new Error(
       getErrorMessage(
@@ -32,7 +32,7 @@ export async function getGoalPreview(
   try {
     const { previewGoalOnboardingPreviewPost } = getOnboarding();
     const response = await previewGoalOnboardingPreviewPost(payload);
-    return response.data;
+    return response;
   } catch (error) {
     throw new Error(
       getErrorMessage(
@@ -50,7 +50,7 @@ export async function completeOnboarding(
   try {
     const { completeOnboardingOnboardingPost } = getOnboarding();
     const response = await completeOnboardingOnboardingPost(payload);
-    return response.data;
+    return response;
 
   } catch (error) {
     throw new Error(

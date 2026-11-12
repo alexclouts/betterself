@@ -61,6 +61,7 @@ type OnboardingContextValue = {
     resetOnboarding: () => void;
 };
 
+// État initial du formulaire d’onboarding.
 const initialForm: OnboardingFormState = {
   goalType: "",
   pace: "",
@@ -125,13 +126,10 @@ export function OnboardingProvider({
 
         } catch (caughtError) {
             const message =
-                caughtError instanceof Error
-                ? caughtError.message
-                : "Impossible de récupérer l’état de l’onboarding.";
+                caughtError instanceof Error? caughtError.message: "Impossible de récupérer l’état de l’onboarding.";
 
             setError(message);
-
-        throw caughtError;
+            throw caughtError;
         } finally {
             setIsLoadingStatus(false);
         }
@@ -151,13 +149,11 @@ export function OnboardingProvider({
 
         } catch (caughtError) {
             const message =
-                caughtError instanceof Error
-                ? caughtError.message
-                : "Impossible de calculer l’aperçu de votre objectif.";
+                caughtError instanceof Error? caughtError.message: "Impossible de calculer l’aperçu de votre objectif.";
 
             setError(message);
-
             throw caughtError;
+
         } finally {
             setIsSubmitting(false);
         }

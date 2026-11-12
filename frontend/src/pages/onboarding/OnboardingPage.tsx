@@ -93,12 +93,6 @@ export function OnboardingPage() {
         </p>
       </header>
 
-      {error ? (
-        <p className="onboarding-error" role="alert">
-          {error}
-        </p>
-      ) : null}
-
       <section className="onboarding-content">
         {currentStep === "profile" ? (
           <ProfileStep

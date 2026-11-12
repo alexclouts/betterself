@@ -38,10 +38,10 @@ export function LoginPage() {
                 const onboardingStatus = await refreshStatus();
                 // Redirige l'utilisateur en fonction de l'état de l'onboarding.
                 navigate(
-                    onboardingStatus.isComplete ? "/" : "/onboarding",
+                    onboardingStatus.is_complete ? "/" : "/onboarding",
                     { replace: true }
                 );
-            } catch {
+            } catch(error) {
                 // Si la vérification du statut de l'onboarding échoue, on affiche un message d'erreur.
                 setError(
                     "Connexion réussie, mais impossible de vérifier votre onboarding. Réessayez."

@@ -1,5 +1,6 @@
 import { useOnboarding } from "../../context/OnboardingContext";
 import Button from "../../components/ui/Button";
+import Card from "../ui/Card";
 
 type ReviewStepProps = {
   onBack: () => void;
@@ -34,6 +35,7 @@ export function ReviewStep({
 }: ReviewStepProps) {
   const { goalPreview, form, error } = useOnboarding();
 
+  // Si l'aperçu de l'objectif n'est pas disponible, afficher un message d'erreur et un bouton de retour.
   if (!goalPreview) {
     return (
       <section className="space-y-4">
@@ -45,53 +47,84 @@ export function ReviewStep({
           L’aperçu de votre objectif n’est pas disponible.
           Retournez à l’étape précédente pour le générer.
         </p>
+
+        <Button
+          variant="secondary"
+          type="button"
+          className="font-bold mt-4 px-8"
+          onClick={onBack}
+          disabled={isSubmitting}
+        >
+          Retour
+        </Button>
       </section>
     );
   }
-
+  // Affichage du récapitulatif de l'onboarding.
   return (
     <section className="space-y-4">
       <h2 className="mb-4 text-2xl font-bold">
         Récapitulatif
       </h2>
+      <Card className="w-full p-6 bg-surface">
+        <ul className="space-y-2">
+          <li>
+            <strong>Prénom :</strong>{" "}
+            {form.firstName || "Non défini"}
+          </li>
 
-      <ul className="space-y-2 mt-10">
-        <li>
-          <strong>Prénom :</strong>{" "}
-          {form.firstName || "Non défini"}
-        </li>
+          <li>
+            <strong>Année de naissance :</strong>{" "}
+            {form.birthYear || "Non définie"}
+          </li>
 
-        <li>
-          <strong>Objectif :</strong>{" "}
-          {goalLabels[goalPreview.goal_type] || "Non défini"}
-        </li>
+          <li>
+            <strong>Sexe :</strong>{" "}
+            {sexLabels[form.sex] || "Non défini"}
+          </li>
 
-        <li>
-          <strong>Année de naissance :</strong>{" "}
-          {form.birthYear || "Non définie"}
-        </li>
+          <li>
+            <strong>Taille :</strong>{" "}
+            {form.heightCm || "Non définie"} cm
+          </li>
 
-        <li>
-          <strong>Sexe :</strong>{" "}
-          {sexLabels[form.sex] || "Non défini"}
-        </li>
+          <li>
+            <strong>Niveau d’activité :</strong>{" "}
+            {activityLabels[form.activityLevel] || "Non défini"}
+          </li>
 
-        <li>
-          <strong>Taille :</strong>{" "}
-          {form.heightCm || "Non définie"} cm
-        </li>
+          <li>
+            <strong>Objectif :</strong>{" "}
+            {goalLabels[goalPreview.goal_type] || "Non défini"}
+          </li>
 
-        <li>
-          <strong>Poids :</strong>{" "}
-          {form.currentWeightKg || "Non défini"} kg
-        </li>
+          <li>
+            <strong>Poids :</strong>{" "}
+            {form.currentWeightKg || "Non défini"} kg
+          </li>
 
-        <li>
-          <strong>Niveau d’activité :</strong>{" "}
-          {activityLabels[form.activityLevel] || "Non défini"}
-        </li>
-      </ul>
+          <li>
+            <strong>Poids cible :</strong>{" "}
+            {form.targetWeightKg || "Non défini"} kg
+          </li>
 
+          <li>
+            <strong>Calories quotidiennes cibles :</strong>{" "}
+            {goalPreview.first_target_calories_kcal || "Non défini"} kcal
+          </li>
+
+          <li>
+            <strong>Durée :</strong>{" "}
+            {goalPreview.estimated_weeks || "Non défini"} semaines
+          </li>
+
+          <li>
+            <strong>Date de fin :</strong>{" "}
+            {goalPreview.estimated_completion_date || "Non défini"}
+          </li>
+        </ul>
+      </Card>
+      {/* Affichage des erreurs éventuelles */}
       {error ? (
         <p role="alert">
           {error}

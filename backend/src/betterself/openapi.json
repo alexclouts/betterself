@@ -3126,9 +3126,16 @@
             "title": "Current Weight Kg"
           },
           "target_weight_kg": {
-            "type": "number",
-            "maximum": 300.0,
-            "minimum": 30.0,
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 300.0,
+                "minimum": 30.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Target Weight Kg"
           },
           "activity_level": {
@@ -3144,7 +3151,6 @@
           "sex",
           "height_cm",
           "current_weight_kg",
-          "target_weight_kg",
           "activity_level"
         ],
         "title": "OnboardingCreate"

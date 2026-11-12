@@ -24,7 +24,7 @@ class OnboardingCreate(BaseModel):
     sex: Sex
     height_cm: int = Field(ge=100, le=250)
     current_weight_kg: float = Field(ge=30, le=300)
-    target_weight_kg: float = Field(ge=30, le=300)
+    target_weight_kg: float | None = Field(default=None, ge=30, le=300)
     activity_level: ActivityLevel
 
     # Validateur pour s'assurer que les objectifs et les poids sont cohérents.
@@ -35,16 +35,22 @@ class OnboardingCreate(BaseModel):
                 raise ValueError(
                     "Un rythme ne doit pas être fourni pour un objectif de maintien."
                 )
-            if self.target_weight_kg != self.current_weight_kg:
+
+            if self.target_weight_kg is not None:
                 raise ValueError(
-                    "Le poids cible doit être égal au poids actuel pour un objectif de maintien."
-                )
+                "Un poids cible ne doit pas être fourni pour un objectif de maintien."
+            )
             return self
 
         if self.pace is None:
             raise ValueError(
                 "Un rythme est requis pour les objectifs de perte de poids ou de gain musculaire."
             )
+        if self.target_weight_kg is None:
+            raise ValueError(
+                "Un poids cible est requis pour les objectifs de perte de poids ou de gain musculaire."
+            )
+
         if self.goal_type == GoalType.LOSE_WEIGHT:
             if self.target_weight_kg >= self.current_weight_kg:
                 raise ValueError(
