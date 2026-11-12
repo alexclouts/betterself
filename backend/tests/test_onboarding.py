@@ -18,7 +18,7 @@ def make_onboarding_create_payload(
     return {
         "goal_type": goal_type,
         "pace": pace,
-        "name": "Test User",
+        "first_name": "Test User",
         "birth_year": 2000,
         "sex": "male",
         "height_cm": 180,

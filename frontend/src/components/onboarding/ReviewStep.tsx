@@ -32,7 +32,22 @@ export function ReviewStep({
   onFinish,
   isSubmitting = false,
 }: ReviewStepProps) {
-  const { data, error } = useOnboarding();
+  const { goalPreview, form, error } = useOnboarding();
+
+  if (!goalPreview) {
+    return (
+      <section className="space-y-4">
+        <h2 className="mb-4 text-2xl font-bold">
+          Récapitulatif
+        </h2>
+
+        <p className="text-sm text-red-600">
+          L’aperçu de votre objectif n’est pas disponible.
+          Retournez à l’étape précédente pour le générer.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-4">
@@ -43,37 +58,37 @@ export function ReviewStep({
       <ul className="space-y-2 mt-10">
         <li>
           <strong>Prénom :</strong>{" "}
-          {data.firstName || "Non défini"}
+          {form.firstName || "Non défini"}
         </li>
 
         <li>
           <strong>Objectif :</strong>{" "}
-          {goalLabels[data.goal] || "Non défini"}
+          {goalLabels[goalPreview.goal_type] || "Non défini"}
         </li>
 
         <li>
           <strong>Année de naissance :</strong>{" "}
-          {data.birthYear || "Non définie"}
+          {form.birthYear || "Non définie"}
         </li>
 
         <li>
           <strong>Sexe :</strong>{" "}
-          {sexLabels[data.sex] || "Non défini"}
+          {sexLabels[form.sex] || "Non défini"}
         </li>
 
         <li>
           <strong>Taille :</strong>{" "}
-          {data.heightCm || "Non définie"} cm
+          {form.heightCm || "Non définie"} cm
         </li>
 
         <li>
           <strong>Poids :</strong>{" "}
-          {data.weightKg || "Non défini"} kg
+          {form.currentWeightKg || "Non défini"} kg
         </li>
 
         <li>
           <strong>Niveau d’activité :</strong>{" "}
-          {activityLabels[data.activityLevel] || "Non défini"}
+          {activityLabels[form.activityLevel] || "Non défini"}
         </li>
       </ul>
 

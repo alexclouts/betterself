@@ -1,8 +1,4 @@
-import {
-  completeOnboardingOnboardingPost,
-  getOnboardingStatusOnboardingStatusGet,
-  previewGoalOnboardingPreviewPost
-} from "../api/generated/onboarding/onboarding";
+import { getOnboarding } from "../api/generated/onboarding/onboarding";
 
 import { getErrorMessage } from "../api/axios";
 
@@ -16,8 +12,9 @@ const DEFAULT_ERROR = "Une erreur est survenue.";
 // Récupère le statut actuel de l’onboarding.
 export async function getOnboardingStatus(): Promise<OnboardingStatusRead> {
   try {
-    const { data } = await getOnboardingStatusOnboardingStatusGet();
-    return data;
+        const { getOnboardingStatusOnboardingStatusGet } = getOnboarding();
+        const response = await getOnboardingStatusOnboardingStatusGet();
+    return response.data;
   } catch (error) {
     throw new Error(
       getErrorMessage(
@@ -33,8 +30,9 @@ export async function getGoalPreview(
   payload: OnboardingCreate,
 ): Promise<GoalPreviewRead> {
   try {
-    const { data } = await previewGoalOnboardingPreviewPost(payload);
-    return data;
+    const { previewGoalOnboardingPreviewPost } = getOnboarding();
+    const response = await previewGoalOnboardingPreviewPost(payload);
+    return response.data;
   } catch (error) {
     throw new Error(
       getErrorMessage(
@@ -48,16 +46,18 @@ export async function getGoalPreview(
 // Envoie les informations de l’onboarding pour le compléter.
 export async function completeOnboarding(
   payload: OnboardingCreate,
-): Promise<GoalPreviewRead> {
+): Promise<OnboardingStatusRead> {
   try {
-    const { data } = await completeOnboardingOnboardingPost(payload);
-    return data;
+    const { completeOnboardingOnboardingPost } = getOnboarding();
+    const response = await completeOnboardingOnboardingPost(payload);
+    return response.data;
+
   } catch (error) {
     throw new Error(
-      getErrorMessage(
-        error,
-        "Impossible de compléter l’onboarding.",
-      ),
+        getErrorMessage(  
+            error,
+            "Impossible de compléter l’onboarding.",
+        )
     );
   }
 }

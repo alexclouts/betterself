@@ -25,7 +25,7 @@ def complete_onboarding(
     onboarding_data: OnboardingCreate,
     current_user=Depends(get_current_user),
     db=Depends(get_db),
-):
+) -> OnboardingStatusRead:
     service = OnboardingService(db)
 
     payload = {
@@ -39,8 +39,10 @@ def complete_onboarding(
         "activityLevel": onboarding_data.activity_level,
     }
     service.save_onboarding(current_user, payload)
-
-    return {"status": "onboarding_completed"}
+    return OnboardingStatusRead(
+        is_complete=True,
+        missing_steps=[]
+    )
 
 
 @router.post("/preview", response_model=GoalPreviewRead)

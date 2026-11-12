@@ -30,7 +30,7 @@ export function OnboardingPage() {
   } = useOnboarding();
 
   useEffect(() => {
-    if (status?.isComplete) {
+    if (status?.is_complete) {
       navigate("/", { replace: true });
     }
   }, [status, navigate]);
@@ -121,7 +121,7 @@ export function OnboardingPage() {
             onFinish={async () => {
               const nextStatus = await refreshStatus();
 
-              if (nextStatus.isComplete) {
+              if (nextStatus.is_complete) {
                 navigate("/", { replace: true });
               }
             }}
