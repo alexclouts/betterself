@@ -10,6 +10,7 @@ from betterself.core.validation import validate_date_not_future, validate_date_w
 
 class NutritionGoalCreate(BaseModel):
     goal_type: GoalType = Field(example="lose_weight")
+    goal_pace: GoalPace = Field(example="moderate")
     
     start_weight_kg: Decimal = Field(gt=30, le=500)
     target_weight_kg: Decimal = Field(gt=30, le=500)
@@ -45,6 +46,7 @@ class NutritionGoalCreate(BaseModel):
 class NutritionGoalRead(BaseModel):
     user_id: UUID
     goal_type: GoalType
+    goal_pace: GoalPace
     start_weight_kg: Decimal
     target_weight_kg: Decimal | None
     start_date: date

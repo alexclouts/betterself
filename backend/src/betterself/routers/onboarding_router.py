@@ -28,17 +28,7 @@ def complete_onboarding(
 ) -> OnboardingStatusRead:
     service = OnboardingService(db)
 
-    payload = {
-        "name": onboarding_data.name,
-        "birthYear": onboarding_data.birth_year,
-        "sex": onboarding_data.sex,
-        "goal": onboarding_data.goal_type,
-        "heightCm": onboarding_data.height_cm,
-        "currentWeightKg": onboarding_data.current_weight_kg,
-        "targetWeightKg": onboarding_data.target_weight_kg,
-        "activityLevel": onboarding_data.activity_level,
-    }
-    service.save_onboarding(current_user, payload)
+    service.save_onboarding(current_user, onboarding_data)
     return OnboardingStatusRead(
         is_complete=True,
         missing_steps=[]

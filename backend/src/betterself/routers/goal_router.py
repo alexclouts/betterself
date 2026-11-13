@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from betterself.schemas.target_schemas import GoalTargetRead, GoalTargetRecalculate
+from betterself.schemas.target_schemas import GoalTargetCalculationInput, GoalTargetRead
 from betterself.services.goal_service import GoalService
 from betterself.core.database import get_db
 from betterself.core.exceptions import RecordNotFound
@@ -118,7 +118,7 @@ La cible précédente est fermée et conservée dans l'historique. La nouvelle c
 """
 @router.post(f"{TARGET_URL}/recalculate", response_model=GoalTargetRead, status_code=status.HTTP_201_CREATED)
 def recalculate_current_goal_target(
-    payload: GoalTargetRecalculate,
+    payload: GoalTargetCalculationInput,
     service: GoalService = Depends(get_goal_service),
     current_user: User = Depends(get_current_user),
 ) -> GoalTargetRead:

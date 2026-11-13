@@ -1,13 +1,17 @@
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Optional
 
 from betterself.core.exceptions import RecordNotFound
-from betterself.models.goal_models import GoalType, NutritionGoal
+from betterself.models.goal_models import GoalPace, GoalType, NutritionGoal
+from betterself.models.profile_models import UserProfile
 from betterself.models.target_models import GoalTarget
 from betterself.repos.goal_repo import GoalRepository
 from betterself.repos.target_repo import TargetRepository
 from betterself.schemas.goal_schemas import NutritionGoalCreate
-from betterself.schemas.target_schemas import GoalTargetRecalculate
+from betterself.schemas.onboarding_schemas import OnboardingCreate
+from betterself.schemas.profile_schemas import ActivityLevel, Sex
+from betterself.schemas.target_schemas import GoalTargetCalculationInput
 from betterself.models.user_models import User
 
 
@@ -17,6 +21,15 @@ class NutritionGoalAlreadyExistsError(Exception):
 
 class GoalTargetCalculationError(Exception):
     """La cible nutritionnelle ne peut pas être calculée."""
+
+CALORIES_PER_KG = Decimal("7700")
+
+WEEKLY_WEIGHT_CHANGE_KG = {
+    GoalPace.SLOW: Decimal("0.226796"),       # 0.5 lb / semaine
+    GoalPace.MODERATE: Decimal("0.453592"),   # 1 lb / semaine
+    GoalPace.AGGRESSIVE: Decimal("0.680389"), # 1.5 lb / semaine
+}
+
 
 """
 Service pour la gestion des objectifs nutritionnels et des cibles associées.
@@ -111,60 +124,100 @@ class GoalService:
         return target
 
 
+    # Calcule l'ajustement calorique quotidien en fonction du type d'objectif et du rythme.
+    # Lève une erreur si le calcul de l'ajustement calorique échoue.
+    def calculate_calorie_adjustment(
+        self,
+        *,
+        goal_type: GoalType,
+        pace: Optional[GoalPace],
+    ) -> int:
+        if goal_type == GoalType.MAINTAIN_WEIGHT:
+            # Pour un objectif de maintien du poids, l'ajustement calorique est nul.
+            if pace is not None:
+                raise GoalTargetCalculationError(
+                    "Le rythme ne doit pas être fourni pour un objectif de maintien."
+                )
+
+            return 0
+
+        if pace is None:
+            raise GoalTargetCalculationError(
+                "Le rythme est requis pour une perte de poids ou un gain musculaire."
+            )
+        # Calcule le changement de poids quotidien en fonction du rythme hebdomadaire.
+        weekly_weight_change_kg = WEEKLY_WEIGHT_CHANGE_KG[pace]
+
+        daily_weight_change_kg = (
+            weekly_weight_change_kg / Decimal("7")
+        )
+        # Calcule l'ajustement calorique quotidien en fonction du changement de poids quotidien.
+        daily_calorie_adjustment = (
+            daily_weight_change_kg * CALORIES_PER_KG
+        ).quantize(
+            Decimal("1"),
+            rounding=ROUND_HALF_UP,
+        )
+
+        # Retourne l'ajustement calorique en fonction du type d'objectif.
+        if goal_type == GoalType.LOSE_WEIGHT:
+            return -int(daily_calorie_adjustment)
+
+        if goal_type == GoalType.GAIN_MUSCLE:
+            return int(daily_calorie_adjustment)
+
+        raise GoalTargetCalculationError(
+            "Le type d’objectif n’est pas pris en charge pour le calcul "
+            "de l’ajustement calorique."
+        )
+
+
     # Calcule la cible nutritionnelle pour un objectif donné en fonction du poids de référence et des paramètres personnels.
+    # Lève une erreur si le calcul de la cible nutritionnelle échoue.
     def calculate_goal_target(
         self,
-        goal_type: GoalType,
-        reference_weight_kg: Decimal,
-        *,
-        sex: str,
-        birth_year: int,
-        height_cm: Decimal,
-        activity_level: str,
+        data: GoalTargetCalculationInput,
     ) -> dict:
-        weight = float(reference_weight_kg)
-        height = float(height_cm)
-        age = date.today().year - birth_year
-
-        # Calcul du métabolisme de base (BMR) en utilisant la formule de Mifflin-St Jeor.
-        if sex == "male":
-            bmr = (10 * weight + 6.25 * height - 5 * age + 5)
-        elif sex == "female":
-            bmr = (10 * weight + 6.25 * height - 5 * age - 161)
+        weight = float(data.reference_weight_kg)
+        height = float(data.height_cm)
+        age = date.today().year - data.birth_year
+        # Calcule l'âge de l'utilisateur à partir de l'année de naissance.
+        if data.sex == Sex.male:
+            bmr = 10 * weight + 6.25 * height - 5 * age + 5
+        elif data.sex == Sex.female:
+            bmr = 10 * weight + 6.25 * height - 5 * age - 161
         else:
-            bmr = (10 * weight + 6.25 * height - 5 * age)
+            bmr = 10 * weight + 6.25 * height - 5 * age
 
         activity_multipliers = {
-            "sedentary": 1.2,
-            "lightly_active": 1.375,
-            "moderately_active": 1.55,
-            "very_active": 1.725,
-            "extra_active": 1.9,
+            ActivityLevel.SEDENTARY: 1.2,
+            ActivityLevel.LIGHTLY_ACTIVE: 1.375,
+            ActivityLevel.MODERATELY_ACTIVE: 1.55,
+            ActivityLevel.VERY_ACTIVE: 1.725,
+            ActivityLevel.EXTREMELY_ACTIVE: 1.9,
         }
-        # Vérifie que le niveau d'activité physique est valide.
-        if activity_level not in activity_multipliers:
-            raise GoalTargetCalculationError(
-                "Le niveau d'activité physique est invalide."
-            )
-        # Calcul des calories de maintien en fonction du BMR et du niveau d'activité.
-        maintenance_calories = round(bmr * activity_multipliers[activity_level])
 
-        calorie_adjustments = {
-            "lose_weight": -500,
-            "maintain_weight": 0,
-            "gain_muscle": 300,
-            "body_recomposition": 0,
-        }
-        # Ajuste les calories en fonction de l'objectif nutritionnel.
-        calories_adjustment_kcal = calorie_adjustments[goal_type.value]
-        calories_target_kcal = (maintenance_calories + calories_adjustment_kcal)
+        if data.activity_level not in activity_multipliers:
+            raise GoalTargetCalculationError(
+                "Le niveau d’activité physique est invalide."
+            )
+
+        maintenance_calories = round(bmr * activity_multipliers[data.activity_level])
+        # Obtient l'ajustement calorique en fonction du type d'objectif et du rythme.
+        calories_adjustment_kcal = self.calculate_calorie_adjustment(
+            goal_type=data.goal_type,
+            pace=data.pace,
+        )
+
+        calories_target_kcal = (
+            maintenance_calories + calories_adjustment_kcal
+        )
 
         if calories_target_kcal <= 0:
             raise GoalTargetCalculationError(
                 "La cible calorique calculée est invalide."
             )
-
-        # Calcul des macronutriments cibles en fonction des calories cibles.
+        # Calcule les cibles en macronutriments en fonction des calories cibles et du poids de référence.
         protein_target = round(weight * 1.8)
         fat_target = round((calories_target_kcal * 0.25) / 9)
         carbs_target = max(round((calories_target_kcal - protein_target * 4 - fat_target * 9) / 4), 0)
@@ -183,9 +236,8 @@ class GoalService:
     def recalculate_goal_target(
         self,
         user: User,
-        data: GoalTargetRecalculate,
+        data: GoalTargetCalculationInput,
     ) -> GoalTarget:
-        goal = self.get_goal_or_404(user)
         today = date.today()
         # Récupère la cible active actuelle de l'utilisateur, le cas échéant.
         active_target = self.target_repository.get_active_for_user(user.id)
@@ -198,18 +250,16 @@ class GoalService:
             )
         # Calcule les nouvelles valeurs cibles en fonction des données fournies.
         calculated_values = self.calculate_goal_target(
-            goal_type=goal.goal_type,
-            reference_weight_kg=data.reference_weight_kg,
-            sex=data.sex,
-            birth_year=data.birth_year,
-            height_cm=data.height_cm,
-            activity_level=data.activity_level,
+            data
         )
+
         new_target = GoalTarget(
             user_id=user.id,
             valid_from=today,
             valid_until=None,
             reference_weight_kg=data.reference_weight_kg,
-            **calculated_values,
+            **calculated_values
         )
         return self.target_repository.add(new_target)
+
+

@@ -1,7 +1,10 @@
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Optional
 from uuid import UUID
 
+from betterself.models.goal_models import GoalType
+from betterself.schemas.profile_schemas import ActivityLevel, Sex
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -27,34 +30,15 @@ class GoalTargetRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
-"""
-Payload temporaire pour le recalcul d'une cible nutritionnelle.
-TODO: Lorsque la table `user_profiles` sera implémentée, seuls `reference_weight_kg` devrait rester dans ce payload. 
-Les paramètres biométriques seront récupérés depuis le profil de l'utilisateur.
-"""
-class GoalTargetRecalculate(BaseModel):
-    reference_weight_kg: Decimal = Field(
-        ge=30,
-        le=500,
-        examples=[85],
-    )
 
-    # Champs temporaires jusqu'à l'implémentation de user_profiles.
-    sex: str = Field(
-        examples=["M"],
-        description="Sexe utilisé pour le calcul du BMR.",
-    )
-    birth_year: int = Field(
-        ge=1900,
-        le=date.today().year,
-        examples=[1996],
-    )
-    height_cm: Decimal = Field(
-        ge=100,
-        le=250,
-        examples=[175],
-    )
-    activity_level: str = Field(
-        examples=["moderate"],
-        description="Niveau d'activité physique.",
-    )
+class GoalTargetCalculationInput(BaseModel):
+    goal_type: GoalType
+    pace: str
+    reference_weight_kg: Decimal
+    target_weight_kg: Optional[Decimal] = Field(default=None)
+    sex: Sex
+    birth_year: int
+    height_cm: Decimal
+    activity_level: ActivityLevel
+
+    model_config = {"from_attributes": True}

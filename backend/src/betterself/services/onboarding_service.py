@@ -2,8 +2,8 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from betterself.schemas.onboarding_schemas import GoalPreviewRead, GoalTimeline
 from betterself.schemas.onboarding_schemas import OnboardingCreate
-from betterself.services.goal_service import GoalService
-from fastapi import HTTPException
+from betterself.schemas.target_schemas import GoalTargetCalculationInput
+from betterself.services.goal_service import WEEKLY_WEIGHT_CHANGE_KG, GoalService
 from opentelemetry.trace import Status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -101,11 +101,11 @@ class OnboardingService:
         return target is not None
 
     # Enregistre les informations d'onboarding pour l'utilisateur.
-    def save_onboarding(self, user, onboarding_data: dict) -> None:
-        self._save_profile(user, onboarding_data)
-        self._save_measurement(user, onboarding_data)
-        self._save_nutrition_goal(user, onboarding_data)
-        self._save_goal_target(user, onboarding_data)
+    def save_onboarding(self, user, data: OnboardingCreate) -> None:
+        self._save_profile(user, data)
+        self._save_measurement(user, data)
+        self._save_nutrition_goal(user, data)
+        self._save_goal_target(user, data)
 
     
     # Sauvegarde les informations du profil utilisateur.
@@ -153,7 +153,7 @@ class OnboardingService:
     def _save_goal_target(
         self,
         user,
-        onboarding_data: dict,
+        data: OnboardingCreate,
     ) -> None:
         nutrition_goal = self.goal_repository.get_for_user(user.id)
 
@@ -177,16 +177,19 @@ class OnboardingService:
 
         # Récupère les calculs de la cible d'objectif en fonction des données d'onboarding.
         calculation = self.goal_service.calculate_goal_target(
-            goal_type=nutrition_goal,
-            reference_weight_kg=onboarding_data["weightKg"],
-            sex=onboarding_data["sex"],
-            birth_year=onboarding_data["birthYear"],
-            height_cm=onboarding_data["heightCm"],
-            activity_level=onboarding_data["activityLevel"],
+            GoalTargetCalculationInput(
+                goal_type=nutrition_goal.goal_type,
+                pace=data.pace,
+                reference_weight_kg=data.current_weight_kg,
+                sex=data.sex,
+                birth_year=data.birth_year,
+                height_cm=data.height_cm,
+                activity_level=data.activity_level,
+            )
         )
 
         # Met à jour les attributs de la cible d'objectif avec les calculs obtenus.
-        goal_target.reference_weight_kg = onboarding_data["weightKg"]
+        goal_target.reference_weight_kg = data.current_weight_kg
         goal_target.maintenance_calories_kcal = calculation["maintenance_calories_kcal"]
         goal_target.calories_target_kcal = calculation["calories_target_kcal"]
         goal_target.calories_adjustment_kcal = calculation["calories_adjustment_kcal"]
@@ -211,12 +214,15 @@ class OnboardingService:
 
         # Calcule la cible d'objectif nutritionnel
         goal_target = self.goal_service.calculate_goal_target(
-            goal_type=goal_data.goal_type,
-            reference_weight_kg=goal_data.current_weight_kg,
-            sex=goal_data.sex,
-            birth_year=goal_data.birth_year,
-            height_cm=goal_data.height_cm,
-            activity_level=goal_data.activity_level,
+            GoalTargetCalculationInput(
+                goal_type=goal_data.goal_type,
+                pace=goal_data.pace,
+                reference_weight_kg=goal_data.current_weight_kg,
+                sex=goal_data.sex,
+                birth_year=goal_data.birth_year,
+                height_cm=goal_data.height_cm,
+                activity_level=goal_data.activity_level
+            )
         )
         return GoalPreviewRead(
             goal_type=goal_data.goal_type,
@@ -271,10 +277,3 @@ class OnboardingService:
             estimated_weeks=estimated_weeks,
             target_date=target_date,
         )
-
-# Dictionnaire des changements de poids hebdomadaires en fonction du rythme de l'objectif.
-WEEKLY_WEIGHT_CHANGE_KG = {
-    GoalPace.SLOW: Decimal("0.226796"),       # 0.5 lb / semaine
-    GoalPace.MODERATE: Decimal("0.453592"),   # 1 lb / semaine
-    GoalPace.AGGRESSIVE: Decimal("0.680389"), # 1.5 lb / semaine
-}

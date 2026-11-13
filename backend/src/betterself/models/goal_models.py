@@ -57,6 +57,11 @@ class NutritionGoal(Base):
         nullable=False,
     )
 
+    goal_pace: Mapped[GoalPace] = mapped_column(
+        SAEnum(GoalPace, name="goal_pace"),
+        nullable=False,
+    )
+
     start_weight_kg: Mapped[Decimal] = mapped_column(
         Numeric(6, 2),
         nullable=False,

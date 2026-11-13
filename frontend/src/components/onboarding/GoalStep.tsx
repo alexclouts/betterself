@@ -48,7 +48,6 @@ export function GoalStep({
         form, 
         updateForm,
         previewGoal,
-        setCurrentStep,
         isSubmitting,
         error
     } = useOnboarding();
