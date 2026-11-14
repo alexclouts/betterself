@@ -33,7 +33,24 @@ export function ReviewStep({
   onFinish,
   isSubmitting = false,
 }: ReviewStepProps) {
-  const { goalPreview, form, error } = useOnboarding();
+  const { goalPreview, form, error, completeOnboarding } = useOnboarding();
+
+
+  const handleSubmit = async (
+    event: React.SubmitEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
+    try {
+      const nextStatus = await completeOnboarding();
+      if (nextStatus.is_complete) {
+        await onFinish();
+      }
+    } catch {
+      // L’erreur est déjà enregistrée dans le contexte.
+    }
+  };
+  
 
   // Si l'aperçu de l'objectif n'est pas disponible, afficher un message d'erreur et un bouton de retour.
   if (!goalPreview) {
@@ -66,94 +83,97 @@ export function ReviewStep({
       <h2 className="mb-4 text-2xl font-bold">
         Récapitulatif
       </h2>
-      <Card className="w-full p-6 bg-surface">
-        <ul className="space-y-2">
-          <li>
-            <strong>Prénom :</strong>{" "}
-            {form.firstName || "Non défini"}
-          </li>
-
-          <li>
-            <strong>Année de naissance :</strong>{" "}
-            {form.birthYear || "Non définie"}
-          </li>
-
-          <li>
-            <strong>Sexe :</strong>{" "}
-            {sexLabels[form.sex] || "Non défini"}
-          </li>
-
-          <li>
-            <strong>Taille :</strong>{" "}
-            {form.heightCm || "Non définie"} cm
-          </li>
-
-          <li>
-            <strong>Niveau d’activité :</strong>{" "}
-            {activityLabels[form.activityLevel] || "Non défini"}
-          </li>
-
-          <li>
-            <strong>Objectif :</strong>{" "}
-            {goalLabels[goalPreview.goal_type] || "Non défini"}
-          </li>
-
-          <li>
-            <strong>Poids :</strong>{" "}
-            {form.currentWeightKg || "Non défini"} kg
-          </li>
-
-          <li>
-            <strong>Poids cible :</strong>{" "}
-            {form.targetWeightKg || "Non défini"} kg
-          </li>
-
-          <li>
-            <strong>Calories quotidiennes cibles :</strong>{" "}
-            {goalPreview.first_target_calories_kcal || "Non défini"} kcal
-          </li>
-
-          <li>
-            <strong>Durée :</strong>{" "}
-            {goalPreview.estimated_weeks || "Non défini"} semaines
-          </li>
-
-          <li>
-            <strong>Date de fin :</strong>{" "}
-            {goalPreview.estimated_completion_date || "Non défini"}
-          </li>
-        </ul>
-      </Card>
-      {/* Affichage des erreurs éventuelles */}
-      {error ? (
-        <p role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className="flex justify-center gap-3">
-        <Button
-          variant="secondary"
-          type="button"
-          className="font-bold mt-4 px-8"
-          onClick={onBack}
-          disabled={isSubmitting}
+        <form
+        className="space-y-4"
+        onSubmit={handleSubmit}
+        noValidate
         >
-          Retour
-        </Button>
+          <Card className="w-full p-6 bg-surface">
+            <ul className="space-y-2">
+              <li>
+                <strong>Prénom :</strong>{" "}
+                {form.firstName || "Non défini"}
+              </li>
 
-        <Button
-          variant="primary"
-          type="button"
-          className="font-bold mt-4 px-8"
-          onClick={() => {
-            void onFinish();
-          }}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Enregistrement…" : "Terminer"}
-        </Button>
-      </div>
+              <li>
+                <strong>Année de naissance :</strong>{" "}
+                {form.birthYear || "Non définie"}
+              </li>
+
+              <li>
+                <strong>Sexe :</strong>{" "}
+                {sexLabels[form.sex] || "Non défini"}
+              </li>
+
+              <li>
+                <strong>Taille :</strong>{" "}
+                {form.heightCm || "Non définie"} cm
+              </li>
+
+              <li>
+                <strong>Niveau d’activité :</strong>{" "}
+                {activityLabels[form.activityLevel] || "Non défini"}
+              </li>
+
+              <li>
+                <strong>Objectif :</strong>{" "}
+                {goalLabels[goalPreview.goal_type] || "Non défini"}
+              </li>
+
+              <li>
+                <strong>Poids :</strong>{" "}
+                {form.currentWeightKg || "Non défini"} kg
+              </li>
+
+              <li>
+                <strong>Poids cible :</strong>{" "}
+                {form.targetWeightKg || "Non défini"} kg
+              </li>
+
+              <li>
+                <strong>Calories quotidiennes cibles :</strong>{" "}
+                {goalPreview.first_target_calories_kcal || "Non défini"} kcal
+              </li>
+
+              <li>
+                <strong>Durée :</strong>{" "}
+                {goalPreview.estimated_weeks || "Non défini"} semaines
+              </li>
+
+              <li>
+                <strong>Date de fin :</strong>{" "}
+                {goalPreview.estimated_completion_date || "Non défini"}
+              </li>
+            </ul>
+          </Card>
+
+          {error ? (
+            <p role="alert">
+              {error}
+            </p>
+          ) : null}
+
+          <div className="flex justify-center gap-3">
+            <Button
+              variant="secondary"
+              type="button"
+              className="font-bold mt-4 px-8"
+              onClick={onBack}
+              disabled={isSubmitting}
+            >
+              Retour
+            </Button>
+
+            <Button
+              variant="primary"
+              type="submit"
+              className="font-bold mt-4 px-8"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Enregistrement…" : "Terminer"}
+            </Button>
+          </div>
+        </form>
     </section>
   );
 }

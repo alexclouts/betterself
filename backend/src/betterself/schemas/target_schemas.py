@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from betterself.models.goal_models import GoalType
+from betterself.models.goal_models import GoalType, GoalPace
 from betterself.schemas.profile_schemas import ActivityLevel, Sex
 from pydantic import BaseModel, Field, field_validator
 
@@ -33,7 +33,7 @@ class GoalTargetRead(BaseModel):
 
 class GoalTargetCalculationInput(BaseModel):
     goal_type: GoalType
-    pace: str
+    pace: Optional[GoalPace] = Field(default=None)
     reference_weight_kg: Decimal
     target_weight_kg: Optional[Decimal] = Field(default=None)
     sex: Sex

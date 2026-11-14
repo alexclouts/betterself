@@ -7,11 +7,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 
-import {
-  completeOnboarding,
-  getGoalPreview,
-  getOnboardingStatus,
-} from "../services/onboardingService";
+import { onboardingService} from "../services/onboardingService";
 
 import type { OnboardingStatusRead } from "../api/generated/onboardingStatusRead";
 import type { GoalPreviewRead } from "../api/generated/goalPreviewRead";
@@ -120,7 +116,8 @@ export function OnboardingProvider({
         setError(null);
 
         try {
-            const nextStatus = await getOnboardingStatus();
+            const nextStatus = await onboardingService.getOnboardingStatus();
+            console.log("Refreshing onboarding status:");
             setStatus(nextStatus);
             return nextStatus;
 
@@ -142,7 +139,7 @@ export function OnboardingProvider({
 
         try {
             const payload = buildOnboardingCreate(form);
-            const preview = await getGoalPreview(payload);
+            const preview = await onboardingService.getGoalPreview(payload);
 
             setGoalPreview(preview);
             return preview;
@@ -166,27 +163,23 @@ export function OnboardingProvider({
 
             try {
                 const payload = buildOnboardingCreate(form);
-                const nextStatus = await completeOnboarding(payload);
+                const nextStatus = await onboardingService.completeOnboarding(payload);
 
                 setStatus(nextStatus);
                 return nextStatus;
-                
+
             } catch (caughtError) {
-                const message =
-                    caughtError instanceof Error
-                    ? caughtError.message
-                    : "Impossible de compléter l’onboarding.";
+                const message = caughtError instanceof Error? caughtError.message :"Impossible de compléter l’onboarding.";
 
-                setError(message);
-
+            setError(message);
                 throw caughtError;
             } finally {
                 setIsSubmitting(false);
             }
-        },
+        },  
         [form],
     );
-    // Réinitialise l’onboarding à son état initial.
+        // Réinitialise l’onboarding à son état initial.
     const resetOnboarding = useCallback(() => {
         setForm(initialForm);
         setStatus(null);

@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from betterself.schemas.onboarding_schemas import OnboardingStatusRead
 from betterself.schemas.user_schemas import UserRead
 from betterself.services.onboarding_service import OnboardingService
 from betterself.core.database import get_db

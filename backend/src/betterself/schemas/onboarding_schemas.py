@@ -13,8 +13,7 @@ from betterself.schemas.profile_schemas import Sex
 class OnboardingStatusRead(BaseModel):
     is_complete: bool
     missing_steps: list[str]
-    steps: dict[str, bool]
-
+    
 
 class OnboardingCreate(BaseModel):
     goal_type: GoalType

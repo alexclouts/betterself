@@ -15,35 +15,15 @@ export function OnboardingGuard() {
     isLoadingStatus,
   } = useOnboarding();
 
-  const [hasChecked, setHasChecked] = useState(false);
-
   useEffect(() => {
-    let isActive = true;
-
-    const checkStatus = async () => {
-      try {
-        await refreshStatus();
-      } catch {
-        // L’erreur est déjà exposée par le contexte.
-      } finally {
-        if (isActive) {
-          setHasChecked(true);
-        }
-      }
-    };
-
     if (!status) {
-      void checkStatus();
-    } else {
-      setHasChecked(true);
+      void refreshStatus().catch(() => {
+        // L’erreur est déjà exposée par le contexte.
+      });
     }
-
-    return () => {
-      isActive = false;
-    };
   }, [refreshStatus, status]);
 
-  if (!hasChecked || isLoadingStatus) {
+  if (isLoadingStatus) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p>Chargement…</p>

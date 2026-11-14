@@ -20,6 +20,10 @@ export function HomePage() {
           Se déconnecter
         </Button>
       </header>
+
+      <Button onClick={() => navigate("/journal/add")} className="mt-4">
+        Ajouter un aliment
+      </Button>
     </div>
     );
 }

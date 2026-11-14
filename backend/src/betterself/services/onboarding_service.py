@@ -2,6 +2,7 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from betterself.schemas.onboarding_schemas import GoalPreviewRead, GoalTimeline
 from betterself.schemas.onboarding_schemas import OnboardingCreate
+from betterself.schemas.profile_schemas import UserProfileUpdate
 from betterself.schemas.target_schemas import GoalTargetCalculationInput
 from betterself.services.goal_service import WEEKLY_WEIGHT_CHANGE_KG, GoalService
 from opentelemetry.trace import Status
@@ -101,105 +102,116 @@ class OnboardingService:
         return target is not None
 
     # Enregistre les informations d'onboarding pour l'utilisateur.
-    def save_onboarding(self, user, data: OnboardingCreate) -> None:
+    def save_onboarding(self, user: User, data: OnboardingCreate) -> None:
         self._save_profile(user, data)
         self._save_measurement(user, data)
-        self._save_nutrition_goal(user, data)
+        goal = self._save_nutrition_goal(user, data)
         self._save_goal_target(user, data)
 
     
     # Sauvegarde les informations du profil utilisateur.
-    def _save_profile(self, user, data: dict) -> None:
-        profile = self.profile_repository.get_profile_or_404(user.id)
-
-        if profile is None:
-            profile = UserProfile(user_id=user.id)
-            self.profile_repository.add(profile)
-
-        profile.first_name = data["name"]
-        profile.year_of_birth = date(int(data["birthYear"]), 1, 1)
-        profile.sex = data["sex"]
+    def _save_profile(
+        self,
+        user: User,
+        data: OnboardingCreate,
+    ) -> UserProfile:
+        return self.profile_repository.create_or_update_profile(
+            user=user,
+            data=UserProfileUpdate(
+                first_name=data.first_name,
+                year_of_birth=data.birth_year,
+                sex=data.sex,
+                height_cm=data.height_cm,
+                activity_level=data.activity_level,
+            ),
+        )
 
 
     # Sauvegarde les mesures corporelles de l'utilisateur.
-    def _save_measurement(self, user, data: dict) -> None:
-        measurement = self.measurement_repository.get_measurements_for_user(user)
-        
-        if measurement is None:
-            measurement = Measurement(
-                user_id=user.id,
-                date=date.today(),
-            )
-            self.measurement_repository.add(measurement)
-
-        measurement.weight_kg = data["weightKg"]
+    def _save_measurement(
+        self,
+        user: User,
+        data: OnboardingCreate,
+    ) -> Measurement:
+        measurement = Measurement(
+            user_id=user.id,
+            date=date.today(),
+            weight_kg=data.current_weight_kg,
+        )
+        return self.measurement_repository.add(measurement)
 
 
     # Sauvegarde l'objectif nutritionnel de l'utilisateur.
-    def _save_nutrition_goal(self, user, data: dict) -> None:
-        goal = self.goal_repository.get_for_user(user.id)
+    def _save_nutrition_goal(
+        self,
+        user: User,
+        data: OnboardingCreate,
+    ) -> NutritionGoal:
+        nutrition_goal = self.goal_repository.get_for_user(user)
 
-        if goal is None:
-            goal = NutritionGoal(
+        timeline = self.calculate_goal_timeline(
+            onboarding=data,
+        )
+
+        if nutrition_goal is None:
+            nutrition_goal = NutritionGoal(
                 user_id=user.id,
+                goal_type=data.goal_type,
+                goal_pace=data.pace,
+                start_weight_kg=data.current_weight_kg,
+                target_weight_kg=data.target_weight_kg,
+                start_date=date.today(),
+                target_date=timeline.target_date,
                 status="active",
             )
-            self.goal_repository.add(goal)
+            return self.goal_repository.add(nutrition_goal)
 
-        goal.goal_type = data["goal"]
+        nutrition_goal.goal_type = data.goal_type
+        nutrition_goal.goal_pace = data.pace
+        nutrition_goal.start_weight_kg = data.current_weight_kg
+        nutrition_goal.target_weight_kg = data.target_weight_kg
+        nutrition_goal.start_date = date.today()
+        nutrition_goal.target_date = timeline.target_date
+        nutrition_goal.status = "active"
+
+        return nutrition_goal
 
 
     # Sauvegarde la cible d'objectif de l'utilisateur.
     def _save_goal_target(
         self,
-        user,
+        user: User,
         data: OnboardingCreate,
-    ) -> None:
-        nutrition_goal = self.goal_repository.get_for_user(user.id)
+    ) -> GoalTarget:
+        self.target_repository.close(user, date.today())
 
-        if nutrition_goal is None:
-            raise ValueError(
-                "Un objectif nutritionnel actif doit exister avant la création d’une cible."
-            )
-
-        # Vérifie si une cible active existe pour l'utilisateur. Pas supposée exister au moment de l'onboarding.
-        goal_target = self.target_repository.get_active_for_user(user.id)
-
-        if goal_target is None:
-            # Crée une nouvelle cible si aucune n'existe.
-            goal_target = GoalTarget(
-                user_id=user.id,
-                goal_id=nutrition_goal.id,
-                valid_from=date.today(),
-                valid_until=None,
-            )
-            self.target_repository.add(goal_target)
-
-        # Récupère les calculs de la cible d'objectif en fonction des données d'onboarding.
         calculation = self.goal_service.calculate_goal_target(
             GoalTargetCalculationInput(
-                goal_type=nutrition_goal.goal_type,
+                goal_type=data.goal_type,
                 pace=data.pace,
                 reference_weight_kg=data.current_weight_kg,
+                target_weight_kg=data.target_weight_kg,
                 sex=data.sex,
                 birth_year=data.birth_year,
                 height_cm=data.height_cm,
                 activity_level=data.activity_level,
             )
         )
-
-        # Met à jour les attributs de la cible d'objectif avec les calculs obtenus.
-        goal_target.reference_weight_kg = data.current_weight_kg
-        goal_target.maintenance_calories_kcal = calculation["maintenance_calories_kcal"]
-        goal_target.calories_target_kcal = calculation["calories_target_kcal"]
-        goal_target.calories_adjustment_kcal = calculation["calories_adjustment_kcal"]
-        goal_target.protein_target_g = calculation["protein_target_g"]
-        goal_target.carbs_target_g = calculation["carbs_target_g"]
-        goal_target.fat_target_g = calculation["fat_target_g"]
-        goal_target.calculation_method = calculation["calculation_method"]
-
-
-    
+        goal_target = GoalTarget(
+            user_id=user.id,
+            valid_from=date.today(),
+            valid_until=None,
+            reference_weight_kg=data.current_weight_kg,
+            maintenance_calories_kcal=calculation["maintenance_calories_kcal"],
+            calories_target_kcal=calculation["calories_target_kcal"],
+            calories_adjustment_kcal=calculation["calories_adjustment_kcal"],
+            protein_target_g=calculation["protein_target_g"],
+            carbs_target_g=calculation["carbs_target_g"],
+            fat_target_g=calculation["fat_target_g"],
+            calculation_method=calculation["calculation_method"],
+        )
+        return self.target_repository.add(goal_target)
+        
 
     """
     Prévisualise l'objectif nutritionnel de l'utilisateur en fonction des données fournies.
@@ -218,6 +230,7 @@ class OnboardingService:
                 goal_type=goal_data.goal_type,
                 pace=goal_data.pace,
                 reference_weight_kg=goal_data.current_weight_kg,
+                target_weight_kg=goal_data.target_weight_kg,
                 sex=goal_data.sex,
                 birth_year=goal_data.birth_year,
                 height_cm=goal_data.height_cm,

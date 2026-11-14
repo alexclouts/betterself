@@ -140,7 +140,33 @@ h2 {
   }
 }
 p {
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 135%;
+  color: var(--muted);
   margin: 0;
+}
+
+/*
+ * Listes de définitions (ex. valeurs nutritives).
+ * Dans @layer base pour que les classes Tailwind puissent les surcharger.
+ */
+@layer base {
+  dt {
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 135%;
+    color: var(--muted);
+  }
+
+  dd {
+    margin: 0;
+    font-family: var(--heading);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 135%;
+    color: var(--text-h);
+  }
 }
 
 code,

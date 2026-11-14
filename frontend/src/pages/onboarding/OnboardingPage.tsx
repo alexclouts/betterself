@@ -112,12 +112,9 @@ export function OnboardingPage() {
         {currentStep === "review" ? (
           <ReviewStep
             onBack={handleBack}
-            onFinish={async () => {
-              const nextStatus = await refreshStatus();
-
-              if (nextStatus.is_complete) {
-                navigate("/", { replace: true });
-              }
+            onFinish={() =>  {
+              console.log("onFinish called.");
+              navigate("/", { replace: true });
             }}
             isSubmitting={isSubmitting}
           />

@@ -36,21 +36,14 @@ class UserProfileRepository:
 
     """
     Crée le profil de l'utilisateur s'il n'existe pas, sinon met à jour le profil existant.
-    Retourne un tuple contenant le profil et un booléen indiquant si le profil vient d'être créé.
+    Retourne le profil de l'utilisateur, qu'il ait été créé ou mis à jour.
     """
     def create_or_update_profile(
         self,
         user: User,
         data: UserProfileUpdate,
-    ) -> tuple[UserProfile, bool]:
-
-        profile = self.db.scalar(
-            select(UserProfile).where(
-                UserProfile.user_id == user.id,
-            )
-        )
-
-        created = profile is None
+    ) -> UserProfile:
+        profile = self.get_by_user(user)
 
         if profile is None:
             profile = UserProfile(
@@ -65,4 +58,13 @@ class UserProfileRepository:
         profile.activity_level = data.activity_level
 
         self.db.flush()
-        return profile, created
+        return profile
+
+
+    # Récupère le profil de l'utilisateur s'il existe, sinon retourne None.
+    def get_by_user(self, user: User) -> UserProfile | None:
+        return (
+            self.db.query(UserProfile)
+            .filter(UserProfile.user_id == user.id)
+            .one_or_none()
+        )

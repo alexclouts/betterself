@@ -1,7 +1,7 @@
 // src/features/auth/LoginPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../../services/authService";
+import { authService } from "../../services/authService";
 import { useAuthStore } from "../../stores/authStore";
 import { useOnboarding } from "../../context/OnboardingContext";
 import Card from "../../components/ui/Card";
@@ -31,7 +31,7 @@ export function LoginPage() {
         setIsSubmitting(true);
 
         try {
-            const response = await login({ email, password });
+            const response = await authService.login({ email, password });
             setAuth(response.access_token);
 
             try {

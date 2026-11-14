@@ -82,5 +82,4 @@ class MeasurementRepository:
     def add(self, measurement: Measurement) -> Measurement:
         self.db.add(measurement)
         self.db.flush()
-        
         return measurement

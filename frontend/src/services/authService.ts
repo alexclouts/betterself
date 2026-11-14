@@ -25,6 +25,7 @@ export type RegisterResponse = {
 
 
 export const authService = {
+
     getToken() {
         return getAccessToken();
     },
@@ -33,32 +34,32 @@ export const authService = {
     },
     logout() {
         clearAccessToken();
+    },
+
+    // Réalise l'appel à l'API pour l'inscription
+    async register(payload: RegisterPayload) {
+        try {
+            const { registerUserAuthRegisterPost } = getAuthentication();
+            return await registerUserAuthRegisterPost(payload);
+        } catch (error) {
+            throw new Error(getErrorMessage(error, "Impossible de créer le compte."));
+        }
+    },
+
+    // Fonction de connexion
+    async login(
+    credentials: LoginPayload
+    ): Promise<LoginResponse> {
+        try {
+            const { loginUserAuthLoginPost } = getAuthentication();
+            return await loginUserAuthLoginPost({
+                username: credentials.email,
+                password: credentials.password
+            });
+        } catch (error) {
+            throw new Error(
+                getErrorMessage(error, "Impossible de se connecter.")
+            );
+        }
     }
 };
-
-// Réalise l'appel à l'API pour l'inscription
-export async function register(payload: RegisterPayload) {
-    try {
-        const { registerUserAuthRegisterPost } = getAuthentication();
-        return await registerUserAuthRegisterPost(payload);
-    } catch (error) {
-        throw new Error(getErrorMessage(error, "Impossible de créer le compte."));
-    }
-}
-
-// Fonction de connexion
-export async function login(
-  credentials: LoginPayload
-): Promise<LoginResponse> {
-    try {
-        const { loginUserAuthLoginPost } = getAuthentication();
-        return await loginUserAuthLoginPost({
-            username: credentials.email,
-            password: credentials.password
-        });
-    } catch (error) {
-        throw new Error(
-            getErrorMessage(error, "Impossible de se connecter.")
-        );
-    }
-}

@@ -3,9 +3,8 @@ import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { useState } from "react";
-import { register } from "../../services/authService";
+import { authService } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../stores/authStore";
 
 export function RegisterPage() {
     const navigate = useNavigate();
@@ -39,7 +38,7 @@ export function RegisterPage() {
         setIsSubmitting(true);
 
         try {
-            await register({ email, password });
+            await authService.register({ email, password });
 
             navigate("/login", {
                 replace: true,
