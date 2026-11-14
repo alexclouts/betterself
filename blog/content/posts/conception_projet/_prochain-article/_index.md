@@ -1,6 +1,6 @@
 # Le endpoint goal_preview
 
-Je n'avais pas réfléchi à cette particularité en construisant mon backend, peut-être parce que c'est difficile de réfléchir aux besoins du frontend avant de l'avoir commencé. Bref, je me suis apperçu que des fonctions étaient manquantes dans le service de Onboarding. C'est le cas de la fonction qui permet de récupérer un objectif de poids et une mesure de rhythme (lent, modéré, rapide) pour retourner une date de fin estimée. Cette information doit d'ailleurs être retournée au frontend pour informer l'utilisateur de ces données avant qu'elles ne soient sauvegardés dans la base de données.
+Je n'avais pas réfléchi à cette particularité en construisant mon backend. Je me suis aperçu que des fonctions étaient manquantes dans le service de Onboarding. C'est le cas d'une fonction permettant de récupérer un objectif de poids et une mesure de rhythme (lent, modéré, rapide) pour calculer une date de fin estimée. Cette information doit d'ailleurs être retournée au frontend pour informer l'utilisateur de ces données avant qu'elles ne soient sauvegardés dans la base de données.
 
 En discutant avec l'IA, elle me suggère de créer un nouveau endpoint, soit `goal-preview`, qui vise à obtenir les données à afficher dans le récapitualtif.
 
@@ -49,11 +49,11 @@ L'IA me suggère ensuite les informations que le backend devrait retourner. J'ai
 
 # Synchronisation des endpoints API
 
-Une problématique que j'ai rencontré en concevant le frontend était la gestion des endpoints des deux côtés de l'application. Souvent, l'IA génère du code en me proposant des endpoints inexistants. J'ai donc chercher une solution afin d'automatiser la synchronisation des endpoints et j'ai opté pour OpenAPI et Orval.
+Un défi que j'ai rencontré en concevant le frontend était la gestion des endpoints des deux côtés de l'application. Les réponses de l'IA song parfois erronées, ce qui fait qu'elle me propose des endpoints inexistants lorsqu'elle construit mes fonctions. J'ai donc chercher une solution afin d'automatiser la synchronisation des endpoints pour éviter d'avoir à les hardcoder dans mon service à chaque fois. Initialement, j'avais pensé à créer un seul fichier contenant tous les chemins API utilisés par mon backend dans un format JSON, par exemple. Celui-ci serait accessible des deux côtés de l'application. Finalement, après avoir évalué mes options, j'ai opté pour une configuration qui utilise OpenAPI et Orval.
 
 ## L'ajout de scripts
 
-Pour que cela fonctionne, j'ai dû ajouter des scripts à mon fichier `packages.json` :
+Pour commencer, j'ai dû ajouter des scripts à mon fichier `packages.json` :
 
 ```
 "generate:api": "orval --config ./orval.config.ts",
@@ -61,4 +61,16 @@ Pour que cela fonctionne, j'ai dû ajouter des scripts à mon fichier `packages.
 "api:sync": "npm run api:export && npm run generate:api"
 ```
 
-Ainsi, quand j'exécute le script `npm run api:sync`, _Orval_ récupère le fichier généré par OpenAPI pour créer des fonctions utilisables dans mon frontend. D'ailleurs, il interagit avec mon API Axios pour effectuer les requêtes avec mon `access_token`.
+Ainsi, quand j'exécute le script avec la commande `npm run api:sync`, le frontend se synchronise avec mon backend pour me permettre d'utiliser ses fonctions et ses modèles de données. Ceci est rendu possible grâce à FastAPI. Quand je lance mon backend, OpenAPI génère un fichier qui décrit toutes les données utilisables. Le script exécute ensuite Orval, qui récupère ce fichier pour créer des fonctions utilisables dans mon frontend. Cela me permet d'effectuer mes requêtes API avec Axios. Du côté d'Axios, il vérifie simplement que l'utilisateur possède un `access_token` valide avant d'acheminer la requête. 
+
+# Les limitations de l'IA externe
+
+Plus je progresse dans le développement des nouvelles fonctionnalités, plus je réalise que l'IA doit connaître les aspects techniques de mon projet pour me proposer du code approprié à mon architecture. C'est ainsi que j'ai dû adapter mon approche en renonçant à l'usage d'une IA externe à mon projet. En effet, en l'absence du contexte, les erreurs faites par Perplexity étaient de plus en plus fréquentes, ce qui suscitait des enjeux de performance.
+
+## Intégration de Claude Code
+
+Dans son ensemble, la structure du projet est définie. J'ai donc décidé d'intégrer Claude à mon environnement de travail en lui permettant d'apporter des modifications à mon projet. 
+
+### Avantages
+
+Contrairement à Perplexity, Claude aura accès au contexte du projet pour écrire les fonctions dont j'ai de besoin. Il pourra ainsi consulter les fonctions déjà présentes afin d'en produire de nouvelles basées sur les décisions techniques que j'ai pris jusqu'à présent. Le but est surtout de progresser plus rapidement, tout en gardant le contrôle du code produit par l'IA. 
