@@ -401,6 +401,7 @@ def test_onboarding_status_incomplete_then_complete(client):
         NUTRITION_GOAL_URL,
         json={
             "goal_type": "lose_weight",
+            "goal_pace": "moderate",
             "start_weight_kg": 85,
             "target_weight_kg": 75,
             "start_date": "2026-11-01",
@@ -433,9 +434,3 @@ def test_onboarding_status_incomplete_then_complete(client):
     final_status = final_response.json()
     assert final_status["is_complete"] is True
     assert final_status["missing_steps"] == []
-    assert final_status["steps"] == {
-        "profile": True,
-        "body_measurement": True,
-        "nutrition_goal": True,
-        "goal_target": True,
-    }

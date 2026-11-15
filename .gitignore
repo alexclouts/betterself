@@ -11,7 +11,8 @@ backend/tests/__pycache__/
 blog/public
 blog/node_modules
 blog/resources/_gen/
-blod/ExampleSite
+blog/ExampleSite
+blog/content/posts/.ignore
 
 
 backend/src/betterself/core/config.py

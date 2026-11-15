@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -95,6 +96,8 @@ export function OnboardingProvider({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const accessToken = useAuthStore((state) => state.accessToken);
+
     const updateForm = useCallback(
         (patch: Partial<OnboardingFormState>) => {
         setForm((current) => ({
@@ -187,6 +190,15 @@ export function OnboardingProvider({
         setCurrentStep(initialStep);
         setError(null);
     }, []);
+
+    // À la déconnexion (ou si le token expire), on oublie le statut et le
+    // formulaire de la session précédente pour ne pas les réutiliser au
+    // prochain utilisateur.
+    useEffect(() => {
+        if (accessToken === null) {
+            resetOnboarding();
+        }
+    }, [accessToken, resetOnboarding]);
 
     // Valeur du contexte à fournir aux composants enfants.
     const value = useMemo(

@@ -9,19 +9,14 @@ import {
   computeNutrientsForQuantity,
   formatNutrient,
   getDefaultQuantityG,
+  MEAL_TYPE_LABELS,
 } from "../../lib/food";
 import { foodService } from "../../services/foodService";
+import { consumedAtForDay, formatDayLabel, todayKey } from "../../lib/date";
+import { journalUrl, readJournalContext } from "../../lib/journal";
 import Card from "../../components/ui/Card";
 
 const MAX_QUANTITY_G = 5000;
-
-// Labels pour les types de repas.
-const MEAL_TYPE_LABELS: Record<MealType, string> = {
-  breakfast: "Déjeuner",
-  lunch: "Dîner",
-  dinner: "Souper",
-  snack: "Collation",
-};
 
 // Propose un repas selon l'heure actuelle.
 function getDefaultMealType(date = new Date()): MealType {
@@ -47,12 +42,17 @@ export function FoodAddPage() {
   const foodFromState = (location.state as { food?: FoodRead } | null)?.food;
   // Si l'aliment n'a pas été transmis par l'état, il sera chargé depuis le service.
   const initialFood = foodFromState && foodFromState.id === id ? foodFromState : null;
+  // Repas et journée choisis depuis le journal, le cas échéant.
+  const journalContext = readJournalContext(location.state);
+  const dayKey = journalContext.date ?? todayKey();
 
   const [food, setFood] = useState<FoodRead | null>(initialFood);
   const [quantityInput, setQuantityInput] = useState(
     initialFood ? String(getDefaultQuantityG(initialFood)) : "",
   );
-  const [mealType, setMealType] = useState<MealType>(getDefaultMealType);
+  const [mealType, setMealType] = useState<MealType>(
+    () => journalContext.mealType ?? getDefaultMealType(),
+  );
   const [isLoading, setIsLoading] = useState(!initialFood);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,8 +118,9 @@ export function FoodAddPage() {
         food_id: food.id,
         quantity_g: quantityG,
         meal_type: mealType,
+        consumed_at: consumedAtForDay(dayKey),
       });
-      navigate("/", { replace: true });
+      navigate(journalUrl(dayKey), { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Impossible d’ajouter cet aliment au journal.");
     } finally {
@@ -130,7 +131,7 @@ export function FoodAddPage() {
   if (isLoading) {
     return (
       <main className="mx-auto w-full max-w-md px-4 py-6">
-        <p className="text-sm text-gray-500">Chargement…</p>
+        <p>Chargement…</p>
       </main>
     );
   }
@@ -139,7 +140,7 @@ export function FoodAddPage() {
   if (!food) {
     return (
       <main className="mx-auto w-full max-w-md px-4 py-6">
-        <p className="text-sm text-red-600">{error ?? "Aliment introuvable."}</p>
+        <p className="text-danger">{error ?? "Aliment introuvable."}</p>
         <Button variant="ghost" className="mt-4" onClick={() => navigate("/journal/add")}>
           Retour à la recherche
         </Button>
@@ -158,11 +159,14 @@ export function FoodAddPage() {
         ← Retour
       </Button>
 
-      <h1 className="mt-2 text-xl font-semibold">{food.name}</h1>
-      {food.brand && <p className="text-sm text-gray-500">{food.brand}</p>}
-      <p className="mt-1 text-sm text-gray-500">
+      <h1>{food.name}</h1>
+      {food.brand && <p>{food.brand}</p>}
+      <p className="mt-1">
         Portion de référence : {formatNutrient(food.reference_weight_g)} g
       </p>
+      {dayKey !== todayKey() && (
+        <p className="mt-1">Ajout au journal de : {formatDayLabel(dayKey).toLowerCase()}</p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <label className="block">
@@ -220,7 +224,7 @@ export function FoodAddPage() {
           </dl>
         </Card>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-danger">{error}</p>}
 
         <Button
           type="submit"

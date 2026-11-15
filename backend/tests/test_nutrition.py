@@ -39,6 +39,7 @@ def update_nutrition_goal(client, access_token: str, payload: dict):
 def valid_nutrition_goal_payload() -> dict:
     return {
         "goal_type": "lose_weight",
+        "goal_pace": "moderate",
         "start_weight_kg": 85,
         "target_weight_kg": 75,
         "start_date": "2026-10-01",
@@ -336,3 +337,20 @@ def test_update_nutrition_goal_not_found(client):
     )
 
     assert response.status_code == 404
+
+# Le rythme est requis pour une perte de poids et interdit pour un maintien.
+def test_create_nutrition_goal_validates_goal_pace(client):
+    access_token = register_and_login(client)
+
+    payload = valid_nutrition_goal_payload()
+    payload.pop("goal_pace")
+    assert create_nutrition_goal(client, access_token, payload).status_code == 422
+
+    payload = valid_nutrition_goal_payload()
+    payload.update({"goal_type": "maintain_weight", "target_weight_kg": 85})
+    assert create_nutrition_goal(client, access_token, payload).status_code == 422
+
+    payload.pop("goal_pace")
+    response = create_nutrition_goal(client, access_token, payload)
+    assert response.status_code == 201, response.text
+    assert response.json()["goal_pace"] is None

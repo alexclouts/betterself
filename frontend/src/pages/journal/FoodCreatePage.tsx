@@ -5,6 +5,7 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { formatNutrient } from "../../lib/food";
+import { readJournalContext } from "../../lib/journal";
 import { foodService } from "../../services/foodService";
 import Card from "../../components/ui/Card";
 
@@ -61,6 +62,7 @@ export function FoodCreatePage() {
 
   // Préremplit le nom avec la recherche effectuée, si disponible.
   const initialName = (location.state as { name?: string } | null)?.name ?? "";
+  const journalContext = readJournalContext(location.state);
 
   const [name, setName] = useState(initialName);
   const [brand, setBrand] = useState("");
@@ -141,7 +143,7 @@ export function FoodCreatePage() {
         ...parsed,
       });
       // Enchaîne directement sur l'ajout au journal avec l'aliment créé.
-      navigate(`/journal/food/${food.id}`, { replace: true, state: { food } });
+      navigate(`/journal/food/${food.id}`, { replace: true, state: { ...journalContext, food } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Impossible de créer cet aliment.");
     } finally {
@@ -155,7 +157,7 @@ export function FoodCreatePage() {
         ← Retour
       </Button>
 
-      <h1 className="mt-2 text-xl font-semibold">Créer un aliment</h1>
+      <h1>Créer un aliment</h1>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <label className="block">
@@ -221,7 +223,7 @@ export function FoodCreatePage() {
             ))}
 
             {macroCheck && !macroCheck.matches && (
-              <p className="text-sm text-red-600">
+              <p className="text-danger">
                 Les calories ne correspondent pas aux macronutriments (environ{" "}
                 {formatNutrient(macroCheck.calculated, 0)} kcal attendues).
               </p>
@@ -230,7 +232,7 @@ export function FoodCreatePage() {
         </Card>
 
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-danger">{error}</p>}
 
         <Button type="submit" className="w-full mt-2" disabled={!canSubmit}>
           {isSubmitting ? "Création…" : "Créer et ajouter au journal"}

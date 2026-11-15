@@ -1,6 +1,6 @@
 import { getAuthentication } from "../api/generated/authentication/authentication"
 import { getErrorMessage } from "../api/axios";
-import { getAccessToken, setAccessToken, clearAccessToken } from "../lib/auth";
+import { useAuthStore } from "../stores/authStore";
 
 export type LoginPayload = {
   email: string;
@@ -26,14 +26,15 @@ export type RegisterResponse = {
 
 export const authService = {
 
+    // Passe par le store pour que le localStorage et l'état React restent synchronisés.
     getToken() {
-        return getAccessToken();
+        return useAuthStore.getState().accessToken;
     },
     setToken(token: string) {
-        setAccessToken(token);
+        useAuthStore.getState().setAuth(token);
     },
     logout() {
-        clearAccessToken();
+        useAuthStore.getState().clearAuth();
     },
 
     // Réalise l'appel à l'API pour l'inscription

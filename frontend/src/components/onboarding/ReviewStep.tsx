@@ -56,11 +56,11 @@ export function ReviewStep({
   if (!goalPreview) {
     return (
       <section className="space-y-4">
-        <h2 className="mb-4 text-2xl font-bold">
+        <h2>
           Récapitulatif
         </h2>
 
-        <p className="text-sm text-red-600">
+        <p className="text-danger">
           L’aperçu de votre objectif n’est pas disponible.
           Retournez à l’étape précédente pour le générer.
         </p>
@@ -80,7 +80,7 @@ export function ReviewStep({
   // Affichage du récapitulatif de l'onboarding.
   return (
     <section className="space-y-4">
-      <h2 className="mb-4 text-2xl font-bold">
+      <h2>
         Récapitulatif
       </h2>
         <form
@@ -148,7 +148,7 @@ export function ReviewStep({
           </Card>
 
           {error ? (
-            <p role="alert">
+            <p className="text-danger" role="alert">
               {error}
             </p>
           ) : null}

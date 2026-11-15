@@ -1,5 +1,6 @@
 import axios, { type AxiosRequestConfig } from "axios";
 import { getAccessToken } from "../lib/auth";
+import { useAuthStore } from "../stores/authStore";
 
 // Type représentant le détail d'une erreur renvoyée par l'API.
 type ApiErrorDetail = {
@@ -19,6 +20,23 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Intercepteur de réponse : un 401 sur une requête authentifiée signifie que le
+// token est invalide ou expiré. On vide l'authentification, ce qui renvoie
+// l'utilisateur vers /login via ProtectedRoute.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      error.config?.headers?.Authorization
+    ) {
+      useAuthStore.getState().clearAuth();
+    }
+    return Promise.reject(error);
+  },
+);
 
 
 // Fonction attendue par Orval : retourne directement les données.

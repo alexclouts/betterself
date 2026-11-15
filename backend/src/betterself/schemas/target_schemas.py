@@ -31,6 +31,19 @@ class GoalTargetRead(BaseModel):
 
 
 
+"""
+Données envoyées pour recalculer la cible active (ex. après une nouvelle pesée).
+Le type d'objectif, le rythme et le poids cible proviennent de l'objectif
+nutritionnel enregistré, pas de la requête.
+"""
+class GoalTargetRecalculate(BaseModel):
+    reference_weight_kg: Decimal = Field(ge=30, le=500, examples=[85])
+    sex: Sex
+    birth_year: int = Field(ge=1900, le=date.today().year)
+    height_cm: Decimal = Field(ge=100, le=250)
+    activity_level: ActivityLevel
+
+
 class GoalTargetCalculationInput(BaseModel):
     goal_type: GoalType
     pace: Optional[GoalPace] = Field(default=None)

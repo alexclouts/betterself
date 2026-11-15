@@ -10,7 +10,8 @@ from betterself.core.validation import validate_date_not_future, validate_date_w
 
 class NutritionGoalCreate(BaseModel):
     goal_type: GoalType = Field(example="lose_weight")
-    goal_pace: GoalPace = Field(example="moderate")
+    # Requis pour une perte de poids ou un gain musculaire, interdit pour un maintien.
+    goal_pace: GoalPace | None = Field(default=None, example="moderate")
     
     start_weight_kg: Decimal = Field(gt=30, le=500)
     target_weight_kg: Decimal = Field(gt=30, le=500)
@@ -38,6 +39,16 @@ class NutritionGoalCreate(BaseModel):
             raise ValueError(
                 "La date cible doit être postérieure à la date de début."
             )
+
+        if self.goal_type == GoalType.MAINTAIN_WEIGHT:
+            if self.goal_pace is not None:
+                raise ValueError(
+                    "Un rythme ne doit pas être fourni pour un objectif de maintien."
+                )
+        elif self.goal_pace is None:
+            raise ValueError(
+                "Un rythme est requis pour les objectifs de perte de poids ou de gain musculaire."
+            )
         return self
 
     model_config = {"from_attributes": True}
@@ -46,7 +57,7 @@ class NutritionGoalCreate(BaseModel):
 class NutritionGoalRead(BaseModel):
     user_id: UUID
     goal_type: GoalType
-    goal_pace: GoalPace
+    goal_pace: GoalPace | None
     start_weight_kg: Decimal
     target_weight_kg: Decimal | None
     start_date: date

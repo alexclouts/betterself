@@ -61,7 +61,7 @@ export function RegisterPage() {
                 <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
 
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-bold text-foreground">Créer un compte</h1>
+                        <h1>Créer un compte</h1>
                     </div>
 
                     <Input
@@ -87,7 +87,7 @@ export function RegisterPage() {
                     />
 
                     {error && (
-                        <p className="text-sm text-danger" role="alert">
+                        <p className="text-danger" role="alert">
                             {error}
                         </p>
                     )}
@@ -99,7 +99,7 @@ export function RegisterPage() {
                     </Button>
 
                     <div className="flex justify-center">
-                        <p className="text-foreground">
+                        <p>
                             Déjà un compte ? <a href="/login" className="text-primary font-bold">Se connecter</a>
                         </p>
                     </div>

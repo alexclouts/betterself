@@ -6,7 +6,7 @@ import { ProtectedRoute } from "../routes/ProtectedRoutes";
 import { OnboardingGuard } from "../routes/OnboardingGuard";
 import { HomePage } from "../pages/home/HomePage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
-// import { FoodJournalPage } from "../pages/journal/FoodJournalPage";
+import { FoodJournalPage } from "../pages/journal/FoodJournalPage";
 import { FoodSearchPage } from "../pages/journal/FoodSearchPage";
 import { FoodAddPage } from "../pages/journal/FoodAddPage";
 import { FoodCreatePage } from "../pages/journal/FoodCreatePage";
@@ -24,6 +24,7 @@ export function AppRoutes() {
                 
                 <Route element={<OnboardingGuard />}>
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/journal" element={<FoodJournalPage />} />
                     <Route path="/journal/add" element={<FoodSearchPage />} />
                     <Route path="/journal/food/new" element={<FoodCreatePage />} />
                     <Route path="/journal/food/:id" element={<FoodAddPage />} />

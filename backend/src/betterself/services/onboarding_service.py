@@ -183,7 +183,14 @@ class OnboardingService:
         user: User,
         data: OnboardingCreate,
     ) -> GoalTarget:
-        self.target_repository.close(user, date.today())
+        # Ferme la cible active éventuelle (onboarding refait) pour respecter
+        # l'index unique « une seule cible active par utilisateur ».
+        active_target = self.target_repository.get_active_for_user(user)
+        if active_target is not None:
+            self.target_repository.close(
+                target=active_target,
+                closed_at=date.today(),
+            )
 
         calculation = self.goal_service.calculate_goal_target(
             GoalTargetCalculationInput(

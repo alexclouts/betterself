@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { foodService } from "../../services/foodService";
 import type { FoodRead } from "../../api/generated/foodRead";
 import { formatNutrient } from "../../lib/food";
+import { readJournalContext } from "../../lib/journal";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 
 export function FoodSearchPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Repas et journée choisis depuis le journal, relayés jusqu'à la page d'ajout.
+  const journalContext = readJournalContext(location.state);
 
   const [query, setQuery] = useState("");
   const [foods, setFoods] = useState<FoodRead[]>([]);
@@ -52,7 +56,7 @@ export function FoodSearchPage() {
         ← Retour
       </Button>
 
-      <h1 className="mt-2 text-xl font-semibold">
+      <h1>
         Ajouter un aliment
       </h1>
 
@@ -65,13 +69,13 @@ export function FoodSearchPage() {
       />
 
       {isLoading && (
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4">
           Recherche…
         </p>
       )}
 
       {error && (
-        <p className="mt-4 text-sm text-red-600">
+        <p className="mt-4 text-danger">
           {error}
         </p>
       )}
@@ -84,7 +88,7 @@ export function FoodSearchPage() {
               onClick={() =>
                 // On transmet l'aliment pour éviter un nouvel appel ; la quantité
                 // sera initialisée à la portion de référence et modifiable à l'ajout.
-                navigate(`/journal/food/${food.id}`, { state: { food } })
+                navigate(`/journal/food/${food.id}`, { state: { ...journalContext, food } })
               }
               className="flex w-full items-center justify-between py-3 text-left"
             >
@@ -100,7 +104,7 @@ export function FoodSearchPage() {
       </ul>
 
       {!isLoading && !error && query.trim().length >= 2 && foods.length === 0 && (
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4">
           Aucun aliment trouvé pour « {query.trim()} ».
         </p>
       )}
@@ -108,7 +112,7 @@ export function FoodSearchPage() {
         <Button
           type="button"
           onClick={() =>
-            navigate("/journal/food/new", { state: { name: query.trim() } })
+            navigate("/journal/food/new", { state: { ...journalContext, name: query.trim() } })
           }
           className="mt-4 w-full rounded-lg py-3 text-sm text-primary font-bold"
         >

@@ -36,7 +36,7 @@ export function ProfileStep({
       className="space-y-4"
       onSubmit={handleSubmit}
     >
-      <h2 className="text-2xl font-bold">
+      <h2>
         Vos informations
       </h2>
 

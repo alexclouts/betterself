@@ -11,7 +11,7 @@ from betterself.repos.target_repo import TargetRepository
 from betterself.schemas.goal_schemas import NutritionGoalCreate
 from betterself.schemas.onboarding_schemas import OnboardingCreate
 from betterself.schemas.profile_schemas import ActivityLevel, Sex
-from betterself.schemas.target_schemas import GoalTargetCalculationInput
+from betterself.schemas.target_schemas import GoalTargetCalculationInput, GoalTargetRecalculate
 from betterself.models.user_models import User
 
 
@@ -23,6 +23,10 @@ class GoalTargetCalculationError(Exception):
     """La cible nutritionnelle ne peut pas être calculée."""
 
 CALORIES_PER_KG = Decimal("7700")
+
+# Apport calorique quotidien minimal accepté (même seuil que la contrainte
+# goal_targets_check_calories de la base de données).
+MIN_DAILY_CALORIES_KCAL = 1200
 
 WEEKLY_WEIGHT_CHANGE_KG = {
     GoalPace.SLOW: Decimal("0.226796"),       # 0.5 lb / semaine
@@ -83,6 +87,7 @@ class GoalService:
         goal = NutritionGoal(
             user_id=user.id,
             goal_type=data.goal_type,
+            goal_pace=data.goal_pace,
             start_weight_kg=data.start_weight_kg,
             target_weight_kg=data.target_weight_kg,
             start_date=data.start_date,
@@ -101,6 +106,7 @@ class GoalService:
         goal = self.get_goal_or_404(user)
 
         goal.goal_type = data.goal_type
+        goal.goal_pace = data.goal_pace
         goal.start_weight_kg = data.start_weight_kg
         goal.target_weight_kg = data.target_weight_kg
         goal.start_date = data.start_date
@@ -213,9 +219,19 @@ class GoalService:
             maintenance_calories + calories_adjustment_kcal
         )
 
-        if calories_target_kcal <= 0:
+        if maintenance_calories < MIN_DAILY_CALORIES_KCAL:
             raise GoalTargetCalculationError(
-                "La cible calorique calculée est invalide."
+                "Les calories de maintien calculées sont inférieures à "
+                f"{MIN_DAILY_CALORIES_KCAL} kcal. Vérifiez votre profil "
+                "(poids, taille, année de naissance, niveau d’activité)."
+            )
+
+        if calories_target_kcal < MIN_DAILY_CALORIES_KCAL:
+            raise GoalTargetCalculationError(
+                "La cible calorique calculée "
+                f"({calories_target_kcal} kcal) est inférieure au minimum "
+                f"recommandé de {MIN_DAILY_CALORIES_KCAL} kcal par jour. "
+                "Choisissez un rythme plus lent."
             )
         # Calcule les cibles en macronutriments en fonction des calories cibles et du poids de référence.
         protein_target = round(weight * 1.8)
@@ -236,22 +252,34 @@ class GoalService:
     def recalculate_goal_target(
         self,
         user: User,
-        data: GoalTargetCalculationInput,
+        data: GoalTargetRecalculate,
     ) -> GoalTarget:
+        # Le type d'objectif, le rythme et le poids cible viennent de l'objectif enregistré.
+        goal = self.get_goal_or_404(user)
         today = date.today()
-        # Récupère la cible active actuelle de l'utilisateur, le cas échéant.
-        active_target = self.target_repository.get_active_for_user(user.id)
 
+        # Calcule les nouvelles valeurs avant de toucher à la cible active,
+        # pour ne rien modifier si le calcul échoue.
+        calculated_values = self.calculate_goal_target(
+            GoalTargetCalculationInput(
+                goal_type=goal.goal_type,
+                pace=goal.goal_pace,
+                reference_weight_kg=data.reference_weight_kg,
+                target_weight_kg=goal.target_weight_kg,
+                sex=data.sex,
+                birth_year=data.birth_year,
+                height_cm=data.height_cm,
+                activity_level=data.activity_level,
+            )
+        )
+
+        # Ferme la cible active actuelle avant de créer la nouvelle.
+        active_target = self.target_repository.get_active_for_user(user)
         if active_target is not None:
-            # Ferme la cible active actuelle avant de créer une nouvelle cible.
             self.target_repository.close(
                 target=active_target,
                 closed_at=today,
             )
-        # Calcule les nouvelles valeurs cibles en fonction des données fournies.
-        calculated_values = self.calculate_goal_target(
-            data
-        )
 
         new_target = GoalTarget(
             user_id=user.id,

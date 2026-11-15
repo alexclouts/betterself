@@ -61,7 +61,7 @@ export function LoginPage() {
                 <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
 
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-bold text-foreground">BetterSelf</h1>
+                        <h1>BetterSelf</h1>
                     </div>
 
                     <Input
@@ -80,7 +80,7 @@ export function LoginPage() {
                     />
 
                     {error && (
-                        <p className="text-sm text-danger" role="alert">
+                        <p className="text-danger" role="alert">
                             {error}
                         </p>
                     )}
@@ -90,7 +90,7 @@ export function LoginPage() {
                     </Button>
 
                     <div className="flex justify-center">
-                        <p className="text-foreground">Pas encore de compte ? <a href="/register" className="text-primary font-bold">Créer un compte</a></p>
+                        <p>Pas encore de compte ? <a href="/register" className="text-primary font-bold">Créer un compte</a></p>
                     </div>
 
                 </form>

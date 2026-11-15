@@ -100,6 +100,7 @@ def create_nutrition_goal(client, headers: dict) -> dict:
         NUTRITION_GOAL_URL,
         json={
             "goal_type": "lose_weight",
+            "goal_pace": "moderate",
             "start_weight_kg": 85,
             "target_weight_kg": 75,
             "start_date": "2026-11-01",

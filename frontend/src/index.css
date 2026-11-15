@@ -17,6 +17,7 @@
   --color-surface-raised: var(--surface-raised);
   --color-surface-overlay: var(--surface-overlay);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
   --color-border: var(--border);
 
 }
@@ -114,37 +115,45 @@ body {
   margin: 0;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+/*
+ * Styles typographiques par défaut dans @layer base : une règle hors couche
+ * l'emporterait sur les classes Tailwind (text-sm, text-red-600, mt-2…).
+ */
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--heading);
+    font-weight: 500;
+    color: var(--text-h);
+  }
 
-h1 {
-  font-size: 42px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+  h1 {
+    font-size: 42px;
+    letter-spacing: -1.68px;
+    margin: 32px 0;
+    @media (max-width: 1024px) {
+      font-size: 36px;
+      margin: 20px 0;
+    }
   }
-}
-h2 {
-  font-size: 32px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 16px 0;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+  h2 {
+    font-size: 32px;
+    line-height: 118%;
+    letter-spacing: -0.24px;
+    margin: 16px 0;
+    @media (max-width: 1024px) {
+      font-size: 20px;
+    }
   }
-}
-p {
-  font-family: var(--sans);
-  font-size: 18px;
-  line-height: 135%;
-  color: var(--muted);
-  margin: 0;
+
+  p {
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 135%;
+    color: var(--muted);
+    margin: 0;
+  }
 }
 
 /*

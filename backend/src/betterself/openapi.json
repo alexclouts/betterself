@@ -2799,21 +2799,13 @@
             ]
           },
           "sex": {
-            "type": "string",
-            "title": "Sex",
-            "description": "Sexe utilisé pour le calcul du BMR.",
-            "examples": [
-              "M"
-            ]
+            "$ref": "#/components/schemas/Sex"
           },
           "birth_year": {
             "type": "integer",
             "maximum": 2026.0,
             "minimum": 1900.0,
-            "title": "Birth Year",
-            "examples": [
-              1996
-            ]
+            "title": "Birth Year"
           },
           "height_cm": {
             "anyOf": [
@@ -2826,18 +2818,10 @@
                 "type": "string"
               }
             ],
-            "title": "Height Cm",
-            "examples": [
-              175
-            ]
+            "title": "Height Cm"
           },
           "activity_level": {
-            "type": "string",
-            "title": "Activity Level",
-            "description": "Niveau d'activité physique.",
-            "examples": [
-              "moderate"
-            ]
+            "$ref": "#/components/schemas/ActivityLevel"
           }
         },
         "type": "object",
@@ -2971,6 +2955,17 @@
             "$ref": "#/components/schemas/GoalType",
             "example": "lose_weight"
           },
+          "goal_pace": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalPace"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "example": "moderate"
+          },
           "start_weight_kg": {
             "anyOf": [
               {
@@ -3034,6 +3029,16 @@
           "goal_type": {
             "$ref": "#/components/schemas/GoalType"
           },
+          "goal_pace": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalPace"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "start_weight_kg": {
             "type": "string",
             "title": "Start Weight Kg"
@@ -3075,6 +3080,7 @@
         "required": [
           "user_id",
           "goal_type",
+          "goal_pace",
           "start_weight_kg",
           "target_weight_kg",
           "start_date",
@@ -3167,20 +3173,12 @@
             },
             "type": "array",
             "title": "Missing Steps"
-          },
-          "steps": {
-            "additionalProperties": {
-              "type": "boolean"
-            },
-            "type": "object",
-            "title": "Steps"
           }
         },
         "type": "object",
         "required": [
           "is_complete",
-          "missing_steps",
-          "steps"
+          "missing_steps"
         ],
         "title": "OnboardingStatusRead"
       },

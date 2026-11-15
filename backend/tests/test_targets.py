@@ -56,6 +56,7 @@ def create_goal_for_user(client, access_token: str):
         access_token,
         {
             "goal_type": "lose_weight",
+            "goal_pace": "moderate",
             "start_weight_kg": 85,
             "target_weight_kg": 75,
             "start_date": "2026-10-01",

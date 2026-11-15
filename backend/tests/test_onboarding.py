@@ -85,7 +85,7 @@ def test_preview_goal_maintenance_has_no_timeline(client: TestClient) -> None:
         goal_type="maintain_weight",
         pace=None,
         current_weight_kg=80.0,
-        target_weight_kg=80.0,
+        target_weight_kg=None,
     )
 
     response = client.post(
@@ -286,3 +286,71 @@ def test_preview_goal_rejects_invalid_target_weight(client: TestClient) -> None:
         json=payload,
     )
     assert response.status_code == 422
+
+# Profil dont la cible calorique tombe sous 1200 kcal avec un rythme agressif :
+# BMR ≈ 1009 kcal, maintien ≈ 1211 kcal, cible ≈ 463 kcal.
+def make_low_calorie_onboarding_payload() -> dict:
+    payload = make_onboarding_create_payload(
+        goal_type="lose_weight",
+        pace="aggressive",
+        current_weight_kg=50.0,
+        target_weight_kg=45.0,
+    )
+    payload.update(
+        {
+            "sex": "female",
+            "birth_year": date.today().year - 66,
+            "height_cm": 160,
+            "activity_level": "sedentary",
+        }
+    )
+    return payload
+
+
+# Vérifie que la prévisualisation refuse une cible calorique sous le minimum.
+def test_preview_goal_rejects_target_below_minimum_calories(client: TestClient) -> None:
+    response = client.post(
+        f"{ONBOARDING_URL}/preview",
+        json=make_low_calorie_onboarding_payload(),
+    )
+    assert response.status_code == 400, response.text
+    assert "1200" in response.json()["detail"]
+
+
+# Vérifie que l'onboarding est refusé (400, pas 500) et que rien n'est enregistré.
+def test_complete_onboarding_rejects_target_below_minimum_calories(client: TestClient) -> None:
+    access_token = register_and_login(client)
+    headers = auth_headers(access_token)
+
+    response = client.post(
+        ONBOARDING_URL,
+        json=make_low_calorie_onboarding_payload(),
+        headers=headers,
+    )
+    assert response.status_code == 400, response.text
+    assert "1200" in response.json()["detail"]
+
+    status_response = client.get(f"{ONBOARDING_URL}/status", headers=headers)
+    assert status_response.status_code == 200
+    assert status_response.json()["is_complete"] is False
+
+
+# Refaire l'onboarding ferme la cible active précédente au lieu de violer
+# l'index unique « une seule cible active par utilisateur ».
+def test_complete_onboarding_twice_keeps_single_active_target(client: TestClient) -> None:
+    access_token = register_and_login(client)
+    headers = auth_headers(access_token)
+
+    first = client.post(ONBOARDING_URL, json=make_onboarding_create_payload(), headers=headers)
+    assert first.status_code == 201, first.text
+
+    second = client.post(
+        ONBOARDING_URL,
+        json=make_onboarding_create_payload(current_weight_kg=78.0, target_weight_kg=70.0),
+        headers=headers,
+    )
+    assert second.status_code == 201, second.text
+
+    current = client.get(TARGET_URL, headers=headers)
+    assert current.status_code == 200, current.text
+    assert Decimal(str(current.json()["reference_weight_kg"])) == Decimal("78")

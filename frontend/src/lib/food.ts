@@ -1,4 +1,27 @@
+import type { FoodConsumptionRead } from "../api/generated/foodConsumptionRead";
 import type { FoodRead } from "../api/generated/foodRead";
+import { MealType } from "../api/generated/mealType";
+
+// Ordre d'affichage des repas dans la journée.
+export const MEAL_TYPE_ORDER: MealType[] = [
+  MealType.breakfast,
+  MealType.lunch,
+  MealType.dinner,
+  MealType.snack,
+];
+
+// Libellés des types de repas (usage québécois).
+export const MEAL_TYPE_LABELS: Record<MealType, string> = {
+  breakfast: "Déjeuner",
+  lunch: "Dîner",
+  dinner: "Souper",
+  snack: "Collation",
+};
+
+// Vérifie qu'une valeur reçue (URL, état de navigation) est un type de repas.
+export function isMealType(value: unknown): value is MealType {
+  return typeof value === "string" && (MEAL_TYPE_ORDER as string[]).includes(value);
+}
 
 export interface FoodNutrients {
   calories_kcal: number;
@@ -8,7 +31,7 @@ export interface FoodNutrients {
 }
 
 // Les valeurs décimales arrivent de l'API sous forme de chaînes ("250.00").
-function toNumber(value: string | number): number {
+export function toNumber(value: string | number): number {
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
@@ -42,4 +65,17 @@ export function computeNutrientsForQuantity(
     carbohydrates_g: toNumber(food.carbohydrates_g) * ratio,
     fat_g: toNumber(food.fat_g) * ratio,
   };
+}
+
+// Additionne les valeurs nutritionnelles d'une liste de consommations.
+export function sumNutrients(entries: FoodConsumptionRead[]): FoodNutrients {
+  return entries.reduce<FoodNutrients>(
+    (total, entry) => ({
+      calories_kcal: total.calories_kcal + toNumber(entry.calories_kcal),
+      protein_g: total.protein_g + toNumber(entry.protein_g),
+      carbohydrates_g: total.carbohydrates_g + toNumber(entry.carbohydrates_g),
+      fat_g: total.fat_g + toNumber(entry.fat_g),
+    }),
+    { calories_kcal: 0, protein_g: 0, carbohydrates_g: 0, fat_g: 0 },
+  );
 }

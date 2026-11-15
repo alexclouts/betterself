@@ -29,6 +29,16 @@ export function OnboardingPage() {
     refreshStatus,
   } = useOnboarding();
 
+  // Charge le statut si on arrive directement sur /onboarding (ex. rafraîchissement) :
+  // cette route n'est pas couverte par OnboardingGuard, qui s'en charge ailleurs.
+  useEffect(() => {
+    if (!status) {
+      void refreshStatus().catch(() => {
+        // L’erreur est déjà exposée par le contexte.
+      });
+    }
+  }, [refreshStatus, status]);
+
   useEffect(() => {
     if (status?.is_complete) {
       navigate("/", { replace: true });
@@ -46,7 +56,7 @@ export function OnboardingPage() {
   if (!status) {
     return (
       <div className="onboarding-error">
-        <p>
+        <p className="text-danger" role="alert">
           Impossible de récupérer l’état de votre onboarding.
         </p>
 

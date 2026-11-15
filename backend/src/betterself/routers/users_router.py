@@ -60,7 +60,10 @@ def create_or_update_current_user_profile(
     current_user: User = Depends(get_current_user),
     service: UserProfileRepository = Depends(get_user_profile_repository),
 ):
-    profile, created = service.create_or_update_profile(
+    # Le repository ne retourne que le profil : on détermine avant l'appel
+    # s'il s'agit d'une création (201) ou d'une mise à jour (200).
+    created = service.get_by_user(current_user) is None
+    profile = service.create_or_update_profile(
         user=current_user,
         data=data
     )

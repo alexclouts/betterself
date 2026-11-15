@@ -71,7 +71,7 @@ export function GoalStep({
       className="space-y-4 space-x-4"
       onSubmit={handleSubmit}
     >
-      <h2 className="text-2xl font-bold">
+      <h2>
         Votre objectif principal
       </h2>
 
@@ -198,7 +198,7 @@ export function GoalStep({
       )}
 
         {error && (
-            <p className="text-sm text-danger" role="alert">
+            <p className="text-danger" role="alert">
                 {error}
             </p>
         )}

@@ -1,10 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/ui/Button";
+import { DailySummaryCard } from "../../components/journal/DailySummaryCard";
+import { useJournalDay } from "../../hooks/useJournalDay";
+import { todayKey } from "../../lib/date";
 import { authService } from "../../services/authService";
 
 
 export function HomePage() {
     const navigate = useNavigate();
+    // Résumé de la journée en cours.
+    const { totals, target, isLoading, error } = useJournalDay(todayKey());
 
     function handleLogout() {
         authService.logout();
@@ -21,9 +26,24 @@ export function HomePage() {
         </Button>
       </header>
 
-      <Button onClick={() => navigate("/journal/add")} className="mt-4">
-        Ajouter un aliment
-      </Button>
+      <section className="mt-6" aria-label="Résumé d’aujourd’hui">
+        {isLoading ? (
+          <p>Chargement de votre journée…</p>
+        ) : error ? (
+          <p className="text-danger" role="alert">{error}</p>
+        ) : (
+          <DailySummaryCard totals={totals} target={target} />
+        )}
+      </section>
+
+      <div className="mt-4 flex flex-col gap-2">
+        <Button onClick={() => navigate("/journal")}>
+          Mon journal
+        </Button>
+        <Button onClick={() => navigate("/journal/add")}>
+          Ajouter un aliment
+        </Button>
+      </div>
     </div>
     );
 }

@@ -4,7 +4,8 @@ from betterself.models.user_models import User
 from betterself.services.onboarding_service import OnboardingService
 from betterself.prefix import ONBOARDING_URL
 from betterself.routers.users_router import get_onboarding_service
-from fastapi import APIRouter, Depends, status
+from betterself.services.goal_service import GoalTargetCalculationError
+from fastapi import APIRouter, Depends, HTTPException, status
 from betterself.schemas.onboarding_schemas import OnboardingCreate, OnboardingStatusRead, GoalPreviewRead
 
 router = APIRouter(prefix=ONBOARDING_URL, tags=["Onboarding"])
@@ -28,7 +29,13 @@ def complete_onboarding(
 ) -> OnboardingStatusRead:
     service = OnboardingService(db)
 
-    service.save_onboarding(current_user, onboarding_data)
+    try:
+        service.save_onboarding(current_user, onboarding_data)
+    except GoalTargetCalculationError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error),
+        )
     return OnboardingStatusRead(
         is_complete=True,
         missing_steps=[]
@@ -40,4 +47,10 @@ def preview_goal(
     payload: OnboardingCreate,
     service: OnboardingService = Depends(get_onboarding_service),
 ) -> GoalPreviewRead:
-    return service.preview_goal(goal_data=payload)
+    try:
+        return service.preview_goal(goal_data=payload)
+    except GoalTargetCalculationError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error),
+        )
