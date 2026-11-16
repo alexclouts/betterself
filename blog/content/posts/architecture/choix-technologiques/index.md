@@ -1,8 +1,8 @@
 ---
-title: "Les choix de l'architecture"
+title: "Une architecture API-first"
 header: ""
 date: 2026-10-17T16:30:00.000Z
-description: "Les décisions architecturales derrière BetterSelf : React, FastAPI, SQL et la séparation des responsabilités."
+description: "Le bilan des décisions d'architecture de BetterSelf : séparation API-first entre React et FastAPI, abandon de MVVM, persistance SQL et authentification par JWT."
 tags:
   - Architecture
   - React
@@ -20,9 +20,9 @@ width="500">}}
 
 # Une architecture complète
 
-Dans ma [publication précédente](https://alexclouts.github.io/betterself/posts/data_schema/), j’ai présenté la manière dont je souhaitais structurer les données de BetterSelf. J’y ai expliqué la séparation entre les utilisateurs, leurs profils, leurs mesures corporelles, leurs objectifs et leurs consommations alimentaires.
+Dans ma [publication précédente](https://alexclouts.github.io/betterself/posts/architecture/schemas-données/), j’ai présenté la manière dont je souhaitais structurer les données de BetterSelf. J’y ai expliqué la séparation entre les utilisateurs, leurs profils, leurs mesures corporelles, leurs objectifs et leurs consommations alimentaires.
 
-Au cours des dernières semaines, j'ai écrit plusieurs publications décrivant les raisons derrières l'architecture choisie pour la conception de ce projet. Vous pouvez consulter un résumé de ces choix sur [cette page](https://alexclouts.github.io/betterself/posts/technical_choices/architecture-globale/).
+Au cours des dernières semaines, j'ai écrit plusieurs publications décrivant les raisons derrières l'architecture choisie pour la conception de ce projet. Vous pouvez consulter un résumé de ces choix sur [cette page](https://alexclouts.github.io/betterself/posts/choix_techniques/architecture-globale/).
 
 ## L'organisation du code
 
@@ -58,7 +58,7 @@ De plus, l’application devra interroger l’API Open Food Facts pour récupér
 
 ## React + FastAPI
 
-Le choix de ces architectures a été expliqué dans ma publication portant sur [Mes choix techniques](https://alexclouts.github.io/betterself/posts/technical_choices/choix-techniques/), où je décris d'ailleurs ce qui les démarque des autres solutions.
+Le choix de ces architectures a été expliqué dans ma publication [React, FastAPI et Pydantic : mes choix techniques](https://alexclouts.github.io/betterself/posts/choix_techniques/choix-techniques/), où je décris d'ailleurs ce qui les démarque des autres solutions.
 
 Vous pouvez également retrouvé un comparatif de mon choix avec les alternatives que j'ai envisagé pour la conception de ce projet dans la documentation [ADR: Choix d'un frontend React](https://github.com/alexclouts/betterself/tree/main/docs/adr/react-frontend/index.md) et [ADR: Choix d'un backend FastAPI](https://github.com/alexclouts/betterself/tree/main/docs/adr/fastapi-backend/index.md).
 
@@ -72,13 +72,13 @@ Python est adapté à BetterSelf parce qu’il est utilisé à la fois pour le d
 
 ## SQL pour la persistance
 
-Pour la base de données, j’ai choisi une approche relationnelle SQL. Ce choix est d'ailleurs bien expliqué dans [cette publication](https://alexclouts.github.io/betterself/posts/technical_choices/choix-sql-hebergement/) portant sur les solutions d'hébergement.
+Pour la base de données, j’ai choisi une approche relationnelle SQL. Ce choix est d'ailleurs bien expliqué dans [cette publication](https://alexclouts.github.io/betterself/posts/choix_techniques/choix-sql-hebergement/) portant sur les solutions d'hébergement.
 
 Comme décrit plus haut, les données de l'application sont fortement structurées et liées entre elles. Un utilisateur possède un profil, plusieurs mesures corporelles, plusieurs objectifs et plusieurs consommations alimentaires. Une base relationnelle permet de représenter ces relations avec des clés primaires, des clés étrangères et des contraintes de validation.
 
 ### Alternatives rejetées
 
-Comme expliqué dans ma publication portant sur [les alternatives](https://alexclouts.github.io/betterself/posts/technical_choices/autres-alternatives/), d'autres solutions ont d'ailleurs été envisagées. J’ai considéré MongoDB, mais je l’ai rejeté parce que les données de BetterSelf sont fortement relationnelles.
+Comme expliqué dans ma publication portant sur [les alternatives](https://alexclouts.github.io/betterself/posts/choix_techniques/autres-alternatives/), d'autres solutions ont d'ailleurs été envisagées. J’ai considéré MongoDB, mais je l’ai rejeté parce que les données de BetterSelf sont fortement relationnelles.
 
 J’ai aussi envisagé Firebase, qui permettrait un déploiement rapide. Par contre, cette solution offre moins de contrôle sur le modèle relationnel et sur les requêtes complexes. Pour un projet où je souhaite comprendre et maîtriser l’architecture des données, une base SQL est plus appropriée.
 
@@ -86,7 +86,7 @@ J’ai aussi envisagé Firebase, qui permettrait un déploiement rapide. Par con
 
 Pour l’authentification, j’ai choisi des jetons JWT (JSON Web Tokens). Vous pouvez consulter mon [ADR: Authentification JWT Token](https://github.com/alexclouts/betterself/tree/main/docs/adr/auth-jwt/index.md).
 
-Les explications plus complètes à ce sujet sont d'ailleurs abordé dans ma publication portant sur le [processus d'authentification](https://alexclouts.github.io/betterself/posts/authentication/).
+Les explications plus complètes à ce sujet sont d'ailleurs abordé dans ma publication [Sécuriser l'authentification](https://alexclouts.github.io/betterself/posts/choix_techniques/methode-authentification/).
 
 Lorsqu’un utilisateur se connecte, le backend valide son courriel et son mot de passe. Si les identifiants sont corrects, FastAPI génère un jeton signé et le retourne au frontend. React conservera ensuite ce jeton et l’inclura dans les requêtes protégées.
 

@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { FoodCategory } from "../../api/generated/foodCategory";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { formatNutrient } from "../../lib/food";
-import { readJournalContext } from "../../lib/journal";
+import { readJournalNavState } from "../../lib/journal";
+import { queryKeys } from "../../lib/queryClient";
 import { foodService } from "../../services/foodService";
 import Card from "../../components/ui/Card";
 
+// Les catégories d'aliments et leurs libellés affichés.
 const CATEGORY_LABELS: Record<FoodCategory, string> = {
   vegetables_and_fruits: "Fruits et légumes",
   cereals: "Céréales",
@@ -23,6 +26,7 @@ const CATEGORY_LABELS: Record<FoodCategory, string> = {
   other: "Autre",
 };
 
+// Les champs numériques et leurs unités affichées.
 type NumericField =
   | "reference_weight_g"
   | "calories_kcal"
@@ -58,12 +62,14 @@ function caloriesMatchMacros(calories: number, protein: number, carbs: number, f
 
 export function FoodCreatePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
 
   // Préremplit le nom avec la recherche effectuée, si disponible.
   const initialName = (location.state as { name?: string } | null)?.name ?? "";
-  const journalContext = readJournalContext(location.state);
+  const journalNavState = readJournalNavState(location.state);
 
+  // Déclaration des variables d'état pour le formulaire de création d'aliment.
   const [name, setName] = useState(initialName);
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState<FoodCategory | "">("");
@@ -84,25 +90,18 @@ export function FoodCreatePage() {
   ) as Record<NumericField, number>;
 
 
+  // Vérifie chaque champ numérique pour les erreurs.
   const fieldErrors = Object.fromEntries(
-    // Vérifie chaque champ numérique pour les erreurs.
     NUMERIC_FIELDS.map(({ key, max }) => {
       const value = parsed[key];
 
-      // Si le champ est vide, pas d'erreur.
-      if (values[key].trim() === "") 
+      if (values[key].trim() === "") // Champ vide, pas d'erreur
         return [key, null];
-
-      // Si la valeur n'est pas un nombre fini, erreur.
-      if (!Number.isFinite(value)) 
+      if (!Number.isFinite(value)) // Valeur non finie
         return [key, "Valeur invalide."];
-
-      // Vérifie que la valeur n'est pas négative (ou strictement positive pour le poids de référence).
-      if (key === "reference_weight_g" ? value <= 0 : value < 0)
+      if (key === "reference_weight_g" ? value <= 0 : value < 0) // Valeurs négatives non autorisées
         return [key, key === "reference_weight_g" ? "Doit être supérieur à 0." : "Ne peut pas être négatif."];
-      
-      // Vérifie que la valeur ne dépasse pas le maximum autorisé.
-      if (max !== undefined && value > max) return [key, `Maximum ${max}.`];
+      if (max !== undefined && value > max) return [key, `Maximum ${max}.`]; // Maximum autorisé
         return [key, null];
     }),
   ) as Record<NumericField, string | null>;
@@ -127,7 +126,7 @@ export function FoodCreatePage() {
     setValues((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.SubmitEvent) {
     event.preventDefault();
     if (!canSubmit) 
       return;
@@ -142,8 +141,10 @@ export function FoodCreatePage() {
         category: category || null,
         ...parsed,
       });
+      // Le nouvel aliment doit apparaître dans les prochaines recherches.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.foods.all });
       // Enchaîne directement sur l'ajout au journal avec l'aliment créé.
-      navigate(`/journal/food/${food.id}`, { replace: true, state: { ...journalContext, food } });
+      navigate(`/journal/food/${food.id}`, { replace: true, state: { ...journalNavState, food } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Impossible de créer cet aliment.");
     } finally {

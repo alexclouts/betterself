@@ -1,8 +1,8 @@
 ---
-title: "Configuration de GitHub et l'IA"
+title: "Premiers défis : uv, Git et l'IA"
 header: ""
 date: 2026-09-26T08:45:00.000Z
-description: "Configurer le projet GitHub et m'approprier l'IA."
+description: "Mes premiers obstacles avec la configuration de uv et du pipeline CI, l'apprentissage de Git, et une façon de travailler avec l'IA en gardant le rôle de chef d'orchestre."
 tags:
   - IA
   - Défi

@@ -2,7 +2,7 @@
 title: "Validation et gestion des erreurs"
 header: ""
 date: 2026-10-30T00:10:15.000Z
-description: "Comment valider les données d'un modèle et choix du code d'erreur (404, 403) associé à la mise à jour d'un enregistrement."
+description: "Où placer la validation des mesures de poids, et pourquoi modifier la mesure d'un autre utilisateur retourne une erreur 404 plutôt que 403."
 tags:
   - Architecture
   - FastAPI

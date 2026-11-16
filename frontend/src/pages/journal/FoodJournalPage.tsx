@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FoodConsumptionRead } from "../../api/generated/foodConsumptionRead";
 import type { MealType } from "../../api/generated/mealType";
 import Button from "../../components/ui/Button";
@@ -12,10 +13,12 @@ import {
   MEAL_TYPE_ORDER,
   sumNutrients,
 } from "../../lib/food";
+import { queryKeys } from "../../lib/queryClient";
 import { journalService } from "../../services/journalService";
 
 export function FoodJournalPage() {
   const navigate = useNavigate();
+  // Recherche des paramètres de l'URL pour déterminer la journée affichée.
   const [searchParams, setSearchParams] = useSearchParams();
 
   // La journée affichée est dans l'URL (?date=YYYY-MM-DD) ; aujourd'hui par défaut.
@@ -23,25 +26,44 @@ export function FoodJournalPage() {
   const dayKey = parseDateKey(requestedDate) ? requestedDate! : todayKey();
   const isToday = dayKey === todayKey();
 
-  const { entries, setEntries, totals, target, isLoading, error, setError } =
-    useJournalDay(dayKey);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  // État du journal pour la journée affichée.
+  const { entries, totals, target, isLoading, error: loadError } = useJournalDay(dayKey);
+
+  const queryClient = useQueryClient();
+  // Suppression d'une entrée.
+  const deleteMutation = useMutation({
+    mutationFn: (entryId: string) => journalService.deleteEntry(entryId),
+    onSuccess: (_result, entryId) => {
+      // Retire l'entrée immédiatement de la journée affichée…
+      queryClient.setQueryData<FoodConsumptionRead[]>(
+        queryKeys.journal.day(dayKey),
+        (current) => current?.filter((item) => item.id !== entryId),
+      );
+      // …puis marque tout le journal comme périmé (accueil, autres journées).
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journal.all });
+    },
+  });
+
+  // Identifiant de l'entrée en cours de suppression, pour désactiver son bouton.
+  const deletingId = deleteMutation.isPending ? deleteMutation.variables : null;
+  const error = loadError ?? deleteMutation.error?.message ?? null;
 
   // Regroupe les entrées par repas, dans l'ordre de la journée.
   const entriesByMeal = useMemo(() => {
-    const groups = Object.fromEntries(
-      MEAL_TYPE_ORDER.map((meal) => [meal, [] as FoodConsumptionRead[]]),
-    ) as Record<MealType, FoodConsumptionRead[]>;
+    const groups = Object.fromEntries(MEAL_TYPE_ORDER.map((meal) => [meal, [] as FoodConsumptionRead[]])) as Record<MealType, FoodConsumptionRead[]>;
 
+    // Initialise les groupes de repas avec des tableaux vides.
     for (const entry of entries) {
       groups[entry.meal_type]?.push(entry);
     }
+    // Trie les entrées de chaque repas par ordre chronologique.
     for (const meal of MEAL_TYPE_ORDER) {
       groups[meal].sort((a, b) => a.consumed_at.localeCompare(b.consumed_at));
     }
     return groups;
   }, [entries]);
 
+  // Navigue vers la journée spécifiée.
   function goToDay(key: string) {
     if (key === todayKey()) {
       setSearchParams({}, { replace: true });
@@ -50,26 +72,27 @@ export function FoodJournalPage() {
     }
   }
 
+  // Ajoute un aliment au journal pour le repas spécifié.
   function handleAdd(mealType: MealType) {
     navigate("/journal/add", { state: { mealType, date: dayKey } });
   }
 
-  async function handleDelete(entry: FoodConsumptionRead) {
+  // Ouvre le détail d'une entrée du journal.
+  function handleOpen(entry: FoodConsumptionRead) {
+    console.log(entry);
+
+    if (!entry.food_id) 
+      return;
+
+    navigate(`/journal/entry/${entry.id}`, { state: { entry } });
+  }
+
+  // Supprime une entrée du journal, après confirmation.
+  function handleDelete(entry: FoodConsumptionRead) {
     if (!window.confirm(`Retirer « ${entry.item_name_snapshot} » du journal ?`)) {
       return;
     }
-
-    setDeletingId(entry.id);
-    setError(null);
-
-    try {
-      await journalService.deleteEntry(entry.id);
-      setEntries((current) => current.filter((item) => item.id !== entry.id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible de supprimer cette entrée.");
-    } finally {
-      setDeletingId(null);
-    }
+    deleteMutation.mutate(entry.id);
   }
 
   return (
@@ -156,7 +179,16 @@ export function FoodJournalPage() {
                   <ul className="divide-y divide-border">
                     {mealEntries.map((entry) => (
                       <li key={entry.id} className="flex items-center gap-3 py-3">
-                        <div className="min-w-0 flex-1">
+                        {/* Un clic ouvre la page de l'aliment pour modifier l'entrée
+                            (les entrées de recettes ne sont pas modifiables ici). */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleOpen(entry);
+                          }}
+                          disabled={!entry.food_id}
+                          className="min-w-0 flex-1 rounded-lg px-2 py-1 hover:bg-surface-raised disabled:cursor-default disabled:hover:bg-transparent"
+                        >
                           <span className="block truncate text-foreground">
                             {entry.item_name_snapshot}
                           </span>
@@ -164,11 +196,13 @@ export function FoodJournalPage() {
                             {formatNutrient(entry.quantity_g)} g ·{" "}
                             {formatNutrient(entry.calories_kcal, 0)} kcal
                           </span>
-                        </div>
+                        </button>
 
                         <button
                           type="button"
-                          onClick={() => void handleDelete(entry)}
+                          onClick={() => {
+                            void handleDelete(entry)}
+                          }
                           disabled={deletingId === entry.id}
                           aria-label={`Retirer ${entry.item_name_snapshot}`}
                           className="rounded-full px-3 py-1 text-muted hover:bg-surface-raised hover:text-danger disabled:opacity-50"

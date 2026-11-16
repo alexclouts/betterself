@@ -15,7 +15,6 @@ const steps: OnboardingStep[] = [
     "review",
 ];
 
-
 export function OnboardingPage() {
   const navigate = useNavigate();
 

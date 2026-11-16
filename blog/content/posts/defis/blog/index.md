@@ -2,7 +2,7 @@
 title: "Présentation du Blog"
 header: ""
 date: 2026-10-04T14:30:00.000Z
-description: "Présentation du blog et des problématiques rencontrées lors du déploiement et correction de bogue."
+description: "Une vidéo de présentation du blog, suivie de la correction d'un bogue de navigation dans la section « Étapes du projet »."
 tags:
   - Vidéo
   - Défi

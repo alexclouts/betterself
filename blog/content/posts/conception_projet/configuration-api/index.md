@@ -1,8 +1,8 @@
 ---
-title: "Déploiement de FastAPI"
+title: "Connecter le frontend au backend"
 header: ""
 date: 2026-10-18T00:04:00.000Z
-description: "Établir une connexion API entre le frontend et le backend, politique CORS."
+description: "Les obstacles rencontrés pour faire communiquer le frontend Vite et l'API FastAPI : un pyproject.toml en trop, puis une politique CORS à configurer."
 tags:
   - FastAPI
   - Problème

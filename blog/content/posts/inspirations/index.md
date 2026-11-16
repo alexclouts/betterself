@@ -2,7 +2,7 @@
 title: "La première impression"
 header: ""
 date: 2026-09-26T08:45:00.000Z
-description: "Logo, processus de On Boarding et recherche d'inspiration."
+description: "La création du logo, l'ébauche du processus d'onboarding et une sélection de designs qui inspireront l'interface de BetterSelf."
 tags:
   - Idée
   - Inspiration

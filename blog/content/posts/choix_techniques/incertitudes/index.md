@@ -2,7 +2,7 @@
 title: "Incertitudes et questionnements"
 header: ""
 date: 2026-09-25T08:50:00.000Z
-description: "Les principales incertitudes techniques qui devront être résolues pendant le développement."
+description: "Les questions encore ouvertes au début du projet : l'hébergement, l'authentification, la structure du frontend React et l'intégration de l'API Open Food Facts."
 tags:
   - Incertitude
   - Questionnement

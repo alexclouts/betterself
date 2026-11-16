@@ -2,7 +2,7 @@
 title: "Conception des modèles de données SQL"
 header: ""
 date: 2026-11-06T00:09:02.000Z
-description: "Défis et apprentissages rencontrés lors de la conception des modèles de données."
+description: "Trois leçons tirées de la création des neuf tables SQLAlchemy : regrouper les fonctions dupliquées, détecter les doublons avec jscpd et comprendre les relationships."
 tags:
   - FastAPI
   - IA
@@ -20,7 +20,7 @@ width="500">}}
 
 # Développer les tables SQLAlchemy
 
-Cet article porte sur les apprentissages et les défis que j'ai rencontré lors de la conception des tables de ma base de données. Au total, 9 tables ont été construites et chacune d'elle respecte la même architecture globale. Elle est décrite dans la dernière [publication](https://alexclouts.github.io/betterself/posts/conception_projet/principes_dry_kiss/).
+Cet article porte sur les apprentissages et les défis que j'ai rencontré lors de la conception des tables de ma base de données. Au total, 9 tables ont été construites et chacune d'elle respecte la même architecture globale. Elle est décrite dans la dernière [publication](https://alexclouts.github.io/betterself/posts/conception_projet/principes-dry-kiss/).
 
 J'aborderai ici **3 sujets** qui ont suscité une réflexion inattendue lors du développement. J'aborderai la façon de faire que j'ai adopté pour gérer les fonctions dupliquées entre plusieurs services, l'ajout de la librairie `jscpd` pour m'aider à détecter le code _copier/coller_ entre mes fichiers, ainsi que la découverte des relations (`relationship`) inter-modèles et mes considérations en matière de sécurité.
 

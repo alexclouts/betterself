@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import type { FoodConsumptionRead } from "../../api/generated/foodConsumptionRead";
 import type { FoodRead } from "../../api/generated/foodRead";
 import { MealType } from "../../api/generated/mealType";
 import Button from "../../components/ui/Button";
@@ -10,10 +12,14 @@ import {
   formatNutrient,
   getDefaultQuantityG,
   MEAL_TYPE_LABELS,
-} from "../../lib/food";
+  toNumber,
+} from "../../lib/food"
+// Services et utilitaires pour la gestion des aliments et du journal.
 import { foodService } from "../../services/foodService";
-import { consumedAtForDay, formatDayLabel, todayKey } from "../../lib/date";
-import { journalUrl, readJournalContext } from "../../lib/journal";
+import { journalService } from "../../services/journalService";
+import { queryKeys } from "../../lib/queryClient";
+import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
+import { journalUrl, readJournalNavState } from "../../lib/journal";
 import Card from "../../components/ui/Card";
 
 const MAX_QUANTITY_G = 5000;
@@ -34,50 +40,96 @@ function getDefaultMealType(date = new Date()): MealType {
 
 
 export function FoodAddPage() {
+  /*
+   * Variables d'état et constantes pour la gestion de l'ajout ou 
+   * de la modification d'une consommation alimentaire.
+   */
+
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  // Accès au cache TanStack Query, pour signaler que le journal a changé.
+  const queryClient = useQueryClient();
+  // /journal/food/:id → ajout ; 
+  // /journal/entry/:entryId → modification d'une entrée.
+  const { id, entryId } = useParams<{ id: string; entryId: string }>();
+
+  // Détermine si l'on est en mode modification.
+  const isEditing = Boolean(entryId);
+
+  // Lecture de l'état de navigation et récupération des données transmises.
   const location = useLocation();
+  const state = location.state as { food?: FoodRead; entry?: FoodConsumptionRead } | null;
 
-  // L'aliment peut être transmis par la page de recherche pour éviter un appel.
-  const foodFromState = (location.state as { food?: FoodRead } | null)?.food;
-  // Si l'aliment n'a pas été transmis par l'état, il sera chargé depuis le service.
-  const initialFood = foodFromState && foodFromState.id === id ? foodFromState : null;
-  // Repas et journée choisis depuis le journal, le cas échéant.
-  const journalContext = readJournalContext(location.state);
-  const dayKey = journalContext.date ?? todayKey();
+  const foodFromState = state?.food;
+  const initialFood = !isEditing && foodFromState && foodFromState.id === id ? foodFromState : null;
+  const entryFromState = state?.entry && state.entry.id === entryId ? state.entry : null;
+  const journalState = readJournalNavState(location.state);
 
+
+  // Déclaration des variables d'état pour l'aliment, l'entrée, la quantité et le type de repas.
   const [food, setFood] = useState<FoodRead | null>(initialFood);
+  const [entry, setEntry] = useState<FoodConsumptionRead | null>(null);
   const [quantityInput, setQuantityInput] = useState(
     initialFood ? String(getDefaultQuantityG(initialFood)) : "",
   );
   const [mealType, setMealType] = useState<MealType>(
-    () => journalContext.mealType ?? getDefaultMealType(),
+    () => journalState.mealType ?? getDefaultMealType(),
   );
+
+  // État pour le chargement et la soumission du formulaire, ainsi que pour les erreurs.
   const [isLoading, setIsLoading] = useState(!initialFood);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // En modification, la journée est celle de l'entrée.
+  const dayKey = entry ? toDateKey(new Date(entry.consumed_at)): journalState.date ?? todayKey();
+
+  /*
+   * Effet déclenché lors de l'accès à la page pour 
+   * charger l'aliment et l'entrée correspondants.
+   */
+
   useEffect(() => {
-    if (food || !id) return;
+    if (food) 
+      return;
 
     let cancelled = false;
     setIsLoading(true);
 
-    // Chargement de l'aliment depuis le service
-    foodService.getFood(id).then((result) => {
-      if (cancelled) 
-        return;
+    async function load() {
+      if (entryId) {
+        // Modification : charge l'entrée, puis l'aliment correspondant.
+        const loadedEntry = entryFromState ?? (await journalService.getEntry(entryId));
+        if (!loadedEntry.food_id) {
+          throw new Error("Cette entrée provient d’une recette et ne peut pas être modifiée ici.");
+        }
+        const loadedFood = await foodService.getFood(loadedEntry.food_id);
+
+        if (cancelled) 
+          return;
+
+        // Mise à jour de l'état avec l'entrée et l'aliment chargés.
+        setEntry(loadedEntry);
+        setFood(loadedFood);
+        setQuantityInput(String(toNumber(loadedEntry.quantity_g)));
+        setMealType(loadedEntry.meal_type);
+
+      } else if (id) {
+        // Ajout : chargement de l'aliment depuis le service.
+        const loadedFood = await foodService.getFood(id);
+        if (cancelled) 
+          return;
         
-      setFood(result);
-      setQuantityInput(String(getDefaultQuantityG(result)));
-      })
+        setFood(loadedFood);
+        setQuantityInput(String(getDefaultQuantityG(loadedFood)));
+      }
+    }
+    // On veut charger l'aliment et l'entrée lorsque l'utilisateur accède à cette page
+    load()
       .catch((err) => {
         if (cancelled) 
           return;
 
-        setError(
-          err instanceof Error ? err.message : "Impossible de charger cet aliment.",
-        );
+        setError(err instanceof Error ? err.message : "Impossible de charger cet aliment.");
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -86,14 +138,10 @@ export function FoodAddPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, food]);
+  }, [id, entryId, food]);
 
-
-  // Accepte la virgule comme séparateur décimal.
+  // Validation de la quantité saisie.
   const quantityG = Number(quantityInput.replace(",", "."));
-
-
-  // Détermine si la quantité saisie est valide.
   const isQuantityValid = quantityInput.trim() !== "" && Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G;
 
   // Calcule les nutriments pour la quantité saisie.
@@ -113,16 +161,27 @@ export function FoodAddPage() {
     setError(null);
 
     try {
-      // Ajout de l'aliment au journal avec la quantité et le type de repas spécifiés.
-      await foodService.addFoodToJournal({
-        food_id: food.id,
-        quantity_g: quantityG,
-        meal_type: mealType,
-        consumed_at: consumedAtForDay(dayKey),
-      });
+      if (entry) {
+        // Modification de l'entrée : l'API recalcule les nutriments.
+        await journalService.updateEntry(entry.id, {
+          quantity_g: quantityG,
+          meal_type: mealType,
+        });
+      } else {
+        // Ajout de l'aliment au journal avec la quantité et le type de repas spécifiés.
+        await foodService.addFoodToJournal({
+          food_id: food.id,
+          quantity_g: quantityG,
+          meal_type: mealType,
+          consumed_at: consumedAtForDay(dayKey),
+        });
+      }
+      // Le journal a changé : l'accueil et le journal rechargeront leurs données.
+      await queryClient.invalidateQueries({ queryKey: queryKeys.journal.all });
       navigate(journalUrl(dayKey), { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible d’ajouter cet aliment au journal.");
+      const fallback = entry ? "Impossible de modifier cette entrée.": "Impossible d’ajouter cet aliment au journal.";
+      setError(err instanceof Error ? err.message : fallback);
     } finally {
       setIsSubmitting(false);
     }
@@ -141,8 +200,12 @@ export function FoodAddPage() {
     return (
       <main className="mx-auto w-full max-w-md px-4 py-6">
         <p className="text-danger">{error ?? "Aliment introuvable."}</p>
-        <Button variant="ghost" className="mt-4" onClick={() => navigate("/journal/add")}>
-          Retour à la recherche
+        <Button
+          variant="ghost"
+          className="mt-4"
+          onClick={() => navigate(isEditing ? "/journal" : "/journal/add")}
+        >
+          {isEditing ? "Retour au journal" : "Retour à la recherche"}
         </Button>
       </main>
     );
@@ -165,7 +228,10 @@ export function FoodAddPage() {
         Portion de référence : {formatNutrient(food.reference_weight_g)} g
       </p>
       {dayKey !== todayKey() && (
-        <p className="mt-1">Ajout au journal de : {formatDayLabel(dayKey).toLowerCase()}</p>
+        <p className="mt-1">
+          {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}
+          {formatDayLabel(dayKey).toLowerCase()}
+        </p>
       )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -231,7 +297,9 @@ export function FoodAddPage() {
           className="w-full mt-2"
           disabled={!isQuantityValid || isSubmitting}
         >
-          {isSubmitting ? "Ajout…" : "Ajouter au journal"}
+          {entry
+            ? isSubmitting ? "Modification…" : "Modifier l’entrée"
+            : isSubmitting ? "Ajout…" : "Ajouter au journal"}
         </Button>
       </form>
     </main>

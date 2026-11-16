@@ -1,8 +1,11 @@
 // src/lib/date.ts
 
 /*
- * Utilitaires de dates « locales » (fuseau de l'appareil) pour le journal.
+ * Contient des utilitaires de dates « locales » (fuseau de l'appareil) pour le journal.
  * Une journée est identifiée par une clé "YYYY-MM-DD" dans le fuseau local.
+ * 
+ * Fournit des fonctions pour convertir, formater et manipuler les dates locales.
+ * Inclut également des fonctions pour obtenir les bornes d'une journée et le moment d'une consommation.
  */
 
 // Retourne la clé "YYYY-MM-DD" d'une date dans le fuseau local.

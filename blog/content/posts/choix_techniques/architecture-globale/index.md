@@ -2,7 +2,7 @@
 title: "Résumé de l'architecture"
 header: ""
 date: 2026-09-25T08:55:00.000Z
-description: "Résumé des choix techniques actuels et présentation de l'architecture globale."
+description: "Un tableau récapitulatif des technologies retenues pour la première version de BetterSelf, et la séparation entre le frontend, le backend et la base de données."
 tags:
   - Architecture
 categories:

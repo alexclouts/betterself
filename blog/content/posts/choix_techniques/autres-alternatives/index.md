@@ -2,7 +2,7 @@
 title: "Les alternatives envisagées"
 header: ""
 date: 2026-09-25T08:45:00.000Z
-description: "Les principales technologies envisagées avant de retenir React, FastAPI et la base de données SQL."
+description: "Les technologies écartées (Kotlin, Vue.js, Node.js, Django, Flask, MongoDB et PostgreSQL dès le départ) et les raisons qui m'ont mené vers React, FastAPI et SQL."
 tags:
   - Alternative
   - NoSQL

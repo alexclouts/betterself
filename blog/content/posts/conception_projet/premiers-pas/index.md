@@ -2,7 +2,7 @@
 title: "Premières étapes de conception"
 header: ""
 date: 2026-10-23T20:04:00.000Z
-description: "Début du projet: ajustements des conversations avec l'IA et enjeux d'efficacité."
+description: "Comment j'ai recadré les suggestions trop rapides de l'IA pour démarrer le backend en Test-Driven Development, en commençant par la base de données."
 tags:
   - IA
   - Incertitude
@@ -21,7 +21,7 @@ width="500">}}
 
 Maintenant que l'architecture a été choisie, je veux savoir ce qui constitue le meilleur point de départ pour débuter la conception du projet. Je crois qu'il est facile de tomber dans le "piège" de s'attaquer tout de suite au frontend, comme il s'agit d'une façon concrète de voir ma progression de jour en jour. J'ai donc demandé à l'IA de m'aider à situer les premières étapes sur lesquelles je pourrai m'appuyer pour aller de l'avant.
 
-La prochaine section illustre une conversation condensée que j'ai eu avec _Perplexity_. Celle-ci m'offre l'option de convertir les idées échangées sous forme de fichier `Markdown`. Elle fait suite à l'implémentation de FastAPI et de la politique CORS, discuté dans la [dernière publication](https://alexclouts.github.io/betterself/posts/configuration-api/).
+La prochaine section illustre une conversation condensée que j'ai eu avec _Perplexity_. Celle-ci m'offre l'option de convertir les idées échangées sous forme de fichier `Markdown`. Elle fait suite à l'implémentation de FastAPI et de la politique CORS, discuté dans la [dernière publication](https://alexclouts.github.io/betterself/posts/conception_projet/configuration-api/).
 
 ## Conversation avec l'IA
 

@@ -1,8 +1,8 @@
 ---
-title: "Processus d'authentification"
+title: "Sécuriser l'authentification"
 header: ""
 date: 2026-10-03T22:10:00.000Z
-description: "Processus d'authentification des utilisateurs, sécurité et gestion des sessions."
+description: "Comment BetterSelf authentifiera ses utilisateurs : courriel et mot de passe haché, jetons JWT à courte durée, cookie HttpOnly et bonnes pratiques de l'OWASP."
 tags:
   - Authentification
   - SQL

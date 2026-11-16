@@ -2,6 +2,14 @@ import type { FoodConsumptionRead } from "../api/generated/foodConsumptionRead";
 import type { FoodRead } from "../api/generated/foodRead";
 import { MealType } from "../api/generated/mealType";
 
+/**
+ * Contient toutes les fonctions utilitaires pour la gestion des aliments et de leurs valeurs nutritionnelles.
+ * 
+ * Fournit des fonctions pour convertir, formater et calculer les valeurs nutritionnelles des aliments.
+ * Inclut également des fonctions pour additionner les valeurs nutritionnelles de plusieurs consommations.
+ */
+
+
 // Ordre d'affichage des repas dans la journée.
 export const MEAL_TYPE_ORDER: MealType[] = [
   MealType.breakfast,

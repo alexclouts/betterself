@@ -1,8 +1,8 @@
 ---
-title: "Les choix d'hébergement"
+title: "Base de données SQL et hébergement"
 header: ""
 date: 2026-09-25T08:40:00.000Z
-description: "La stratégie d'hébergement et la base de données comme solution de stockage."
+description: "Pourquoi une base de données relationnelle convient aux données de BetterSelf, et comment Railway et GitHub Pages pourraient héberger le backend et le frontend."
 tags:
   - SQL
   - Hébergement

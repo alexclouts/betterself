@@ -4,16 +4,19 @@ import { parseDateKey, todayKey } from "./date";
 import { isMealType } from "./food";
 
 /*
- * Contexte transmis entre les pages du parcours d'ajout
- * (journal → recherche → [création] → ajout), via l'état de navigation.
+ * Gestion de l'état de navigation transmis entre les pages du parcours d'ajout
+ * (journal → recherche → [création] → ajout), via location.state (pas un contexte React).
+ * 
+ * Un state de navigation conserve les données à travers les différentes pages du parcours d'ajout.
  */
-export type JournalContext = {
+
+export type JournalNavState = {
   mealType?: MealType;
   date?: string; // "YYYY-MM-DD"
 };
 
-// Lit le contexte du journal depuis location.state, en ignorant les valeurs invalides.
-export function readJournalContext(state: unknown): JournalContext {
+// Lit l'état de navigation du journal depuis location.state, en ignorant les valeurs invalides.
+export function readJournalNavState(state: unknown): JournalNavState {
   if (!state || typeof state !== "object") return {};
   const { mealType, date } = state as Record<string, unknown>;
 

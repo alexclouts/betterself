@@ -2,7 +2,7 @@
 title: "Les schémas de données"
 header: ""
 date: 2026-10-07T21:56:00.000Z
-description: "Réfléchir à comment organiser les données dans l'application de la meilleure manière envisageable, selon les tâches à accomplir."
+description: "Comment j'ai traduit chaque fonctionnalité de BetterSelf en tables : utilisateurs, profil, historique de poids, objectifs, aliments, recettes et journal alimentaire."
 tags:
   - SQL
   - Architecture
@@ -28,7 +28,7 @@ L'authentification comprend la connexion de l'utilisateur à l'application. Cett
 
 ### Sauvegarde du hash
 
-Comme je l'ai expliqué dans une [publication](https://alexclouts.github.io/betterself/posts/authentication/) portant sur l'authentification la semaine dernière, c'est important de **ne pas sauvegarder le mot de passe en _plain text_ dans la base de données**. C'est ici que le hash entre en jeu. On va plutôt utiliser des algorithmes pour encrypter le mot de passe, tels que **Argon2id et bcrypt**.
+Comme je l'ai expliqué dans une [publication](https://alexclouts.github.io/betterself/posts/choix_techniques/methode-authentification/) portant sur l'authentification la semaine dernière, c'est important de **ne pas sauvegarder le mot de passe en _plain text_ dans la base de données**. C'est ici que le hash entre en jeu. On va plutôt utiliser des algorithmes pour encrypter le mot de passe, tels que **Argon2id et bcrypt**.
 
 ## Autres informations du profile
 

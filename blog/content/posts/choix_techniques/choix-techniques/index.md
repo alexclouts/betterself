@@ -1,8 +1,8 @@
 ---
-title: "Mes choix techniques"
+title: "React, FastAPI et Pydantic : mes choix techniques"
 header: ""
 date: 2026-09-25T08:35:00.000Z
-description: "Présentation des choix du framework et des technologies frontend / backend."
+description: "Pourquoi j'ai choisi React en PWA pour le frontend, ainsi que Python, FastAPI et Pydantic pour le backend de BetterSelf."
 tags:
   - Frontend
   - Backend

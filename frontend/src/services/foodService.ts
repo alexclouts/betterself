@@ -9,17 +9,23 @@ import type { SearchFoodsFoodsGetParams } from "../api/generated/searchFoodsFood
 
 export const foodService = {
     // Recherche des aliments par nom, marque ou référence externe
+    // `signal` permet d'annuler la requête (ex. : recherche devenue inutile).
     async searchFoods(
         query: string,
         options: Omit<SearchFoodsFoodsGetParams, "query"> = {},
+        signal?: AbortSignal,
     ): Promise<FoodRead[]> {
         try {
+            // Récupère la fonction de recherche des aliments depuis l'API.
             const { searchFoodsFoodsGet } = getFoods();
-            return await searchFoodsFoodsGet({
-                query: query.trim(),
-                limit: 20,
-                ...options,
-            });
+            return await searchFoodsFoodsGet(
+                {
+                    query: query.trim(),
+                    limit: 20,
+                    ...options,
+                },
+                { signal },
+            );
         } catch (error) {
             throw new Error(
                 getErrorMessage(

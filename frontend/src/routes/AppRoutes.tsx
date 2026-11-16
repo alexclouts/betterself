@@ -28,6 +28,7 @@ export function AppRoutes() {
                     <Route path="/journal/add" element={<FoodSearchPage />} />
                     <Route path="/journal/food/new" element={<FoodCreatePage />} />
                     <Route path="/journal/food/:id" element={<FoodAddPage />} />
+                    <Route path="/journal/entry/:entryId" element={<FoodAddPage />} />
                 </Route>
                 
             </Route>

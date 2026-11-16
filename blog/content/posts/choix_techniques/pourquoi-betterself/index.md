@@ -1,7 +1,7 @@
 ---
 title: "Pourquoi BetterSelf?"
 date: 2026-09-25T08:15:00.000Z
-description: "Présentation du projet BetterSelf, de son public cible et du problème que l'application cherche à résoudre."
+description: "BetterSelf veut rendre le suivi alimentaire plus rapide et plus fiable grâce à une application web Open Source et gratuite, pensée pour ceux qui consignent leurs repas au quotidien."
 tags:
   - Problème
   - Idée

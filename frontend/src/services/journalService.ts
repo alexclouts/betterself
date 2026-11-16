@@ -2,6 +2,7 @@ import axios from "axios";
 import { getErrorMessage } from "../api/axios";
 import { getFoodConsumptions } from "../api/generated/food-consumptions/food-consumptions";
 import type { FoodConsumptionRead } from "../api/generated/foodConsumptionRead";
+import type { FoodConsumptionUpdate } from "../api/generated/foodConsumptionUpdate";
 import type { GoalTargetRead } from "../api/generated/goalTargetRead";
 import { getNutritionGoal } from "../api/generated/nutrition-goal/nutrition-goal";
 import { getDayBoundsIso } from "../lib/date";
@@ -23,6 +24,33 @@ export const journalService = {
         } catch (error) {
             throw new Error(
                 getErrorMessage(error, "Impossible de charger le journal.")
+            );
+        }
+    },
+
+    // Récupère une consommation du journal.
+    async getEntry(consumptionId: string): Promise<FoodConsumptionRead> {
+        try {
+            const { getFoodConsumptionFoodConsumptionsConsumptionIdGet } = getFoodConsumptions();
+            return await getFoodConsumptionFoodConsumptionsConsumptionIdGet(consumptionId);
+        } catch (error) {
+            throw new Error(
+                getErrorMessage(error, "Impossible de charger cette entrée.")
+            );
+        }
+    },
+
+    // Modifie une consommation (les nutriments sont recalculés par l'API).
+    async updateEntry(
+        consumptionId: string,
+        payload: FoodConsumptionUpdate,
+    ): Promise<FoodConsumptionRead> {
+        try {
+            const { updateFoodConsumptionFoodConsumptionsConsumptionIdPatch } = getFoodConsumptions();
+            return await updateFoodConsumptionFoodConsumptionsConsumptionIdPatch(consumptionId, payload);
+        } catch (error) {
+            throw new Error(
+                getErrorMessage(error, "Impossible de modifier cette entrée.")
             );
         }
     },
