@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
@@ -34,8 +36,8 @@ def create_measurement(
 def get_measurements(
     service: MeasurementRepository = Depends(get_measurement_service),
     current_user: User = Depends(get_current_user),
-    start_date: str = None,
-    end_date: str = None
+    start_date: date | None = None,
+    end_date: date | None = None,
 ):
     return service.get_measurements_for_user(user=current_user, start_date=start_date, end_date=end_date)
 

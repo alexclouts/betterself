@@ -129,7 +129,6 @@ class GoalTarget(Base):
             "user_id",
             unique=True,
             postgresql_where=text("valid_until IS NULL"),
-            sqlite_where=text("valid_until IS NULL"),
         ),
         # Index pour accélérer la recherche de l'historique des cibles
         Index(

@@ -1,0 +1,26 @@
+# Base de données PostgreSQL pour le développement local.
+# Démarrage : docker compose up -d
+# Arrêt     : docker compose down        (les données sont conservées dans le volume)
+# Réinitialisation complète : docker compose down -v
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: betterself
+      POSTGRES_PASSWORD: betterself
+      POSTGRES_DB: betterself
+    ports:
+      # Exposé seulement sur la machine locale, pas sur le réseau.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Crée la base betterself_test au premier démarrage (volume vide seulement).
+      - ./backend/docker/init-test-db.sql:/docker-entrypoint-initdb.d/01-init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U betterself -d betterself"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

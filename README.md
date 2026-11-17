@@ -33,13 +33,18 @@ L’intégration continue (CI) exécute automatiquement les tests du backend à 
 
 ### Lancement des tests
 
-Depuis la racine du projet :
+Le backend utilise PostgreSQL, en développement comme en test. Depuis la racine du projet :
 
 ```bash
+docker compose up -d          # démarre PostgreSQL (bases betterself et betterself_test)
 cd backend
+cp .env.example .env          # première fois seulement
 uv sync
+uv run alembic upgrade head   # applique les migrations à la base de développement
 uv run pytest
 ```
 
+- `docker compose up -d` démarre PostgreSQL en arrière-plan. La base `betterself_test` est créée automatiquement au premier démarrage.
 - `uv sync` installe les dépendances et met à jour l’environnement virtuel local selon `uv.lock`.
-- `uv run pytest` exécute les tests avec l’environnement du backend.
+- `uv run alembic upgrade head` crée ou met à jour le schéma de la base de développement.
+- `uv run pytest` exécute les tests sur la base `betterself_test`. Chaque test s’exécute dans une transaction annulée à la fin, la base reste donc vide. Pour utiliser une autre base, définir la variable d’environnement `TEST_DATABASE_URL`.

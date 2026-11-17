@@ -10,8 +10,8 @@ Vous y trouverez mes réflexions, les choix techniques que j'ai fait pour ce pro
 
 Voici la liste des vidéos réalisées lors du développement du projet :
 
-- [Vidéo 1: Présentation du Blog](https://www.youtube.com/watch?v=CSiVBhjG1qg).
-- [Vidéo 2: Données et début de conception](https://youtu.be/KnhiKsN72_A).
-- [Vidéo 3: Conception des modèles](https://www.youtube.com/watch?v=xKFyHWf_j0A).
-
-[Vidéo 4: Processus du Onboarding](https://www.youtube.com/watch?v=sD8Af65OU6c)
+- [Vidéo 1: Présentation du Blog](https://www.youtube.com/watch?v=CSiVBhjG1qg)
+- [Vidéo 2: Données et début de conception](https://youtu.be/KnhiKsN72_A)
+- [Vidéo 3: Conception des modèles](https://www.youtube.com/watch?v=xKFyHWf_j0A)
+- [Vidéo 4: Processus du Onboarding](https://www.youtube.com/watch?v=sD8Af65OU6c)
+- [Vidéo 5: Ramifications du frontend](https://youtu.be/gS_KuYTpvRI)

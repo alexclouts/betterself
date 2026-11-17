@@ -12,14 +12,10 @@ settings = Settings()
 
 
 def create_db_engine(db_url: str):
-    connect_args = {}
-
-    # L'argument check_same_thread est nécessaire pour SQLite, mais pas pour d'autres bases de données.
-    # Il permet à SQLite de fonctionner correctement dans un environnement multi-thread, comme celui utilisé par FastAPI.
-    if db_url.startswith("sqlite"):
-        connect_args["check_same_thread"] = False
-
-    return create_engine(db_url, connect_args=connect_args)
+    # pool_pre_ping vérifie qu'une connexion du pool est toujours vivante avant de l'utiliser.
+    # Utile avec PostgreSQL, puisque le serveur peut fermer des connexions inactives
+    # (redémarrage, délai d'inactivité de l'hébergeur, etc.).
+    return create_engine(db_url, pool_pre_ping=True)
 
 
 engine = create_db_engine(settings.database_url)

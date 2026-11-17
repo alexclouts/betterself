@@ -11,7 +11,9 @@ Il contient :
 """
 
 class Settings(BaseSettings):
-    database_url: str = "sqlite:///./betterself.db"
+    # Valeur par défaut alignée sur docker-compose.yml (développement local seulement).
+    # En production, DATABASE_URL doit être fournie par une variable d'environnement.
+    database_url: str = "postgresql+psycopg://betterself:betterself@localhost:5432/betterself"
     secret_key: str = "change-me-in-development"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30

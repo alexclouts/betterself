@@ -30,6 +30,7 @@ export function FoodJournalPage() {
   const { entries, totals, target, isLoading, error: loadError } = useJournalDay(dayKey);
 
   const queryClient = useQueryClient();
+  
   // Suppression d'une entrée.
   const deleteMutation = useMutation({
     mutationFn: (entryId: string) => journalService.deleteEntry(entryId),
