@@ -246,7 +246,15 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Start Date"
             }
           },
@@ -255,7 +263,15 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "End Date"
             }
           }
@@ -860,6 +876,127 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/foods/search": {
+      "get": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Search All Foods",
+        "operationId": "search_all_foods_foods_search_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "description": "Nom, marque ou code-barres.",
+              "default": "",
+              "title": "Query"
+            },
+            "description": "Nom, marque ou code-barres."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodSearchRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/foods/catalog/{code}/import": {
+      "post": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Import Catalog Product",
+        "operationId": "import_catalog_product_foods_catalog__code__import_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{1,24}$",
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodRead"
+                }
+              }
+            }
+          },
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodRead"
+                }
+              }
+            },
+            "description": "OK"
           },
           "422": {
             "description": "Validation Error",
@@ -2424,7 +2561,9 @@
             "title": "Fat G"
           },
           "source": {
-            "$ref": "#/components/schemas/FoodSource",
+            "type": "string",
+            "const": "manual",
+            "title": "Source",
             "default": "manual"
           },
           "external_reference_id": {
@@ -2498,6 +2637,17 @@
             "type": "string",
             "title": "Reference Weight G"
           },
+          "serving_g": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serving G"
+          },
           "calories_kcal": {
             "type": "string",
             "title": "Calories Kcal"
@@ -2559,6 +2709,7 @@
           "description",
           "category",
           "reference_weight_g",
+          "serving_g",
           "calories_kcal",
           "protein_g",
           "carbohydrates_g",
@@ -2570,6 +2721,123 @@
           "updated_at"
         ],
         "title": "FoodRead"
+      },
+      "FoodSearchRead": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/FoodSearchResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "catalog_available": {
+            "type": "boolean",
+            "title": "Catalog Available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results",
+          "catalog_available"
+        ],
+        "title": "FoodSearchRead"
+      },
+      "FoodSearchResult": {
+        "properties": {
+          "food_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Food Id"
+          },
+          "catalog_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Code"
+          },
+          "source": {
+            "$ref": "#/components/schemas/FoodSource"
+          },
+          "in_history": {
+            "type": "boolean",
+            "title": "In History"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "reference_weight_g": {
+            "type": "string",
+            "title": "Reference Weight G"
+          },
+          "serving_g": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serving G"
+          },
+          "calories_kcal": {
+            "type": "string",
+            "title": "Calories Kcal"
+          },
+          "protein_g": {
+            "type": "string",
+            "title": "Protein G"
+          },
+          "carbohydrates_g": {
+            "type": "string",
+            "title": "Carbohydrates G"
+          },
+          "fat_g": {
+            "type": "string",
+            "title": "Fat G"
+          }
+        },
+        "type": "object",
+        "required": [
+          "food_id",
+          "catalog_code",
+          "source",
+          "in_history",
+          "name",
+          "brand",
+          "reference_weight_g",
+          "serving_g",
+          "calories_kcal",
+          "protein_g",
+          "carbohydrates_g",
+          "fat_g"
+        ],
+        "title": "FoodSearchResult"
       },
       "FoodSource": {
         "type": "string",

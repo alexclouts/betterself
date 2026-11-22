@@ -1,10 +1,10 @@
 import axios from "axios";
 import { getErrorMessage } from "../api/axios";
-import { getFoodConsumptions } from "../api/generated/food-consumptions/food-consumptions";
+import { getFoodConsumptions } from "../api/generated/endpoints/food-consumptions/food-consumptions";
 import type { FoodConsumptionRead } from "../api/generated/foodConsumptionRead";
 import type { FoodConsumptionUpdate } from "../api/generated/foodConsumptionUpdate";
 import type { GoalTargetRead } from "../api/generated/goalTargetRead";
-import { getNutritionGoal } from "../api/generated/nutrition-goal/nutrition-goal";
+import { getNutritionGoal } from "../api/generated/endpoints/nutrition-goal/nutrition-goal";
 import { getDayBoundsIso } from "../lib/date";
 
 // Nombre maximal d'entrées accepté par l'API pour une page.

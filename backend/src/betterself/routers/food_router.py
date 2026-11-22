@@ -4,17 +4,26 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Path,
     Query,
     Response,
     status,
 )
 from sqlalchemy.orm import Session
 
+from betterself.core.config import settings
 from betterself.core.database import get_db
-from betterself.core.exceptions import RecordNotFound
+from betterself.core.exceptions import CatalogUnavailable, RecordNotFound
 from betterself.models.food_models import FoodCategory
-from betterself.schemas.food_schemas import FoodCreate, FoodRead, FoodUpdate
+from betterself.schemas.food_schemas import (
+    FoodCreate,
+    FoodRead,
+    FoodSearchRead,
+    FoodUpdate,
+)
 from betterself.repos.food_repo import FoodRepository
+from betterself.repos.off_catalog_repo import OffCatalogRepository
+from betterself.services.food_search_service import FoodSearchService
 from betterself.core.dependencies import get_current_user
 from betterself.models.user_models import User
 from betterself.prefix import FOODS_URL
@@ -29,6 +38,9 @@ def get_food_service(
     session: Session = Depends(get_db),
 ) -> FoodRepository:
     return FoodRepository(session)
+
+def get_off_catalog() -> OffCatalogRepository:
+    return OffCatalogRepository(settings.off_catalog_path)
 
 
 # Fonction pour rechercher des aliments
@@ -77,6 +89,63 @@ def create_food(
         user=current_user,
         data=data,
     )
+
+
+# Fonction pour rechercher à la fois dans les aliments et dans le catalogue Open Food
+# Facts. Sans terme, retourne l'historique. Doit rester déclarée avant "/{food_id}".
+@router.get("/search", response_model=FoodSearchRead)
+def search_all_foods(
+    query: str = Query(
+        default="",
+        max_length=255,
+        description="Nom, marque ou code-barres.",
+    ),
+    limit: int = Query(default=20, ge=1, le=50),
+    current_user: User = Depends(get_current_user),
+    foods: FoodRepository = Depends(get_food_service),
+    catalog: OffCatalogRepository = Depends(get_off_catalog),
+):
+    return FoodSearchService(foods, catalog).search(current_user, query, limit=limit)
+
+
+# Fonction pour importer un produit Open Food Facts dans les aliments.
+# Retourne 201 si l'aliment est créé, 200 s'il avait déjà été importé.
+@router.post(
+    "/catalog/{code}/import",
+    response_model=FoodRead,
+    status_code=status.HTTP_201_CREATED,
+    responses={status.HTTP_200_OK: {"model": FoodRead}},
+)
+def import_catalog_product(
+    response: Response,
+    code: str = Path(pattern=r"^[0-9]{1,24}$"),
+    _current_user: User = Depends(get_current_user),
+    service: FoodRepository = Depends(get_food_service),
+    catalog: OffCatalogRepository = Depends(get_off_catalog),
+):
+    # Un produit déjà importé reste disponible même s'il a quitté le catalogue.
+    food = service.get_by_external_reference(code)
+    created = False
+
+    if food is None:
+        try:
+            product = catalog.get(code)
+        except CatalogUnavailable:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Le catalogue Open Food Facts est indisponible pour le moment.",
+            )
+
+        if product is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Ce produit n'a pas été trouvé dans le catalogue.",
+            )
+        food, created = service.get_or_import_product(product)
+
+    if not created:
+        response.status_code = status.HTTP_200_OK
+    return food
 
 
 # Fonction pour récupérer un aliment par son identifiant

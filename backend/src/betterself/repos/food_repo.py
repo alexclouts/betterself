@@ -1,10 +1,15 @@
 import uuid
+from datetime import datetime
 
-from sqlalchemy import or_, select
+from sqlalchemy import Select, and_, case, func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from betterself.core.exceptions import RecordNotFound
+from betterself.core.text_search import folded_column
+from betterself.models.consumption_models import FoodConsumption
 from betterself.models.food_models import Food, FoodSource
+from betterself.repos.off_catalog_repo import CatalogProduct
 from betterself.schemas.food_schemas import FoodCreate, FoodUpdate
 from betterself.models.user_models import User
 
@@ -57,6 +62,73 @@ class FoodRepository:
 
 
     """
+    Sélectionne les aliments avec la date de leur dernière utilisation par l'utilisateur.
+    Un aliment qu'il a créé, mais pas encore consigné, compte à partir de sa création.
+    La date est nulle si l'aliment ne fait pas partie de son historique.
+    """
+    def _select_with_last_use(self, user: User) -> Select[tuple[Food, datetime | None]]:
+        consumptions = (
+            select(
+                FoodConsumption.food_id,
+                func.max(FoodConsumption.consumed_at).label("consumed_at"),
+            )
+            .where(FoodConsumption.user_id == user.id)
+            .group_by(FoodConsumption.food_id)
+            .subquery()
+        )
+        last_use = func.coalesce(
+            consumptions.c.consumed_at,
+            case((Food.created_by_user_id == user.id, Food.created_at)),
+        ).label("last_use")
+
+        return select(Food, last_use).outerjoin(
+            consumptions, consumptions.c.food_id == Food.id
+        )
+
+
+    # Retourne l'historique de l'utilisateur, du plus récent au plus ancien.
+    def list_history(self, user: User, limit: int = 20) -> list[Food]:
+        statement = self._select_with_last_use(user)
+        last_use = statement.selected_columns.last_use
+        statement = statement.where(last_use.is_not(None)).order_by(last_use.desc(), Food.name)
+        return list(self.db.scalars(statement.limit(limit)))
+
+
+    """
+    Recherche des aliments dont le nom ou la marque contient tous les mots (déjà
+    normalisés), ou qui portent l'un des codes fournis. Chaque aliment est accompagné
+    de la date de sa dernière utilisation.
+    """
+    def search_with_history(
+        self,
+        user: User,
+        *,
+        words: list[str],
+        barcodes: list[str],
+        catalog_codes: list[str],
+        limit: int = 200,
+    ) -> list[tuple[Food, datetime | None]]:
+        statement = self._select_with_last_use(user)
+        last_use = statement.selected_columns.last_use
+        text = folded_column(Food.name) + " " + folded_column(Food.brand)
+
+        statement = statement.where(
+            or_(
+                # Les mots ne contiennent que des lettres et des chiffres : aucun
+                # caractère spécial de LIKE à échapper.
+                and_(*(text.like(f"%{word}%") for word in words)),
+                Food.external_reference_id.in_(barcodes),
+                and_(
+                    Food.source == FoodSource.OPEN_FOOD_FACTS,
+                    Food.external_reference_id.in_(catalog_codes),
+                ),
+            )
+        ).order_by(last_use.desc().nulls_last(), func.length(Food.name))
+
+        return [(food, used) for food, used in self.db.execute(statement.limit(limit))]
+
+
+    """
     Crée un aliment manuel associé à l'utilisateur connecté.
     La validation de cohérence entre calories et macronutriments est effectuée par le schéma Pydantic `FoodCreate`.
     """
@@ -82,6 +154,52 @@ class FoodRepository:
         self.db.add(food)
         self.db.flush()
         return food
+
+
+    # Retourne l'aliment importé d'Open Food Facts portant ce code-barres.
+    def get_by_external_reference(self, code: str) -> Food | None:
+        return self.db.scalar(
+            select(Food).where(
+                Food.source == FoodSource.OPEN_FOOD_FACTS,
+                Food.external_reference_id == code,
+            )
+        )
+
+
+    """
+    Copie un produit du catalogue Open Food Facts dans les aliments, s'il n'y est pas déjà.
+    Retourne l'aliment et indique s'il vient d'être créé.
+    """
+    def get_or_import_product(self, product: CatalogProduct) -> tuple[Food, bool]:
+        existing = self.get_by_external_reference(product.code)
+        if existing is not None:
+            return existing, False
+
+        food = Food(
+            name=product.name,
+            brand=product.brand,
+            reference_weight_g=product.reference_weight_g,
+            serving_g=product.serving_g,
+            calories_kcal=product.calories_kcal,
+            protein_g=product.protein_g,
+            carbohydrates_g=product.carbohydrates_g,
+            fat_g=product.fat_g,
+            source=FoodSource.OPEN_FOOD_FACTS,
+            external_reference_id=product.code,
+        )
+
+        try:
+            # Le SAVEPOINT limite l'annulation à cette insertion.
+            with self.db.begin_nested():
+                self.db.add(food)
+        except IntegrityError:
+            # Une autre requête vient peut-être d'importer le même produit.
+            existing = self.get_by_external_reference(product.code)
+            if existing is None:
+                raise
+            return existing, False
+
+        return food, True
 
 
     """

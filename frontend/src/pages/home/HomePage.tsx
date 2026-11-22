@@ -19,7 +19,7 @@ export function HomePage() {
     return (
     <div>
       <header>
-        <h1>Welcome to the Home Page</h1>
+        <h1>Bienvenue, cher utilisateur</h1>
 
         <Button variant="secondary" onClick={handleLogout} className="mt-4">
           Se déconnecter
@@ -36,11 +36,11 @@ export function HomePage() {
         )}
       </section>
 
-      <div className="mt-4 flex flex-col gap-2">
-        <Button onClick={() => navigate("/journal")}>
+      <div className="mt-6 flex flex-col gap-2">
+        <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal")}>
           Mon journal
         </Button>
-        <Button onClick={() => navigate("/journal/add")}>
+        <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal/add")}>
           Ajouter un aliment
         </Button>
       </div>

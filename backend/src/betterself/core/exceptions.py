@@ -7,3 +7,7 @@ class DuplicateRecord(Exception):
     def __init__(self, message="Entrée déjà existante dans la base de données"):
         self.message = message
         super().__init__(self.message)
+
+# Le catalogue Open Food Facts est absent ou illisible.
+class CatalogUnavailable(Exception):
+    pass

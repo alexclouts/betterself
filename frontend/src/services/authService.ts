@@ -1,4 +1,4 @@
-import { getAuthentication } from "../api/generated/authentication/authentication"
+import { getAuthentication } from "../api/generated/endpoints/authentication/authentication"
 import { getErrorMessage } from "../api/axios";
 import { useAuthStore } from "../stores/authStore";
 
@@ -9,7 +9,7 @@ export type LoginPayload = {
 
 export type LoginResponse = {
   access_token: string;
-  token_type: string;
+  token_type?: string;
 };
 
 export type RegisterPayload = {

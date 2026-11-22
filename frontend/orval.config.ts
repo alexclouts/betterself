@@ -5,7 +5,8 @@ export default defineConfig({
   betterself: {
     input: "../backend/src/betterself/openapi.json",
     output: {
-      target: "./src/api/generated",
+      // Dossier distinct de `schemas` : sinon, l’index des routes écrase celui des types.
+      target: "./src/api/generated/endpoints",
       schemas: "./src/api/generated",
       client: "axios",
       mode: "tags-split",

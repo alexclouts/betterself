@@ -178,6 +178,8 @@ export function FoodAddPage() {
       }
       // Le journal a changé : l'accueil et le journal rechargeront leurs données.
       await queryClient.invalidateQueries({ queryKey: queryKeys.journal.all });
+      // L'historique proposé par la recherche aussi.
+      await queryClient.invalidateQueries({ queryKey: queryKeys.foods.all });
       navigate(journalUrl(dayKey), { replace: true });
     } catch (err) {
       const fallback = entry ? "Impossible de modifier cette entrée.": "Impossible d’ajouter cet aliment au journal.";
@@ -225,7 +227,9 @@ export function FoodAddPage() {
       <h1>{food.name}</h1>
       {food.brand && <p>{food.brand}</p>}
       <p className="mt-1">
-        Portion de référence : {formatNutrient(food.reference_weight_g)} g
+        {food.serving_g
+          ? `Portion suggérée : ${formatNutrient(food.serving_g)} g`
+          : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
       </p>
       {dayKey !== todayKey() && (
         <p className="mt-1">

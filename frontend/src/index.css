@@ -130,6 +130,7 @@ body {
   h1 {
     font-size: 42px;
     letter-spacing: -1.68px;
+    line-height: 118%;
     margin: 32px 0;
     @media (max-width: 1024px) {
       font-size: 36px;

@@ -1,9 +1,11 @@
 import os
+import sqlite3
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from betterself.core.config import settings
 from betterself.core.database import Base, create_db_engine, get_db
 from betterself.main import app
 from betterself.models.user_models import User
@@ -80,3 +82,52 @@ def client(test_session):
 
     # Réinitialise les overrides des dépendances de l'application après chaque test
     app.dependency_overrides.clear()
+
+
+# (code, nom, marque, portion, kcal, protéines, glucides, lipides, popularité)
+PRODUCTS = [
+    ("0000000000017", "Petit écolier chocolat au lait", "LU", 25, 498, 6, 66, 23, 900),
+    ("0000000000024", "Lait", "Natrel", 250, 60, 3.2, 4.8, 3.25, 1),
+    ("0000000000031", "Lait 2 %", "Québon", 250, 50, 3.3, 4.8, 2, 50),
+    ("0000000000048", "Laitue romaine", None, None, 17, 1.2, 3.3, 0.3, 700),
+    ("0000000000055", "Crème glacée", "Coaticook", 66, 207.123, 3.5, 24, 11, 10),
+    ("0000000000062", "Boisson au lait", "Natrel", 250, 70, 3, 9, 2, 80),
+    ("0000000000079", "Poudre portion trop petite", None, 0.5, 350, 10, 70, 3, 0),
+    ("0000000000086", "Poudre portion trop grande", None, 2500, 350, 10, 70, 3, 0),
+    ("0000000000093", "Poudre portion limite", None, 1000, 350, 10, 70, 3, 0),
+    ("0055653170259", "Biscuits à l'érable", "Dare", 20, 470.588, 5, 70, 19, 5),
+]
+
+
+# Construit un petit catalogue ayant le même schéma que build_catalog.py.
+# Le dossier contient une espace, comme le disque externe.
+@pytest.fixture
+def catalog_path(tmp_path):
+    folder = tmp_path / "USB Externe"
+    folder.mkdir()
+    path = folder / "off.sqlite"
+
+    db = sqlite3.connect(path)
+    db.executescript("""
+    CREATE TABLE products (
+      code TEXT PRIMARY KEY, name TEXT NOT NULL, brands TEXT, categories_tags TEXT,
+      serving_g REAL, kcal_100g REAL, protein_100g REAL, carbs_100g REAL,
+      fat_100g REAL, scans INTEGER, modified INTEGER);
+    CREATE VIRTUAL TABLE products_fts USING fts5(
+      name, brands, content='products', tokenize='unicode61 remove_diacritics 2');
+    """)
+    db.executemany(
+        "INSERT INTO products VALUES (?,?,?,NULL,?,?,?,?,?,?,0)",
+        PRODUCTS,
+    )
+    db.execute("INSERT INTO products_fts(products_fts) VALUES ('rebuild')")
+    db.commit()
+    db.close()
+    return path
+
+
+# Configure l'application pour utiliser le catalogue de test.
+@pytest.fixture
+def configured_catalog(monkeypatch, catalog_path):
+    monkeypatch.setattr(settings, "off_catalog_path", str(catalog_path))
+    return catalog_path

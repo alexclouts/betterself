@@ -38,6 +38,12 @@ export interface FoodNutrients {
   fat_g: number;
 }
 
+// Valeurs nutritives d'un aliment, ou d'un produit du catalogue, pour sa portion de référence.
+export type NutritionReference = Pick<
+  FoodRead,
+  "reference_weight_g" | "calories_kcal" | "protein_g" | "carbohydrates_g" | "fat_g"
+>;
+
 // Les valeurs décimales arrivent de l'API sous forme de chaînes ("250.00").
 export function toNumber(value: string | number): number {
   const parsed = typeof value === "number" ? value : Number(value);
@@ -51,9 +57,22 @@ export function formatNutrient(value: string | number, maxDecimals = 1): string 
   });
 }
 
-// Quantité par défaut proposée lors de l'ajout : la portion de référence de l'aliment.
-export function getDefaultQuantityG(food: FoodRead): number {
-  return toNumber(food.reference_weight_g);
+/*
+ * Signale des calories très éloignées de celles des macros (4P + 4G + 9L).
+ * L'écart peut être normal (fibres, polyols, alcool) : on avertit sans bloquer.
+ */
+export function hasInconsistentCalories(food: NutritionReference): boolean {
+  // Ramené à 100 g pour que la tolérance ne dépende pas de la portion de référence.
+  const per100g = computeNutrientsForQuantity(food, 100);
+  const expected = per100g.protein_g * 4 + per100g.carbohydrates_g * 4 + per100g.fat_g * 9;
+  return Math.abs(per100g.calories_kcal - expected) > Math.max(20, per100g.calories_kcal * 0.2);
+}
+
+// Quantité proposée par défaut : la portion du fabricant, sinon la portion de référence.
+export function getDefaultQuantityG(
+  food: Pick<FoodRead, "serving_g" | "reference_weight_g">,
+): number {
+  return toNumber(food.serving_g ?? food.reference_weight_g);
 }
 
 /*
@@ -61,7 +80,7 @@ export function getDefaultQuantityG(food: FoodRead): number {
  * à partir des valeurs déclarées pour la portion de référence.
  */
 export function computeNutrientsForQuantity(
-  food: FoodRead,
+  food: NutritionReference,
   quantityG: number,
 ): FoodNutrients {
   const referenceWeight = toNumber(food.reference_weight_g);

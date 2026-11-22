@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { FoodSearchResult } from "../../api/generated/foodSearchResult";
 import { foodService } from "../../services/foodService";
-import { formatNutrient } from "../../lib/food";
 import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { FoodResultItem } from "../../components/journal/FoodResultItem";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 
@@ -15,8 +16,12 @@ const MIN_SEARCH_LENGTH = 2;
 // Délai sans frappe avant de lancer la recherche.
 const SEARCH_DELAY_MS = 300;
 
+// Nombre de résultats affichés avant « Afficher plus ».
+const VISIBLE_RESULTS = 10;
+
 export function FoodSearchPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
   // Repas et journée choisis depuis le journal, relayés jusqu'à la page d'ajout.
   const journalNavState = readJournalNavState(location.state);
@@ -26,7 +31,9 @@ export function FoodSearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
   const searchTerm = useDebouncedValue(query.trim(), SEARCH_DELAY_MS);
-  const isSearchEnabled = searchTerm.length >= MIN_SEARCH_LENGTH;
+  const isSearching = searchTerm.length >= MIN_SEARCH_LENGTH;
+  // Tant que rien n'est recherché, l'API propose l'historique.
+  const apiTerm = isSearching ? searchTerm : "";
 
   // Synchronise l'URL avec le terme recherché, sans ajouter d'entrée à l'historique.
   // L'état de navigation (repas, journée) est conservé.
@@ -41,20 +48,45 @@ export function FoodSearchPage() {
   // Une entrée de cache par terme : les résultats affichés correspondent
   // toujours au terme en cours, même si une ancienne réponse arrive en retard.
   const searchQuery = useQuery({
-    queryKey: queryKeys.foods.search(searchTerm),
-    queryFn: ({ signal }) => foodService.searchFoods(searchTerm, {}, signal),
-    enabled: isSearchEnabled,
+    queryKey: queryKeys.foods.search(apiTerm),
+    queryFn: ({ signal }) => foodService.searchFoods(apiTerm, signal),
     // Garde les résultats précédents affichés pendant le chargement des nouveaux.
     placeholderData: keepPreviousData,
-    // Le catalogue d'aliments change peu.
     staleTime: 5 * 60_000,
   });
 
-  const foods = isSearchEnabled ? (searchQuery.data ?? []) : [];
-  const isLoading = isSearchEnabled && searchQuery.isFetching;
-  const error = isSearchEnabled ? (searchQuery.error?.message ?? null) : null;
+  // Un produit du catalogue est copié dans les aliments seulement lorsqu'il est choisi.
+  const importMutation = useMutation({
+    mutationFn: (code: string) => foodService.importCatalogProduct(code),
+    onSuccess: (food) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.foods.all });
+      navigate(`/journal/food/${food.id}`, { state: { ...journalNavState, food } });
+    },
+  });
+
+  // Terme pour lequel tous les produits sont affichés : une nouvelle recherche replie la liste.
+  const [expandedTerm, setExpandedTerm] = useState<string | null>(null);
+
+  const results = searchQuery.data?.results ?? [];
+  const visibleResults =
+    expandedTerm === apiTerm ? results : results.slice(0, VISIBLE_RESULTS);
+  const hiddenCount = results.length - visibleResults.length;
+  const isLoading = isSearching && searchQuery.isFetching;
+  const error = searchQuery.error?.message ?? null;
+  const hasCurrentResults = searchQuery.isSuccess && !searchQuery.isPlaceholderData;
   // « Aucun résultat » seulement quand la réponse du terme en cours est arrivée.
-  const hasNoResults = isSearchEnabled && searchQuery.isSuccess && !searchQuery.isPlaceholderData && foods.length === 0;
+  const hasNoResults = isSearching && hasCurrentResults && results.length === 0;
+  const isCatalogUnavailable = hasCurrentResults && !searchQuery.data.catalog_available;
+  // L'attribution est exigée dès qu'une donnée d'Open Food Facts est affichée.
+  const needsAttribution = visibleResults.some((food) => food.source === "open_food_facts");
+
+  function handleSelect(food: FoodSearchResult) {
+    if (food.food_id) {
+      navigate(`/journal/food/${food.food_id}`, { state: journalNavState });
+    } else if (food.catalog_code) {
+      importMutation.mutate(food.catalog_code);
+    }
+  }
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
@@ -91,28 +123,47 @@ export function FoodSearchPage() {
         </p>
       )}
 
-      <ul className="mt-4 divide-y">
-        {foods.map((food) => (
-          <li key={food.id}>
-            <button
-              type="button"
-              onClick={() =>
-                // On transmet l'aliment pour éviter un nouvel appel ; la quantité
-                // sera initialisée à la portion de référence et modifiable à l'ajout.
-                navigate(`/journal/food/${food.id}`, { state: { ...journalNavState, food } })
-              }
-              className="flex w-full items-center justify-between py-3 text-left"
-            >
-              <span>{food.name}</span>
+      {importMutation.error && (
+        <p className="mt-4 text-danger" role="alert">
+          {importMutation.error.message}
+        </p>
+      )}
 
-              <span className="text-sm text-gray-500">
-                {formatNutrient(food.calories_kcal, 0)} kcal /{" "}
-                {formatNutrient(food.reference_weight_g)} g
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
+      {results.length > 0 && (
+        <ul
+          aria-label={isSearching ? "Résultats de la recherche" : "Aliments récents"}
+          className="mt-6 divide-y divide-border overflow-hidden bg-surface"
+        >
+          {visibleResults.map((food) => (
+            <FoodResultItem
+              key={food.food_id ?? food.catalog_code}
+              food={food}
+              onSelect={() => handleSelect(food)}
+              disabled={importMutation.isPending}
+              isPending={
+                importMutation.isPending && importMutation.variables === food.catalog_code
+              }
+            />
+          ))}
+        </ul>
+      )}
+
+      {hiddenCount > 0 && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => setExpandedTerm(apiTerm)}
+          className="mt-2 w-full text-sm"
+        >
+          Afficher {hiddenCount} résultat{hiddenCount > 1 ? "s" : ""} de plus
+        </Button>
+      )}
+
+      {isCatalogUnavailable && (
+        <p className="mt-4 text-sm" role="status">
+          Certains aliments sont indisponibles pour le moment.
+        </p>
+      )}
 
       {hasNoResults && (
         <p className="mt-4">
@@ -125,10 +176,25 @@ export function FoodSearchPage() {
           onClick={() =>
             navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
           }
-          className="mt-4 w-full rounded-lg py-3 text-sm text-primary font-bold"
+          className="mt-4 w-full py-3 text-primary font-bold"
         >
           + Créer un nouvel aliment
         </Button>
+
+      {/* Attribution exigée par la licence ODbL. */}
+      {needsAttribution && (
+        <p className="mt-12 text-xs">
+          Contient des données d’
+          <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer" className="underline">
+            Open Food Facts
+          </a>
+          , offertes sous la licence{" "}
+          <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noreferrer" className="underline">
+            Open Database License (ODbL)
+          </a>
+          .
+        </p>
+      )}
     </main>
   );
 }

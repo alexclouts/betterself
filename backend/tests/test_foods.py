@@ -59,6 +59,69 @@ def test_create_food_rejects_inconsistent_calories(client):
     assert response.status_code == 422
 
 
+# Seul l'import du catalogue peut créer un aliment Open Food Facts : déclarer une
+# autre source ne doit pas permettre de contourner la validation des calories.
+def test_create_food_rejects_external_source(client):
+    access_token = register_and_login(client)
+
+    for calories in (370, 800):
+        payload = valid_food_payload()
+        payload["source"] = "open_food_facts"
+        payload["calories_kcal"] = calories
+
+        response = client.post(
+            FOODS_URL,
+            json=payload,
+            headers=auth_headers(access_token),
+        )
+        assert response.status_code == 422
+
+
+# La source est facultative et vaut toujours "manual"
+def test_create_food_defaults_to_manual_source(client):
+    access_token = register_and_login(client)
+
+    payload = valid_food_payload()
+    del payload["source"]
+
+    response = client.post(
+        FOODS_URL,
+        json=payload,
+        headers=auth_headers(access_token),
+    )
+    assert response.status_code == 201
+    assert response.json()["source"] == "manual"
+
+
+# La portion d'un aliment manuel est sa quantité de référence
+def test_create_food_has_no_serving(client):
+    access_token = register_and_login(client)
+
+    response = client.post(
+        FOODS_URL,
+        json=valid_food_payload(),
+        headers=auth_headers(access_token),
+    )
+    assert response.status_code == 201
+    assert response.json()["serving_g"] is None
+
+
+# Sans source, la validation des calories s'applique aussi
+def test_create_food_without_source_validates_calories(client):
+    access_token = register_and_login(client)
+
+    payload = valid_food_payload()
+    del payload["source"]
+    payload["calories_kcal"] = 1000
+
+    response = client.post(
+        FOODS_URL,
+        json=payload,
+        headers=auth_headers(access_token),
+    )
+    assert response.status_code == 422
+
+
 # Test pour vérifier que les calories proches du calcul sont acceptées
 def test_create_food_accepts_calorie_tolerance(client):
     access_token = register_and_login(client)

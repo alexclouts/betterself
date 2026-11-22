@@ -1,4 +1,4 @@
-import { getOnboarding } from "../api/generated/onboarding/onboarding";
+import { getOnboarding } from "../api/generated/endpoints/onboarding/onboarding";
 
 import { getErrorMessage } from "../api/axios";
 

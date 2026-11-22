@@ -13,6 +13,7 @@ from sqlalchemy import (
     String,
     Text,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -93,6 +94,13 @@ class Food(Base):
         nullable=False,
     )
 
+    # Portion suggérée par le fabricant. Sans elle, la quantité proposée à
+    # l'utilisateur est `reference_weight_g`.
+    serving_g: Mapped[Decimal | None] = mapped_column(
+        Numeric(8, 2),
+        nullable=True,
+    )
+
     calories_kcal: Mapped[Decimal] = mapped_column(
         Numeric(8, 2),
         nullable=False,
@@ -158,10 +166,19 @@ class Food(Base):
         cascade="all, delete-orphan",
     )
 
+    # Vrai si l'aliment provient du catalogue Open Food Facts.
+    @property
+    def is_imported(self) -> bool:
+        return self.source is FoodSource.OPEN_FOOD_FACTS
+
     __table_args__ = (
         CheckConstraint(
             "reference_weight_g > 0",
             name="foods_check_reference_weight",
+        ),
+        CheckConstraint(
+            "serving_g IS NULL OR serving_g > 0",
+            name="foods_check_serving",
         ),
         CheckConstraint(
             "calories_kcal >= 0",
@@ -186,5 +203,13 @@ class Food(Base):
         Index(
             "idx_foods_external_reference_id",
             "external_reference_id",
+        ),
+        # Un produit Open Food Facts n'est importé qu'une seule fois. L'index est
+        # partiel : les aliments manuels peuvent porter n'importe quelle référence.
+        Index(
+            "uq_foods_open_food_facts_reference",
+            "external_reference_id",
+            unique=True,
+            postgresql_where=text("source = 'open_food_facts'"),
         ),
     )

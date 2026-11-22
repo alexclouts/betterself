@@ -42,6 +42,8 @@ export function FoodJournalPage() {
       );
       // …puis marque tout le journal comme périmé (accueil, autres journées).
       void queryClient.invalidateQueries({ queryKey: queryKeys.journal.all });
+      // L'aliment peut quitter l'historique proposé par la recherche.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.foods.all });
     },
   });
 

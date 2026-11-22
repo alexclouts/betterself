@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Literal, Self
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -9,7 +10,8 @@ from betterself.core.custom_types import (
     OptionalLongText,
     OptionalText,
 )
-from betterself.models.food_models import FoodCategory, FoodSource
+from betterself.models.food_models import Food, FoodCategory, FoodSource
+from betterself.repos.off_catalog_repo import CatalogProduct
 
 
 class FoodCreate(BaseModel):
@@ -24,7 +26,8 @@ class FoodCreate(BaseModel):
     carbohydrates_g: Decimal = Field(ge=0, le=100000)
     fat_g: Decimal = Field(ge=0, le=100000)
 
-    source: FoodSource = FoodSource.MANUAL
+    # Les aliments Open Food Facts sont créés seulement par l'import du catalogue.
+    source: Literal[FoodSource.MANUAL] = FoodSource.MANUAL
     external_reference_id: OptionalText = None
 
 
@@ -33,9 +36,6 @@ class FoodCreate(BaseModel):
     """
     @model_validator(mode="after")
     def validate_manual_food_macros(self) -> "FoodCreate":
-        if self.source is not FoodSource.MANUAL:
-            return self
-
         calculated_calories = (
             self.protein_g * 4
             + self.carbohydrates_g * 4
@@ -76,6 +76,7 @@ class FoodRead(BaseModel):
     description: str | None
     category: FoodCategory | None
     reference_weight_g: Decimal
+    serving_g: Decimal | None
     calories_kcal: Decimal
     protein_g: Decimal
     carbohydrates_g: Decimal
@@ -85,3 +86,60 @@ class FoodRead(BaseModel):
     created_by_user_id: UUID | None
     created_at: datetime
     updated_at: datetime
+
+
+"""
+Résultat de la recherche : un aliment de la base (`food_id`) ou un produit du
+catalogue Open Food Facts pas encore importé (`catalog_code`).
+"""
+class FoodSearchResult(BaseModel):
+    food_id: UUID | None
+    catalog_code: str | None
+    source: FoodSource
+    # L'utilisateur a déjà consigné ou créé cet aliment.
+    in_history: bool
+
+    name: str
+    brand: str | None
+    reference_weight_g: Decimal
+    serving_g: Decimal | None
+    calories_kcal: Decimal
+    protein_g: Decimal
+    carbohydrates_g: Decimal
+    fat_g: Decimal
+
+    @classmethod
+    def _from_nutrition(cls, item: Food | CatalogProduct, **values) -> Self:
+        return cls(
+            name=item.name,
+            brand=item.brand,
+            reference_weight_g=item.reference_weight_g,
+            serving_g=item.serving_g,
+            calories_kcal=item.calories_kcal,
+            protein_g=item.protein_g,
+            carbohydrates_g=item.carbohydrates_g,
+            fat_g=item.fat_g,
+            **values,
+        )
+
+    @classmethod
+    def from_food(cls, food: Food, in_history: bool) -> Self:
+        return cls._from_nutrition(
+            food, food_id=food.id, catalog_code=None, source=food.source, in_history=in_history
+        )
+
+    @classmethod
+    def from_product(cls, product: CatalogProduct) -> Self:
+        return cls._from_nutrition(
+            product,
+            food_id=None,
+            catalog_code=product.code,
+            source=FoodSource.OPEN_FOOD_FACTS,
+            in_history=False,
+        )
+
+
+class FoodSearchRead(BaseModel):
+    results: list[FoodSearchResult]
+    # Faux si le catalogue Open Food Facts est absent ou illisible.
+    catalog_available: bool
