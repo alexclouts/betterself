@@ -10,6 +10,8 @@ import { FoodJournalPage } from "../pages/journal/FoodJournalPage";
 import { FoodSearchPage } from "../pages/journal/FoodSearchPage";
 import { FoodAddPage } from "../pages/journal/FoodAddPage";
 import { FoodCreatePage } from "../pages/journal/FoodCreatePage";
+import { WeightEntryPage } from "../pages/measurements/WeightEntryPage";
+import { ProfilePage } from "../pages/profile/ProfilePage";
 
 export function AppRoutes() {
     return (
@@ -29,6 +31,8 @@ export function AppRoutes() {
                     <Route path="/journal/food/new" element={<FoodCreatePage />} />
                     <Route path="/journal/food/:id" element={<FoodAddPage />} />
                     <Route path="/journal/entry/:entryId" element={<FoodAddPage />} />
+                    <Route path="/measurements/new" element={<WeightEntryPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
                 </Route>
                 
             </Route>

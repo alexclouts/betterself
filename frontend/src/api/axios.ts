@@ -72,7 +72,8 @@ export function getErrorMessage(
       const firstMessage = detail[0]?.msg;
 
       if (firstMessage) {
-        return firstMessage;
+        // Pydantic préfixe les erreurs des validateurs personnalisés par « Value error, ».
+        return firstMessage.replace(/^Value error,\s*/, "");
       }
     }
   }

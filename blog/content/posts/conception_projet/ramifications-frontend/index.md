@@ -171,3 +171,5 @@ Cet exemple est également une réponse inattendue de la part de l'IA. Il m'aura
 ### Délai avant d'envoyer la requête
 
 En configurant TanStack Query, Claude fera aussi l'ajout d'un petit hook ` useDebouncedValue` afin de conserver le délai de **300 ms** à respecter avant d'envoyer une nouvelle requête pour la recherche. Cette fonctionnalité sert surtout à éviter que des requêtes successives soient faites lorsque l'utilisateur est en train d'écrire dans la barre de recherche.
+
+[Retour](https://alexclouts.github.io/betterself/posts/)

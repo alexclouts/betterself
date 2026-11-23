@@ -123,3 +123,5 @@ J'ai ensuite poursuivi ma conversation avec l'IA en conservant la structure qu'e
 Un défi que je rencontre régulièrement lorsque je travaille avec l'IA est qu'elle fonctionne très rapidement. Elle propose donc beaucoup, voire trop d'informations en même temps. Cela nécessite une plus grande attention pour ne pas ignorer des étapes essentielles au développement. J'ai d'ailleurs rencontré cette situation avec _Alembic_ pour la migration de la base de données. Il s'agit de l'étape 10 proposée initialement dans notre conversation. Cependant, étant donné la quantité volumineuse d'informations, la configuration de _Alembic_ m'a échappé, ce qui a d'ailleurs été mentionné dans la rétroaction du Jalon 2.
 
 Dorénavant, je devrai prendre mon temps davantage pour compenser avec la rapidité de l'IA lors des prochanes étapes.
+
+[Retour](https://alexclouts.github.io/betterself/posts/)

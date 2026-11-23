@@ -23,7 +23,7 @@ width="500">}}
 
 La prochaine étape de mon projet était de modifier mon backend pour que la recherche des aliments effectue une requête à **OpenFoodFacts**, une base de données _open source_ qui regroupe des aliments déjà créés par la communauté. J'ai aussitôt fait face à un imprévu : un _rate limit_ de 10 requêtes/min par adresse IP. Dans ce cas, tous les utilisateurs de mon application partagent la même adresse IP, ce qui rend cette solution inapplicable. Leur [site](https://openfoodfacts.github.io/openfoodfacts-server/api/) mentionne également: **don't use it for a search-as-you-type feature, you would be blocked very quickly.**
 
-Si je consulte la documentation, je vois que la méthode recommandée pour ce genre d'utilisation est de télécharger les données localement en tant que fichier `CSV` ou `JSON`. Il aura la responsabilité de :
+Si je consulte la documentation, je vois que la méthode recommandée pour ce genre d'utilisation est de télécharger les données localement en tant que fichier `CSV` ou `JSON`. J'aurai la responsabilité de :
 
 1. Télécharger le jeu de données depuis OpenFoodFacts.
 2. Filtrer les données avec DuckDB afin de conserver celles qui correspondent à mes critères de sélection (produits complets, pays).
@@ -44,7 +44,7 @@ Actuellement, _SQLite_ est la technologie utilisée pour ma base de données. J'
 
 ## Télécharger les données localement
 
-Claude m'a proposé un script `bash` afin de télécharger les données dans un disque dur externe que j'ai connecté sur un port USB.
+Claude m'a proposé un script `bash` afin de télécharger les données sur un disque dur externe que j'ai connecté sur un port USB.
 
 ```bash
 set -e
@@ -92,7 +92,7 @@ Le fait de pouvoir afficher l'historique des entrées effectuées dans le journa
 
 ### Accéder au repo de OpenFoodFacts
 
-Un des questionnement que j'ai eu était: _De quelle manière l'application comprend-elle que ma base de données OpenFoodFacts se trouve dans mon disque dur externe?_ J'ai retracé off\_`off_catalog_path` jusqu'à sa source dans la classe **Settings** pour voir qu'elle n'était pas déclarée explicitement dans l'application. En questionnant Claude à ce sujet, il m'a expliqué que la classe `BaseSettings`, de laquelle hérite _Settings_ lui permet d'accéder aux variables d'environnement du même nom. En déclarant la variable `OFF_CATALOG_PATH`, cela m'évite d'avoir à le spécifier dans mon code. Cependant, si la base de données est hébergée sur le Cloud, peut-être devrai-je le _hardcodé_?
+Un des questionnement que j'ai eu était: _De quelle manière l'application comprend-elle que ma base de données OpenFoodFacts se trouve sur mon disque dur externe?_ J'ai retracé `off_catalog_path` jusqu'à sa source dans la classe **Settings** pour voir qu'elle n'était pas déclarée explicitement dans l'application. En questionnant Claude à ce sujet, il m'a expliqué que la classe `BaseSettings`, de laquelle hérite _Settings_, lui permet d'accéder aux variables d'environnement du même nom. En déclarant la variable `OFF_CATALOG_PATH`, cela m'évite d'avoir à le spécifier dans mon code. Cependant, si la base de données est hébergée sur le Cloud, peut-être devrai-je le _hardcodé_?
 
 ## Quelques ajustements du UI
 
@@ -103,3 +103,5 @@ J'ai discuté de cette problématique avec Claude, qui m'a intégré cette modif
 ### La suite
 
 La prochaine étape consiste à intégrer d'autres fonctionnalités, telle que l'ajout ou la modifications des informations personnelles et l'ajout d'une mesure de poids.
+
+[Retour](https://alexclouts.github.io/betterself/posts/)

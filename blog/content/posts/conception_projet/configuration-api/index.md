@@ -86,3 +86,5 @@ width="700">}}
 Il faut que je fasse attention à ne pas utiliser `allow_origins=["*"]` avec `allow_credentials=True`. De plus, il faut autoriser uniquement dans CORS les origines précises dans mon frontend. Je conserve cette liste dans une variable d'environnement.
 
 Après avoir apporté les modifications à mon projet, je reçois finalement un réponse `Backend: ok`.
+
+[Retour](https://alexclouts.github.io/betterself/posts/)

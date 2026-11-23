@@ -190,3 +190,5 @@ Cela garantit l’isolation des données, la suppression en cascade et la possib
 
 Plus le projet avance, plus je réalise qu'il n'existe pas **une seule manière cohérente** de développer une application.
 La plupart des questions que je me pose relève du _cas par cas_ qui dépendent de l'envergure du projet et de son développement futur. Je crois que l'implémentation actuelle est bien adapté à mes besoins pour le MVP.
+
+[Retour](https://alexclouts.github.io/betterself/posts/)

@@ -2,7 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Button from "../../components/ui/Button";
 import { DailySummaryCard } from "../../components/journal/DailySummaryCard";
+import { WeightChart } from "../../components/measurements/WeightChart";
+import Card from "../../components/ui/Card";
 import { useJournalDay } from "../../hooks/useJournalDay";
+import { useMeasurements } from "../../hooks/useMeasurements";
 import { todayKey } from "../../lib/date";
 import { queryKeys } from "../../lib/queryClient";
 import { authService } from "../../services/authService";
@@ -22,6 +25,9 @@ export function HomePage() {
     });
     const firstName = profileQuery.data?.first_name?.trim();
 
+    // Mesures de poids, pour la courbe de progression.
+    const weight = useMeasurements();
+
     function handleLogout() {
         authService.logout();
         navigate("/login", { replace: true });
@@ -36,12 +42,17 @@ export function HomePage() {
           {firstName ? `Bienvenue, ${firstName}` : "Bienvenue"}
         </h1>
 
-        <Button variant="secondary" onClick={handleLogout} className="mt-4">
-          Se déconnecter
-        </Button>
+        <div className="mt-4 flex justify-center gap-2">
+          <Button onClick={() => navigate("/profile")}>
+            Mon profil
+          </Button>
+          <Button variant="secondary" onClick={handleLogout}>
+            Se déconnecter
+          </Button>
+        </div>
       </header>
 
-      <section className="mt-6" aria-label="Résumé d’aujourd’hui">
+      <section className="mt-8" aria-label="Résumé d’aujourd’hui">
         {isLoading ? (
           <p>Chargement de votre journée…</p>
         ) : error ? (
@@ -49,16 +60,34 @@ export function HomePage() {
         ) : (
           <DailySummaryCard totals={totals} target={target} />
         )}
+
+        {/* Deux boutons de même largeur sur une rangée. */}
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal")}>
+            Mon journal
+          </Button>
+          <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal/add")}>
+            Ajouter
+          </Button>
+        </div>
       </section>
 
-      <div className="mt-6 flex flex-col gap-2">
-        <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal")}>
-          Mon journal
+      <section className="mt-8" aria-labelledby="weight-heading">
+        <Card className="w-full bg-surface">
+          <h2 id="weight-heading" className="mt-0 mb-2 text-left text-xl">Mon poids</h2>
+          {weight.isLoading ? (
+            <p>Chargement de vos mesures…</p>
+          ) : weight.error ? (
+            <p className="text-danger" role="alert">{weight.error}</p>
+          ) : (
+            <WeightChart measurements={weight.measurements} />
+          )}
+        </Card>
+
+        <Button className="mt-4 w-full text-primary font-bold" onClick={() => navigate("/measurements/new")}>
+          Enregistrer mon poids
         </Button>
-        <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal/add")}>
-          Ajouter un aliment
-        </Button>
-      </div>
+      </section>
     </main>
     );
 }

@@ -252,3 +252,5 @@ def request_measurement(client, method: str, measurement_id: int, access_token: 
 ## Conclusion
 
 Maintenant que le code est réorganisé de manière plus claire et structurée, il est temps de poursuivre le développement du _Backend_ et des tables figurant dans la base de données !
+
+[Retour](https://alexclouts.github.io/betterself/posts/)

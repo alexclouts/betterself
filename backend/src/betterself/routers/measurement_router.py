@@ -10,6 +10,7 @@ from betterself.models.user_models import User
 from betterself.core.dependencies import get_current_user
 from betterself.core.exceptions import RecordNotFound
 from betterself.prefix import MEASUREMENTS_URL
+from betterself.services.target_refresh import refresh_active_target
 
 """
 Pour l'instant, nous optons pour une structure try/except pour gérer les erreurs de type MeasurementNotFound étant
@@ -26,9 +27,18 @@ def get_measurement_service(db: Session = Depends(get_db)) -> MeasurementReposit
 def create_measurement(
     data: MeasurementCreate,
     current_user: User = Depends(get_current_user),
-    service: MeasurementRepository = Depends(get_measurement_service)
+    service: MeasurementRepository = Depends(get_measurement_service),
+    db: Session = Depends(get_db),
 ):
-    return service.create_measurement(user=current_user, data=data)
+    measurement = service.create_measurement(user=current_user, data=data)
+
+    # Un nouveau poids actuel change la cible nutritionnelle. Une mesure
+    # rétroactive (antérieure à la plus récente) ne la change pas.
+    latest = service.get_latest_measurement(current_user)
+    if latest is not None and latest.id == measurement.id:
+        refresh_active_target(db, current_user)
+
+    return measurement
 
 
 # Endpoint pour récupérer les mesures de l'utilisateur courant

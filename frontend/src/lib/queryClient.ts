@@ -34,4 +34,10 @@ export const queryKeys = {
   },
   currentTarget: ["nutrition-goal", "current-target"] as const,
   profile: ["users", "me", "profile"] as const,
+  currentUser: ["users", "me"] as const,
+  measurements: {
+    // Préfixe commun : invalider cette clé rafraîchit toutes les listes de mesures.
+    all: ["measurements"] as const,
+    list: ["measurements", "list"] as const,
+  },
 };

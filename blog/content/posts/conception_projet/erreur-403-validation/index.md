@@ -193,3 +193,5 @@ Pour une API de santé comme BetterSelf, `404` est généralement le meilleur ch
 ## Analyse
 
 En lisant la réponse offerte par l'IA, j'ai rapidement compris que la raison de cette erreur était dû à ma requête, qui vérifie également que la valeur de `user_id` correspond à celle de l'utilisateur qui effectue la requête. Les explications offertes m'ont aussi fait prendre conscience que cette approche était préférable, puisque, de cette manière, un utilisateur ne verra jamais la différence entre une mesure avec un `ID` existant qui ne lui appartient pas, et un identifiant simplement inexistant.
+
+[Retour](https://alexclouts.github.io/betterself/posts/)

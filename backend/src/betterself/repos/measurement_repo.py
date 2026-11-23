@@ -40,6 +40,17 @@ class MeasurementRepository:
         return list(self.db.scalars(query))
 
 
+    # Récupère la mesure la plus récente d'un utilisateur, ou None s'il n'en a aucune.
+    # À date égale, la mesure saisie en dernier (id le plus grand) l'emporte.
+    def get_latest_measurement(self, user: User) -> Measurement | None:
+        query = (
+            Measurement.for_user(user.id)
+            .order_by(Measurement.date.desc(), Measurement.id.desc())
+            .limit(1)
+        )
+        return self.db.scalar(query)
+
+
     # Récupère une mesure spécifique par ID pour un utilisateur donné
     def get_measurement_by_id(self, user: User, measurement_id: int) -> Measurement:
         return self._get_measurement_or_404(user, measurement_id)

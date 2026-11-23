@@ -59,6 +59,24 @@ export function consumedAtForDay(key: string): string | undefined {
   return date.toISOString();
 }
 
+// Date complète avec l'année : « 3 mars 2025 ».
+export function formatLongDate(key: string): string {
+  const date = parseDateKey(key);
+  if (!date) return key;
+  return date.toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" });
+}
+
+// Date courte pour un axe ou une infobulle : « 3 mars » (« 3 mars 2025 » si withYear).
+export function formatShortDate(key: string, withYear = false): string {
+  const date = parseDateKey(key);
+  if (!date) return key;
+  return date.toLocaleDateString("fr-CA", {
+    day: "numeric",
+    month: "short",
+    ...(withYear ? { year: "numeric" } : {}),
+  });
+}
+
 // Libellé lisible d'une journée : « Aujourd'hui », « Hier », « Demain » ou la date complète.
 export function formatDayLabel(key: string): string {
   if (key === todayKey()) return "Aujourd’hui";

@@ -179,7 +179,7 @@ export function FoodSearchPage() {
           }
           className="mt-6 w-full py-3 text-primary font-bold"
         >
-          + Créer un nouvel aliment
+          + Créer un aliment
         </Button>
 
       {/* Attribution exigée par la licence ODbL. */}

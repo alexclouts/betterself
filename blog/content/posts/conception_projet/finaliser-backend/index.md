@@ -301,3 +301,5 @@ async def database_exception_handler(
 Voilà pour cette partie du projet. Vous pouvez consulter la [Vidéo 4: Processus du Onboarding](https://www.youtube.com/watch?v=sD8Af65OU6c) pour une présentation de la structure du frontend.
 
 Les prochains articles s'attarderont à la suite du développement côté _frontend_. Nous aborderons la configuration de **Axios** comme service d'API et la synchronisation des endpoints entre le backend et le frontend avec OpenAPI grâce à des fichiers générés par Orval grâce au script `api:sync`.
+
+[Retour](https://alexclouts.github.io/betterself/posts/)
