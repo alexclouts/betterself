@@ -115,6 +115,18 @@ body {
   margin: 0;
 }
 
+/* Apparition des pop-ups (components/ui/Toaster.tsx). */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /*
  * Styles typographiques par défaut dans @layer base : une règle hors couche
  * l'emporterait sur les classes Tailwind (text-sm, text-red-600, mt-2…).

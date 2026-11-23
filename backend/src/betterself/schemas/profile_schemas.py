@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from betterself.schemas.target_update_schemas import TargetUpdateRead
+
 # Enum représentant le sexe d'un utilisateur.
 class Sex(str, Enum):
     male = "male"
@@ -33,6 +35,14 @@ class UserProfileRead(BaseModel):
     height_cm: Decimal
     activity_level: ActivityLevel
     updated_at: datetime
+
+
+"""
+Réponse à la modification du profil : le profil, plus le résultat du recalcul
+automatique de la cible nutritionnelle (null si aucun recalcul n'a été tenté).
+"""
+class UserProfileUpdatedRead(UserProfileRead):
+    target_update: TargetUpdateRead | None = None
 
 
 class UserProfileUpdate(BaseModel):

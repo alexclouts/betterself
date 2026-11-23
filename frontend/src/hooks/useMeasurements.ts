@@ -21,7 +21,9 @@ export function useMeasurements() {
     const byDate = new Map<string, MeasurementRead>();
     for (const measurement of query.data ?? []) {
       const existing = byDate.get(measurement.date);
-      if (!existing || measurement.id > existing.id) byDate.set(measurement.date, measurement);
+      
+      if (!existing || measurement.id > existing.id) 
+        byDate.set(measurement.date, measurement);
     }
     return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
   }, [query.data]);
