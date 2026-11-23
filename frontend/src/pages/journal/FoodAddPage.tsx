@@ -226,11 +226,34 @@ export function FoodAddPage() {
 
       <h1>{food.name}</h1>
       {food.brand && <p>{food.brand}</p>}
+
       <p className="mt-1">
         {food.serving_g
           ? `Portion suggérée : ${formatNutrient(food.serving_g)} g`
           : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
       </p>
+      <Card className="w-full p-6 mt-6 bg-surface">
+        <dl className="grid grid-cols-3 gap-3">
+          <div className="col-span-3">
+            <dt>Calories</dt>
+            <dd className="text-2xl font-semibold mb-4">
+              {nutrients ? formatNutrient(nutrients.calories_kcal, 0) : "–"} kcal
+            </dd>
+          </div>
+          <div>
+            <dt>Protéines</dt>
+            <dd>{nutrients ? formatNutrient(nutrients.protein_g) : "–"} g</dd>
+          </div>
+          <div>
+            <dt>Glucides</dt>
+            <dd>{nutrients ? formatNutrient(nutrients.carbohydrates_g) : "–"} g</dd>
+          </div>
+          <div>
+            <dt>Lipides</dt>
+            <dd>{nutrients ? formatNutrient(nutrients.fat_g) : "–"} g</dd>
+          </div>
+        </dl>
+      </Card>
       {dayKey !== todayKey() && (
         <p className="mt-1">
           {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}
@@ -271,34 +294,11 @@ export function FoodAddPage() {
           </Select>
         </label>
 
-        <Card className="w-full p-6 mt-6 bg-surface">
-          <dl className="grid grid-cols-3 gap-3">
-            <div className="col-span-3">
-              <dt>Calories</dt>
-              <dd className="text-2xl font-semibold mb-4">
-                {nutrients ? formatNutrient(nutrients.calories_kcal, 0) : "–"} kcal
-              </dd>
-            </div>
-            <div>
-              <dt>Protéines</dt>
-              <dd>{nutrients ? formatNutrient(nutrients.protein_g) : "–"} g</dd>
-            </div>
-            <div>
-              <dt>Glucides</dt>
-              <dd>{nutrients ? formatNutrient(nutrients.carbohydrates_g) : "–"} g</dd>
-            </div>
-            <div>
-              <dt>Lipides</dt>
-              <dd>{nutrients ? formatNutrient(nutrients.fat_g) : "–"} g</dd>
-            </div>
-          </dl>
-        </Card>
-
         {error && <p className="text-danger">{error}</p>}
 
         <Button
           type="submit"
-          className="w-full mt-2"
+          className="w-full mt-2 font-bold"
           disabled={!isQuantityValid || isSubmitting}
         >
           {entry

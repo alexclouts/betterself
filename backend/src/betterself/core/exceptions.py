@@ -10,4 +10,6 @@ class DuplicateRecord(Exception):
 
 # Le catalogue Open Food Facts est absent ou illisible.
 class CatalogUnavailable(Exception):
-    pass
+    def __init__(self, message="Le catalogue Open Food Facts est indisponible"):
+        self.message = message
+        super().__init__(self.message)

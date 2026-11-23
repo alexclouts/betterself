@@ -3,6 +3,14 @@ import unicodedata
 
 from sqlalchemy import ColumnElement, func
 
+"""
+Module pour la recherche textuelle et la manipulation de codes-barres.
+Fournit des fonctions pour normaliser le texte, tokeniser les mots,
+calculer le rang d'un nom selon les mots cherchés, et générer des candidats
+de codes-barres à partir d'une requête.
+"""
+
+
 # Longueur d'un code EAN-13, format utilisé par Open Food Facts.
 EAN13_LENGTH = 13
 

@@ -235,7 +235,7 @@ export function FoodCreatePage() {
 
         {error && <p className="text-danger">{error}</p>}
 
-        <Button type="submit" className="w-full mt-2" disabled={!canSubmit}>
+        <Button type="submit" className="w-full mt-2 font-bold" disabled={!canSubmit}>
           {isSubmitting ? "Création…" : "Créer et ajouter au journal"}
         </Button>
       </form>

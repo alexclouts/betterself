@@ -154,7 +154,7 @@ class FoodRepository:
         self.db.add(food)
         self.db.flush()
         return food
-
+    
 
     # Retourne l'aliment importé d'Open Food Facts portant ce code-barres.
     def get_by_external_reference(self, code: str) -> Food | None:

@@ -68,15 +68,16 @@ export function FoodSearchPage() {
   const [expandedTerm, setExpandedTerm] = useState<string | null>(null);
 
   const results = searchQuery.data?.results ?? [];
-  const visibleResults =
-    expandedTerm === apiTerm ? results : results.slice(0, VISIBLE_RESULTS);
+  const visibleResults = expandedTerm === apiTerm ? results : results.slice(0, VISIBLE_RESULTS);
   const hiddenCount = results.length - visibleResults.length;
   const isLoading = isSearching && searchQuery.isFetching;
   const error = searchQuery.error?.message ?? null;
   const hasCurrentResults = searchQuery.isSuccess && !searchQuery.isPlaceholderData;
+
   // « Aucun résultat » seulement quand la réponse du terme en cours est arrivée.
   const hasNoResults = isSearching && hasCurrentResults && results.length === 0;
   const isCatalogUnavailable = hasCurrentResults && !searchQuery.data.catalog_available;
+
   // L'attribution est exigée dès qu'une donnée d'Open Food Facts est affichée.
   const needsAttribution = visibleResults.some((food) => food.source === "open_food_facts");
 
@@ -176,7 +177,7 @@ export function FoodSearchPage() {
           onClick={() =>
             navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
           }
-          className="mt-4 w-full py-3 text-primary font-bold"
+          className="mt-6 w-full py-3 text-primary font-bold"
         >
           + Créer un nouvel aliment
         </Button>
