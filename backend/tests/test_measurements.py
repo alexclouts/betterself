@@ -331,6 +331,7 @@ Tests pour la suppression d'une mesure.
 # Test pour vérifier la suppression réussie d'une mesure existante
 def test_delete_measurement_success(client):
     access_token = register_and_login(client)
+    create_measurement_and_get_id(client, access_token, date(2024, 5, 1), 74)
     measurement_id = create_measurement_and_get_id(
         client,
         access_token,
@@ -338,11 +339,30 @@ def test_delete_measurement_success(client):
         75,
     )
     response = request_measurement(client, "delete", measurement_id, access_token)
-    assert response.status_code == 204
+    assert response.status_code == 200
+    # Sans objectif, aucun recalcul de la cible n'est tenté.
+    assert response.json() == {"target_update": None}
 
     # Vérifie que la mesure n'est plus accessible après sa suppression
     response = request_measurement(client, "get", measurement_id, access_token)
     assert response.status_code == 404
+
+
+# Test pour vérifier que la seule mesure restante ne peut pas être supprimée
+def test_delete_only_measurement_conflict(client):
+    access_token = register_and_login(client)
+    measurement_id = create_measurement_and_get_id(
+        client,
+        access_token,
+        date(2024, 6, 1),
+        75,
+    )
+    response = request_measurement(client, "delete", measurement_id, access_token)
+    assert response.status_code == 409
+
+    # La mesure est toujours là
+    response = request_measurement(client, "get", measurement_id, access_token)
+    assert response.status_code == 200
 
 
 """

@@ -5,8 +5,8 @@ import { queryKeys } from "../lib/queryClient";
 import { measurementService } from "../services/measurementService";
 
 /*
- * Mesures de poids de l'utilisateur, partagées par l'accueil (graphique) et la
- * page d'enregistrement (dernière mesure). Rechargées après chaque enregistrement
+ * Mesures de poids de l'utilisateur, partagées par l'accueil (graphique), la
+ * page d'enregistrement (dernière mesure) et l'historique. Rechargées après chaque enregistrement
  * grâce à l'invalidation de queryKeys.measurements.all.
  */
 export function useMeasurements() {
@@ -28,8 +28,16 @@ export function useMeasurements() {
     return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
   }, [query.data]);
 
+  // Toutes les mesures, doublons compris, de la plus récente à la plus ancienne :
+  // l'historique doit permettre de corriger ou supprimer chacune d'elles.
+  const history = useMemo(
+    () => [...(query.data ?? [])].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id),
+    [query.data],
+  );
+
   return {
     measurements: daily,
+    history,
     latest: daily.at(-1) ?? null,
     isLoading: query.isPending,
     error: query.error?.message ?? null,

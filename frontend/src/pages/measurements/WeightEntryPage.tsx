@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import type { MeasurementRead } from "../../api/generated/measurementRead";
+import type { TargetUpdateRead } from "../../api/generated/targetUpdateRead";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import { useMeasurements } from "../../hooks/useMeasurements";
@@ -39,21 +41,77 @@ function validateDate(key: string): string | null {
   return null;
 }
 
+/*
+ * Enregistrement d'un poids (/measurements/new) ou modification d'une mesure
+ * existante (/measurements/:measurementId/edit). En modification, le formulaire
+ * attend que la mesure soit chargée pour s'initialiser avec ses valeurs.
+ */
 export function WeightEntryPage() {
   const navigate = useNavigate();
+  const { measurementId } = useParams();
+  const { history, latest, isLoading, error } = useMeasurements();
+
+  const isEditing = measurementId !== undefined;
+  const editedMeasurement = isEditing
+    ? history.find((measurement) => String(measurement.id) === measurementId) ?? null
+    : null;
+
+  // Message de référence sous le titre.
+  const reference = isLoading
+    ? "Chargement de vos mesures…"
+    : error
+      ? "Dernière mesure indisponible."
+      : isEditing
+        ? editedMeasurement
+          ? `Valeur enregistrée : ${editedMeasurement.weight_kg.toLocaleString("fr-CA")} kg le ${formatLongDate(editedMeasurement.date)}.`
+          : null
+        : latest
+          ? `Dernière mesure : ${latest.weight_kg.toLocaleString("fr-CA")} kg le ${formatLongDate(latest.date)}.`
+          : "Aucune mesure enregistrée pour l’instant.";
+
+  return (
+    <main className="mx-auto w-full max-w-md px-4 py-6">
+      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm">
+        ← Retour
+      </Button>
+
+      <h1>{isEditing ? "Modifier une mesure" : "Enregistrer mon poids"}</h1>
+
+      {reference && <p className="text-sm">{reference}</p>}
+
+      {!isEditing ? (
+        <WeightForm />
+      ) : isLoading ? null : editedMeasurement ? (
+        // key : réinitialise le formulaire si on passe d'une mesure à une autre.
+        <WeightForm key={editedMeasurement.id} measurement={editedMeasurement} />
+      ) : (
+        <p className="mt-6 text-danger" role="alert">
+          {error ?? "Cette mesure est introuvable."}
+        </p>
+      )}
+    </main>
+  );
+}
+
+function WeightForm({ measurement }: { measurement?: MeasurementRead }) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isEditing = measurement !== undefined;
 
-  // Dernière mesure, affichée à titre de référence.
-  const { latest, isLoading: isLatestLoading, error: latestError } = useMeasurements();
-
-  const [date, setDate] = useState(todayKey());
-  const [weight, setWeight] = useState("");
+  const [date, setDate] = useState(measurement?.date ?? todayKey());
+  const [weight, setWeight] = useState(
+    measurement ? String(measurement.weight_kg).replace(".", ",") : "",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const weightError = validateWeight(weight);
   const dateError = validateDate(date);
-  const canSubmit = weight.trim() !== "" && !weightError && !dateError && !isSubmitting;
+  // En modification, rien à enregistrer tant que les valeurs n'ont pas changé.
+  const hasChanges =
+    !measurement || date !== measurement.date || parseDecimal(weight) !== measurement.weight_kg;
+  const canSubmit =
+    weight.trim() !== "" && !weightError && !dateError && hasChanges && !isSubmitting;
 
   async function handleSubmit(event: React.SubmitEvent) {
     event.preventDefault();
@@ -62,79 +120,80 @@ export function WeightEntryPage() {
     setIsSubmitting(true);
     setError(null);
 
+    const payload = { date, weight_kg: parseDecimal(weight) };
+
     try {
-      const created = await measurementService.createMeasurement({
-        date,
-        weight_kg: parseDecimal(weight),
-      });
+      let targetUpdate: TargetUpdateRead | null | undefined;
+      if (measurement) {
+        const updated = await measurementService.updateMeasurement(measurement.id, payload);
+        targetUpdate = updated.target_update;
+      } else {
+        const created = await measurementService.createMeasurement(payload);
+        targetUpdate = created.target_update;
+      }
+
       void queryClient.invalidateQueries({ queryKey: queryKeys.measurements.all });
-      // Le backend recalcule la cible avec le nouveau poids : le résumé doit la recharger.
+      // Le backend peut avoir recalculé la cible avec ce poids : le résumé doit la recharger.
       void queryClient.invalidateQueries({ queryKey: queryKeys.currentTarget });
-      // Pop-up de confirmation sur l'accueil, avec la nouvelle cible si elle a changé.
-      notifySaveResult("Votre mesure a été enregistrée avec succès.", created.target_update);
-      // Mesure enregistrée : retour à l'accueil (replace : « Retour » ne ramène pas au formulaire).
-      navigate("/", { replace: true });
+      // Pop-up de confirmation, avec la nouvelle cible si elle a changé.
+      notifySaveResult(
+        isEditing
+          ? "Votre mesure a été modifiée avec succès."
+          : "Votre mesure a été enregistrée avec succès.",
+        targetUpdate,
+      );
+      // Retour à l'historique (modification) ou à l'accueil (nouvelle mesure).
+      // replace : « Retour » ne ramène pas au formulaire.
+      navigate(isEditing ? "/measurements" : "/", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible d’enregistrer cette mesure.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : isEditing
+            ? "Impossible de modifier cette mesure."
+            : "Impossible d’enregistrer cette mesure.",
+      );
       setIsSubmitting(false);
     }
   }
 
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm">
-        ← Retour
+    <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
+      <label className="block">
+        <span className="text-sm font-medium">Date *</span>
+        <Input
+          type="date"
+          value={date}
+          min={MIN_DATE}
+          max={todayKey()}
+          onChange={(event) => setDate(event.target.value)}
+          className="mt-1"
+          aria-invalid={dateError !== null}
+          required
+        />
+        {dateError && <span className="mt-1 block text-sm text-danger">{dateError}</span>}
+      </label>
+
+      <label className="block">
+        <span className="text-sm font-medium">Poids (kg) *</span>
+        <Input
+          type="text"
+          inputMode="decimal"
+          placeholder="ex. 72,5"
+          value={weight}
+          onChange={(event) => setWeight(event.target.value)}
+          className="mt-1"
+          aria-invalid={weightError !== null}
+          required
+        />
+        {weightError && <span className="mt-1 block text-sm text-danger">{weightError}</span>}
+      </label>
+
+      {error && <p className="text-danger" role="alert">{error}</p>}
+
+      <Button type="submit" className="w-full mt-2 font-bold" disabled={!canSubmit}>
+        {isSubmitting ? "Enregistrement…" : "Enregistrer"}
       </Button>
-
-      <h1>Enregistrer mon poids</h1>
-
-      <p className="text-sm">
-        {isLatestLoading
-          ? "Chargement de votre dernière mesure…"
-          : latestError
-            ? "Dernière mesure indisponible."
-            : latest
-              ? `Dernière mesure : ${latest.weight_kg.toLocaleString("fr-CA")} kg le ${formatLongDate(latest.date)}.`
-              : "Aucune mesure enregistrée pour l’instant."}
-      </p>
-
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
-        <label className="block">
-          <span className="text-sm font-medium">Date *</span>
-          <Input
-            type="date"
-            value={date}
-            min={MIN_DATE}
-            max={todayKey()}
-            onChange={(event) => setDate(event.target.value)}
-            className="mt-1"
-            aria-invalid={dateError !== null}
-            required
-          />
-          {dateError && <span className="mt-1 block text-sm text-danger">{dateError}</span>}
-        </label>
-
-        <label className="block">
-          <span className="text-sm font-medium">Poids (kg) *</span>
-          <Input
-            type="text"
-            inputMode="decimal"
-            placeholder="ex. 72,5"
-            value={weight}
-            onChange={(event) => setWeight(event.target.value)}
-            className="mt-1"
-            aria-invalid={weightError !== null}
-            required
-          />
-          {weightError && <span className="mt-1 block text-sm text-danger">{weightError}</span>}
-        </label>
-
-        {error && <p className="text-danger" role="alert">{error}</p>}
-
-        <Button type="submit" className="w-full mt-2 font-bold" disabled={!canSubmit}>
-          {isSubmitting ? "Enregistrement…" : "Enregistrer"}
-        </Button>
-      </form>
-    </main>
+    </form>
   );
 }
