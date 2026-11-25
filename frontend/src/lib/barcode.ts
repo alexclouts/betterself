@@ -3,37 +3,18 @@ import type { BarcodeDetector as BarcodeDetectorPonyfill, DetectedBarcode } from
 /*
  * Lecture des codes-barres des produits alimentaires (EAN-13, EAN-8, UPC-A, UPC-E).
  *
- * L'API native BarcodeDetector est utilisée lorsqu'elle existe et reconnaît ces
- * formats (Chrome sur Android). Sinon (Safari, Firefox, ordinateur), le polyfill
- * `barcode-detector`, basé sur ZXing en WebAssembly, prend le relais avec la même API.
- * Il est chargé seulement à l'ouverture du lecteur, et son fichier .wasm est servi
- * par l'application plutôt que par un CDN.
+ * Le polyfill `barcode-detector`, basé sur ZXing en WebAssembly, est utilisé sur tous
+ * les appareils, même là où l'API native BarcodeDetector existe (Chrome sur Android) :
+ * un seul lecteur se comporte pareil partout, et le lecteur natif d'Android a échoué
+ * sur des codes que ZXing lit sans peine. Il est chargé seulement à l'ouverture du
+ * lecteur, et son fichier .wasm est servi par l'application plutôt que par un CDN.
  */
 
 export const BARCODE_FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"] as const;
 
 type Detector = Pick<BarcodeDetectorPonyfill, "detect">;
-type NativeDetectorClass = {
-  new (options: { formats: string[] }): Detector;
-  getSupportedFormats(): Promise<string[]>;
-};
 
-async function createNativeDetector(): Promise<Detector | null> {
-  const Native = (globalThis as { BarcodeDetector?: NativeDetectorClass }).BarcodeDetector;
-  if (!Native?.getSupportedFormats) return null;
-
-  try {
-    const supported = await Native.getSupportedFormats();
-    const formats = BARCODE_FORMATS.filter((format) => supported.includes(format));
-    // EAN-13 et UPC-A couvrent presque tous les produits d'épicerie.
-    if (!formats.includes("ean_13") || !formats.includes("upc_a")) return null;
-    return new Native({ formats });
-  } catch {
-    return null;
-  }
-}
-
-async function createPolyfillDetector(): Promise<Detector> {
+async function createDetector(): Promise<Detector> {
   const [{ BarcodeDetector, prepareZXingModule }, { default: wasmUrl }] = await Promise.all([
     import("barcode-detector/ponyfill"),
     import("zxing-wasm/reader/zxing_reader.wasm?url"),
@@ -53,12 +34,10 @@ let detectorPromise: Promise<Detector> | null = null;
 
 // Lecteur partagé entre les ouvertures du scanner ; un échec permet de réessayer.
 export function getBarcodeDetector(): Promise<Detector> {
-  detectorPromise ??= (async () => (await createNativeDetector()) ?? createPolyfillDetector())().catch(
-    (error: unknown) => {
-      detectorPromise = null;
-      throw error;
-    },
-  );
+  detectorPromise ??= createDetector().catch((error: unknown) => {
+    detectorPromise = null;
+    throw error;
+  });
   return detectorPromise;
 }
 
