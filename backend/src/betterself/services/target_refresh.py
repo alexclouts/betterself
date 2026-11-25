@@ -3,13 +3,13 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from betterself.models.target_models import GoalTarget
 from betterself.models.user_models import User
 from betterself.repos.goal_repo import GoalRepository
 from betterself.repos.measurement_repo import MeasurementRepository
 from betterself.repos.profile_repo import UserProfileRepository
 from betterself.repos.target_repo import TargetRepository
 from betterself.schemas.target_schemas import GoalTargetRecalculate
+from betterself.schemas.target_update_schemas import TargetUpdateRead, TargetUpdateStatus
 from betterself.services.goal_service import GoalService, GoalTargetCalculationError
 
 logger = logging.getLogger(__name__)
@@ -27,9 +27,10 @@ Ne fait rien si l'utilisateur n'a pas encore de profil ou d'objectif (onboarding
 incomplet). Si le calcul échoue (ex. moins de 1200 kcal), la cible actuelle est
 conservée : la mesure ou le profil restent enregistrés.
 
-Retourne la nouvelle cible, ou None si aucun recalcul n'a eu lieu.
+Retourne le résultat (updated ou failed) à transmettre au client,
+ou None si aucun recalcul n'a été tenté.
 """
-def refresh_active_target(db: Session, user: User) -> GoalTarget | None:
+def refresh_active_target(db: Session, user: User) -> TargetUpdateRead | None:
     profile = UserProfileRepository(db).get_by_user(user)
     goal_repository = GoalRepository(db)
     target_repository = TargetRepository(db)
@@ -48,9 +49,11 @@ def refresh_active_target(db: Session, user: User) -> GoalTarget | None:
     else:
         reference_weight_kg = goal.start_weight_kg
 
+    previous_calories = active_target.calories_target_kcal if active_target is not None else None
+
     service = GoalService(goal_repository=goal_repository, target_repository=target_repository)
     try:
-        return service.recalculate_goal_target(
+        new_target = service.recalculate_goal_target(
             user=user,
             data=GoalTargetRecalculate(
                 reference_weight_kg=reference_weight_kg,
@@ -60,6 +63,17 @@ def refresh_active_target(db: Session, user: User) -> GoalTarget | None:
                 activity_level=profile.activity_level,
             ),
         )
-    except GoalTargetCalculationError:
+    except GoalTargetCalculationError as error:
         logger.warning("Recalcul automatique de la cible impossible ; cible actuelle conservée.", exc_info=True)
-        return None
+        return TargetUpdateRead(
+            status=TargetUpdateStatus.FAILED,
+            previous_calories_target_kcal=previous_calories,
+            calories_target_kcal=previous_calories,
+            message=str(error),
+        )
+
+    return TargetUpdateRead(
+        status=TargetUpdateStatus.UPDATED,
+        previous_calories_target_kcal=previous_calories,
+        calories_target_kcal=new_target.calories_target_kcal,
+    )

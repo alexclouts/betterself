@@ -8,7 +8,7 @@ from betterself.core.database import get_db
 from betterself.core.exceptions import RecordNotFound
 from betterself.core.dependencies import get_current_user
 from betterself.models.user_models import User
-from betterself.schemas.profile_schemas import UserProfileRead, UserProfileUpdate
+from betterself.schemas.profile_schemas import UserProfileRead, UserProfileUpdate, UserProfileUpdatedRead
 from betterself.repos.profile_repo import UserProfileRepository
 from betterself.prefix import USERS_URL, PROFILE_URL
 from betterself.models.profile_models import UserProfile
@@ -68,7 +68,7 @@ def _target_inputs(profile: UserProfile) -> tuple:
 
 
 # Fonction pour créer ou mettre à jour le profil de l'utilisateur connecté
-@router.put(PROFILE_URL, response_model=UserProfileRead)
+@router.put(PROFILE_URL, response_model=UserProfileUpdatedRead)
 def create_or_update_current_user_profile(
     data: UserProfileUpdate,
     current_user: User = Depends(get_current_user),
@@ -88,12 +88,16 @@ def create_or_update_current_user_profile(
 
     # Recalcule la cible seulement si un champ utilisé par le calcul a changé
     # (le prénom, par exemple, n'a aucun effet).
+    target_update = None
     if previous is not None and previous != _target_inputs(profile):
-        refresh_active_target(db, current_user)
+        target_update = refresh_active_target(db, current_user)
 
+    response = UserProfileUpdatedRead.model_validate(profile).model_copy(
+        update={"target_update": target_update}
+    )
     if created:
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
-            content=UserProfileRead.model_validate(profile).model_dump(mode="json"),
+            content=response.model_dump(mode="json"),
         )
-    return profile
+    return response

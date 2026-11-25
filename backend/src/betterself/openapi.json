@@ -161,7 +161,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfileRead"
+                  "$ref": "#/components/schemas/UserProfileUpdatedRead"
                 }
               }
             }
@@ -212,7 +212,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MeasurementRead"
+                  "$ref": "#/components/schemas/MeasurementCreatedRead"
                 }
               }
             }
@@ -3156,6 +3156,46 @@
         ],
         "title": "MeasurementCreate"
       },
+      "MeasurementCreatedRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "weight_kg": {
+            "type": "number",
+            "title": "Weight Kg"
+          },
+          "target_update": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetUpdateRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "date",
+          "weight_kg"
+        ],
+        "title": "MeasurementCreatedRead"
+      },
       "MeasurementRead": {
         "properties": {
           "id": {
@@ -3807,6 +3847,59 @@
         ],
         "title": "Sex"
       },
+      "TargetUpdateRead": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/TargetUpdateStatus"
+          },
+          "previous_calories_target_kcal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Calories Target Kcal"
+          },
+          "calories_target_kcal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calories Target Kcal"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "TargetUpdateRead"
+      },
+      "TargetUpdateStatus": {
+        "type": "string",
+        "enum": [
+          "updated",
+          "failed"
+        ],
+        "title": "TargetUpdateStatus"
+      },
       "Token": {
         "properties": {
           "access_token": {
@@ -3959,6 +4052,66 @@
           "activity_level"
         ],
         "title": "UserProfileUpdate"
+      },
+      "UserProfileUpdatedRead": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "year_of_birth": {
+            "type": "integer",
+            "title": "Year Of Birth"
+          },
+          "sex": {
+            "$ref": "#/components/schemas/Sex"
+          },
+          "height_cm": {
+            "type": "string",
+            "title": "Height Cm"
+          },
+          "activity_level": {
+            "$ref": "#/components/schemas/ActivityLevel"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "target_update": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetUpdateRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "first_name",
+          "year_of_birth",
+          "sex",
+          "height_cm",
+          "activity_level",
+          "updated_at"
+        ],
+        "title": "UserProfileUpdatedRead"
       },
       "UserRead": {
         "properties": {

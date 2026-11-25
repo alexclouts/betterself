@@ -6,6 +6,7 @@ import Input from "../../components/ui/Input";
 import { useMeasurements } from "../../hooks/useMeasurements";
 import { formatLongDate, parseDateKey, todayKey } from "../../lib/date";
 import { queryKeys } from "../../lib/queryClient";
+import { notifySaveResult } from "../../lib/targetUpdate";
 import { measurementService } from "../../services/measurementService";
 
 // Mêmes bornes que le backend (MeasurementCreate et contraintes de la table measurements).
@@ -62,13 +63,15 @@ export function WeightEntryPage() {
     setError(null);
 
     try {
-      await measurementService.createMeasurement({
+      const created = await measurementService.createMeasurement({
         date,
         weight_kg: parseDecimal(weight),
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.measurements.all });
       // Le backend recalcule la cible avec le nouveau poids : le résumé doit la recharger.
       void queryClient.invalidateQueries({ queryKey: queryKeys.currentTarget });
+      // Pop-up de confirmation sur l'accueil, avec la nouvelle cible si elle a changé.
+      notifySaveResult("Votre mesure a été enregistrée avec succès.", created.target_update);
       // Mesure enregistrée : retour à l'accueil (replace : « Retour » ne ramène pas au formulaire).
       navigate("/", { replace: true });
     } catch (err) {

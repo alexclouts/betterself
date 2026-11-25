@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 from betterself.core.database import get_db
-from betterself.schemas.measurement_schemas import MeasurementUpdate, MeasurementCreate, MeasurementRead
+from betterself.schemas.measurement_schemas import MeasurementUpdate, MeasurementCreate, MeasurementCreatedRead, MeasurementRead
 from betterself.repos.measurement_repo import MeasurementRepository
 from betterself.models.user_models import User
 from betterself.core.dependencies import get_current_user
@@ -23,7 +23,7 @@ def get_measurement_service(db: Session = Depends(get_db)) -> MeasurementReposit
     return MeasurementRepository(db)
 
 # Endpoint pour créer une nouvelle mesure
-@router.post("", response_model=MeasurementRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=MeasurementCreatedRead, status_code=status.HTTP_201_CREATED)
 def create_measurement(
     data: MeasurementCreate,
     current_user: User = Depends(get_current_user),
@@ -35,10 +35,14 @@ def create_measurement(
     # Un nouveau poids actuel change la cible nutritionnelle. Une mesure
     # rétroactive (antérieure à la plus récente) ne la change pas.
     latest = service.get_latest_measurement(current_user)
+    target_update = None
+    
     if latest is not None and latest.id == measurement.id:
-        refresh_active_target(db, current_user)
+        target_update = refresh_active_target(db, current_user)
 
-    return measurement
+    return MeasurementCreatedRead.model_validate(measurement).model_copy(
+        update={"target_update": target_update}
+    )
 
 
 # Endpoint pour récupérer les mesures de l'utilisateur courant

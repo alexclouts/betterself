@@ -9,6 +9,7 @@ import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { queryKeys } from "../../lib/queryClient";
+import { notifySaveResult } from "../../lib/targetUpdate";
 import { userService } from "../../services/userService";
 
 const SEX_LABELS: Record<Sex, string> = {
@@ -96,7 +97,6 @@ export function ProfilePage() {
   const [form, setForm] = useState<ProfileForm | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const profile = profileQuery.data;
   const loadError = profileQuery.error?.message ?? userQuery.error?.message ?? null;
@@ -105,7 +105,6 @@ export function ProfilePage() {
     if (!profile) return;
     setForm(toForm(profile));
     setError(null);
-    setSuccess(null);
   }
 
   function update<K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) {
@@ -124,7 +123,7 @@ export function ProfilePage() {
     setError(null);
 
     try {
-      const updated = await userService.updateProfile({
+      const { target_update, ...updated } = await userService.updateProfile({
         first_name: form.firstName.trim() || null,
         year_of_birth: Number(form.yearOfBirth),
         sex: form.sex,
@@ -135,8 +134,8 @@ export function ProfilePage() {
       queryClient.setQueryData(queryKeys.profile, updated);
       // Le backend recalcule la cible si la taille, l'âge, le sexe ou l'activité ont changé.
       void queryClient.invalidateQueries({ queryKey: queryKeys.currentTarget });
+      notifySaveResult("Votre profil a été mis à jour avec succès.", target_update);
       setForm(null);
-      setSuccess("Profil mis à jour.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Impossible d’enregistrer votre profil.");
     } finally {
@@ -269,7 +268,6 @@ export function ProfilePage() {
             </dl>
           </Card>
 
-          {success && <p className="mt-2 text-primary-dark" role="status">{success}</p>}
 
           <Button className="mt-4 w-full font-bold" onClick={startEditing}>
             Modifier

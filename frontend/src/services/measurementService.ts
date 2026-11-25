@@ -1,6 +1,7 @@
 import { getErrorMessage } from "../api/axios";
 import { getMesures } from "../api/generated/endpoints/mesures/mesures";
 import type { MeasurementCreate } from "../api/generated/measurementCreate";
+import type { MeasurementCreatedRead } from "../api/generated/measurementCreatedRead";
 import type { MeasurementRead } from "../api/generated/measurementRead";
 
 export const measurementService = {
@@ -18,7 +19,8 @@ export const measurementService = {
     },
 
     // Enregistre une mesure de poids pour l'utilisateur connecté.
-    async createMeasurement(payload: MeasurementCreate): Promise<MeasurementRead> {
+    // La réponse inclut `target_update` : le résultat du recalcul automatique de la cible.
+    async createMeasurement(payload: MeasurementCreate): Promise<MeasurementCreatedRead> {
         try {
             const { createMeasurementMeasurementsPost } = getMesures();
             return await createMeasurementMeasurementsPost(payload);

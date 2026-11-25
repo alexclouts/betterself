@@ -2,6 +2,7 @@ import { getErrorMessage } from "../api/axios";
 import { getUsers } from "../api/generated/endpoints/users/users";
 import type { UserProfileRead } from "../api/generated/userProfileRead";
 import type { UserProfileUpdate } from "../api/generated/userProfileUpdate";
+import type { UserProfileUpdatedRead } from "../api/generated/userProfileUpdatedRead";
 import type { UserRead } from "../api/generated/userRead";
 
 export const userService = {
@@ -32,7 +33,8 @@ export const userService = {
     },
 
     // Met à jour le profil de l'utilisateur connecté (PUT : tous les champs sont envoyés).
-    async updateProfile(payload: UserProfileUpdate): Promise<UserProfileRead> {
+    // La réponse inclut `target_update` : le résultat du recalcul automatique de la cible.
+    async updateProfile(payload: UserProfileUpdate): Promise<UserProfileUpdatedRead> {
         try {
             const { createOrUpdateCurrentUserProfileUsersMeProfilePut } = getUsers();
             return await createOrUpdateCurrentUserProfileUsersMeProfilePut(payload);
