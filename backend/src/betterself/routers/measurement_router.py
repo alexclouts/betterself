@@ -7,10 +7,10 @@ from betterself.core.database import get_db
 from betterself.schemas.measurement_schemas import MeasurementUpdate, MeasurementCreate, MeasurementCreatedRead, MeasurementRead
 from betterself.repos.measurement_repo import MeasurementRepository
 from betterself.models.user_models import User
-from betterself.core.dependencies import get_current_user
+from betterself.core.dependencies import get_current_user, get_target_service
 from betterself.core.exceptions import RecordNotFound
 from betterself.prefix import MEASUREMENTS_URL
-from betterself.services.target_refresh import refresh_active_target
+from betterself.services.target_service import TargetService
 
 """
 Pour l'instant, nous optons pour une structure try/except pour gérer les erreurs de type MeasurementNotFound étant
@@ -28,7 +28,7 @@ def create_measurement(
     data: MeasurementCreate,
     current_user: User = Depends(get_current_user),
     service: MeasurementRepository = Depends(get_measurement_service),
-    db: Session = Depends(get_db),
+    target_service: TargetService = Depends(get_target_service),
 ):
     measurement = service.create_measurement(user=current_user, data=data)
 
@@ -38,7 +38,7 @@ def create_measurement(
     target_update = None
     
     if latest is not None and latest.id == measurement.id:
-        target_update = refresh_active_target(db, current_user)
+        target_update = target_service.refresh_active_target(current_user)
 
     return MeasurementCreatedRead.model_validate(measurement).model_copy(
         update={"target_update": target_update}
