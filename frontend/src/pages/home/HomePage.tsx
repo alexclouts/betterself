@@ -70,6 +70,9 @@ export function HomePage() {
             Ajouter
           </Button>
         </div>
+        <Button variant="secondary" className="mt-2 w-full font-bold" onClick={() => navigate("/recipes")}>
+          Mes recettes
+        </Button>
       </section>
 
       <section className="mt-8" aria-labelledby="weight-heading">

@@ -14,6 +14,7 @@ import { BarcodeScanPage } from "../pages/journal/BarcodeScanPage";
 import { WeightEntryPage } from "../pages/measurements/WeightEntryPage";
 import { MeasurementsPage } from "../pages/measurements/MeasurementsPage";
 import { ProfilePage } from "../pages/profile/ProfilePage";
+import { RecipesPage } from "../pages/recipes/RecipesPage";
 
 export function AppRoutes() {
     return (
@@ -38,6 +39,7 @@ export function AppRoutes() {
                     <Route path="/measurements/new" element={<WeightEntryPage />} />
                     <Route path="/measurements/:measurementId/edit" element={<WeightEntryPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/recipes" element={<RecipesPage />} />
                 </Route>
                 
             </Route>
