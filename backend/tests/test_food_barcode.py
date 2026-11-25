@@ -86,6 +86,14 @@ def test_barcode_finds_manual_food(client, headers):
     assert result["in_history"] is True
 
 
+# Un aliment créé avec un UPC-A (12 chiffres) est retrouvé quand le lecteur rapporte
+# le même code sous sa forme EAN-13 (0 en tête).
+def test_barcode_finds_upc_a_food_from_ean13_scan(client, headers):
+    food = create_food(client, headers, "Crème à café", external_reference_id="041271025682")
+
+    assert find(client, headers, "0041271025682").json()["food_id"] == food["id"]
+
+
 # Si plusieurs aliments portent le code, celui de l'historique de l'utilisateur l'emporte.
 def test_barcode_prefers_user_history(client, headers, other_headers):
     imported = import_product(client, other_headers, CATALOG_CODE)
