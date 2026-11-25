@@ -112,6 +112,15 @@ export function FoodSearchPage() {
         className="mt-4 w-full border px-4 py-3"
       />
 
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => navigate("/journal/scan", { state: journalNavState })}
+        className="mt-2 w-full text-sm font-semibold"
+      >
+        Scanner un code-barres
+      </Button>
+
       {isLoading && (
         <p className="mt-4">
           Recherche…

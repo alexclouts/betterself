@@ -67,6 +67,9 @@ export function FoodCreatePage() {
 
   // Préremplit le nom avec la recherche effectuée, si disponible.
   const initialName = (location.state as { name?: string } | null)?.name ?? "";
+  // Code-barres d'un produit inconnu, venant du scan : l'aliment sera reconnu au prochain scan.
+  const rawBarcode = (location.state as { barcode?: unknown } | null)?.barcode;
+  const barcode = typeof rawBarcode === "string" && /^\d{8,14}$/.test(rawBarcode) ? rawBarcode : null;
   const journalNavState = readJournalNavState(location.state);
 
   // Déclaration des variables d'état pour le formulaire de création d'aliment.
@@ -139,6 +142,7 @@ export function FoodCreatePage() {
         name: name.trim(),
         brand: brand.trim() || null,
         category: category || null,
+        external_reference_id: barcode,
         ...parsed,
       });
       // Le nouvel aliment doit apparaître dans les prochaines recherches.
@@ -159,6 +163,12 @@ export function FoodCreatePage() {
       </Button>
 
       <h1>Créer un aliment</h1>
+
+      {barcode && (
+        <p className="text-sm">
+          Code-barres : <span className="font-semibold tabular-nums text-foreground">{barcode}</span>
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <label className="block">
