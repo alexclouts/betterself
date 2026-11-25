@@ -6,13 +6,13 @@ from betterself.schemas.user_schemas import UserRead
 from betterself.services.onboarding_service import OnboardingService
 from betterself.core.database import get_db
 from betterself.core.exceptions import RecordNotFound
-from betterself.core.dependencies import get_current_user
+from betterself.core.dependencies import get_current_user, get_target_service
 from betterself.models.user_models import User
 from betterself.schemas.profile_schemas import UserProfileRead, UserProfileUpdate, UserProfileUpdatedRead
 from betterself.repos.profile_repo import UserProfileRepository
 from betterself.prefix import USERS_URL, PROFILE_URL
 from betterself.models.profile_models import UserProfile
-from betterself.services.target_refresh import refresh_active_target
+from betterself.services.target_service import TargetService
 from decimal import Decimal
 
 router = APIRouter(
@@ -73,7 +73,7 @@ def create_or_update_current_user_profile(
     data: UserProfileUpdate,
     current_user: User = Depends(get_current_user),
     service: UserProfileRepository = Depends(get_user_profile_repository),
-    db: Session = Depends(get_db),
+    target_service: TargetService = Depends(get_target_service),
 ):
     # Le repository ne retourne que le profil : on détermine avant l'appel
     # s'il s'agit d'une création (201) ou d'une mise à jour (200).
@@ -90,7 +90,7 @@ def create_or_update_current_user_profile(
     # (le prénom, par exemple, n'a aucun effet).
     target_update = None
     if previous is not None and previous != _target_inputs(profile):
-        target_update = refresh_active_target(db, current_user)
+        target_update = target_service.refresh_active_target(current_user)
 
     response = UserProfileUpdatedRead.model_validate(profile).model_copy(
         update={"target_update": target_update}

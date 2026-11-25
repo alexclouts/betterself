@@ -10,6 +10,7 @@ from betterself.core.config import settings
 from betterself.core.database import get_db
 from betterself.models.user_models import User
 from betterself.services.user_service import UserService
+from betterself.services.target_service import TargetService
 
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -23,6 +24,13 @@ def get_user_service(
     return UserService(
         user_repository=UserRepository(db),
     )
+
+
+# Fournit une instance de TargetService (recalcul automatique de la cible active).
+def get_target_service(
+    db: Session = Depends(get_db),
+) -> TargetService:
+    return TargetService(db)
 
 
 # Récupère l'utilisateur actuellement authentifié à partir du token. Lève une exception HTTP 401 si le token est invalide ou si l'utilisateur n'existe pas.
