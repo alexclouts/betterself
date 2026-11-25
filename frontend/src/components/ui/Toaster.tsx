@@ -1,14 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useToastStore, type Toast } from "../../stores/toastStore";
 
 // Un message : disparaît seul après `duration`, ou en cliquant sur ×.
 function ToastItem({ toast }: { toast: Toast }) {
   const dismissToast = useToastStore((state) => state.dismissToast);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
+    if (isHovered || isFocused) return;
     const timer = setTimeout(() => dismissToast(toast.id), toast.duration);
     return () => clearTimeout(timer);
-  }, [toast.id, toast.duration, dismissToast]);
+  }, [toast.id, toast.duration, dismissToast, isHovered, isFocused]);
 
   const accent = toast.variant === "warning" ? "border-l-warning" : "border-l-primary";
   const icon = toast.variant === "warning" ? "⚠" : "✓";
@@ -17,6 +20,12 @@ function ToastItem({ toast }: { toast: Toast }) {
   return (
     <div
       role={toast.variant === "warning" ? "alert" : "status"}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsFocused(false);
+      }}
       className={`pointer-events-auto flex items-start gap-3 rounded-xl border border-border border-l-4 ${accent} bg-surface-overlay px-4 py-3 text-left text-sm text-foreground shadow-lg animate-[toast-in_200ms_ease-out] motion-reduce:animate-none`}
     >
       <span aria-hidden="true" className={`font-bold ${iconColor}`}>{icon}</span>
