@@ -49,8 +49,13 @@ def name_rank(name: str, words: list[str]) -> int:
 
 # Codes-barres possibles pour un terme, ou une liste vide si ce n'en est pas un.
 # Les codes UPC (12 chiffres) sont complétés par des zéros chez Open Food Facts.
+# À l'inverse, un UPC-A lu sous sa forme EAN-13 (0 en tête) retrouve un aliment
+# enregistré avec ses 12 chiffres.
 def barcode_candidates(query: str) -> list[str]:
     code = query.strip()
     if not (code.isascii() and code.isdigit() and 8 <= len(code) <= 14):
         return []
-    return list(dict.fromkeys([code, code.zfill(EAN13_LENGTH)]))
+    candidates = [code, code.zfill(EAN13_LENGTH)]
+    if len(code) == EAN13_LENGTH and code.startswith("0"):
+        candidates.append(code[1:])
+    return list(dict.fromkeys(candidates))
