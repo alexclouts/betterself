@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { MeasurementRead } from "../../api/generated/measurementRead";
-import { formatLongDate, formatShortDate, parseDateKey } from "../../lib/date";
+import { useElementWidth } from "../../hooks/useElementWidth";
+import { WeightGrid } from "../charts/WeightGrid";
+import { dayNumber, formatKg, nearestIndex, weightAxis } from "../../lib/chart";
+import { formatLongDate, formatShortDate } from "../../lib/date";
 
 /*
  * Courbe du poids au fil du temps, en SVG (aucune dépendance).
@@ -12,67 +15,27 @@ import { formatLongDate, formatShortDate, parseDateKey } from "../../lib/date";
 
 const HEIGHT = 200;
 const MARGIN = { top: 24, right: 16, bottom: 28, left: 40 };
-const DAY_MS = 86_400_000;
 // Au-delà, les points se chevauchent : on ne garde que la ligne.
 const MAX_MARKERS = 40;
-// Pas « ronds » possibles pour l'axe des kilogrammes.
-const NICE_STEPS = [0.5, 1, 2, 5, 10, 20, 50];
-
 // La ligne utilise --primary-dark : --primary n'atteint pas un contraste de 3:1 sur fond blanc.
 const LINE_COLOR = "var(--primary-dark)";
 
 type Point = { key: string; weight: number; day: number };
-
-function formatKg(value: number): string {
-  return value.toLocaleString("fr-CA", { maximumFractionDigits: 1 });
-}
 
 function formatDelta(value: number): string {
   const sign = value > 0 ? "+" : value < 0 ? "−" : "±";
   return `${sign}${formatKg(Math.abs(value))} kg`;
 }
 
-// Largeur du conteneur, mise à jour quand il est redimensionné.
-function useWidth<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  return [ref, width] as const;
-}
-
-// Domaine et graduations de l'axe des poids, avec une marge pour que la courbe respire.
-function weightAxis(points: Point[]) {
-  const weights = points.map((p) => p.weight);
-  const min = Math.min(...weights);
-  const max = Math.max(...weights);
-  const pad = Math.max(0.5, (max - min) * 0.1);
-  const range = max - min + pad * 2;
-  const step = NICE_STEPS.find((s) => range / s <= 4) ?? 100;
-
-  const lo = Math.floor((min - pad) / step) * step;
-  const hi = Math.ceil((max + pad) / step) * step;
-  const ticks: number[] = [];
-  for (let value = lo; value <= hi + step / 2; value += step) ticks.push(value);
-  return { lo, hi, ticks };
-}
-
 export function WeightChart({ measurements }: { measurements: MeasurementRead[] }) {
-  const [containerRef, width] = useWidth<HTMLDivElement>();
+  const [containerRef, width] = useElementWidth<HTMLDivElement>();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const points = useMemo<Point[]>(
     () =>
       measurements.flatMap((m) => {
-        const date = parseDateKey(m.date);
-        return date ? [{ key: m.date, weight: m.weight_kg, day: date.getTime() / DAY_MS }] : [];
+        const day = dayNumber(m.date);
+        return day !== null ? [{ key: m.date, weight: m.weight_kg, day }] : [];
       }),
     [measurements],
   );
@@ -89,7 +52,7 @@ export function WeightChart({ measurements }: { measurements: MeasurementRead[] 
   // Une seule mesure : on centre le point sur une fenêtre de deux jours.
   const dayLo = points.length > 1 ? first.day : first.day - 1;
   const dayHi = points.length > 1 ? last.day : last.day + 1;
-  const { lo, hi, ticks } = weightAxis(points);
+  const { lo, hi, ticks } = weightAxis(points.map((p) => p.weight));
 
   const x = (day: number) => MARGIN.left + ((day - dayLo) / (dayHi - dayLo)) * innerWidth;
   const y = (weight: number) => MARGIN.top + (1 - (weight - lo) / (hi - lo)) * innerHeight;
@@ -105,12 +68,7 @@ export function WeightChart({ measurements }: { measurements: MeasurementRead[] 
   // Mesure dont la date est la plus proche du pointeur.
   function handlePointerMove(event: React.PointerEvent<SVGSVGElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
-    const px = event.clientX - rect.left;
-    let nearest = 0;
-    points.forEach((p, i) => {
-      if (Math.abs(x(p.day) - px) < Math.abs(x(points[nearest].day) - px)) nearest = i;
-    });
-    setActiveIndex(nearest);
+    setActiveIndex(nearestIndex(points.map((p) => x(p.day)), event.clientX - rect.left));
   }
 
   function handleKeyDown(event: React.KeyboardEvent<SVGSVGElement>) {
@@ -153,22 +111,7 @@ export function WeightChart({ measurements }: { measurements: MeasurementRead[] 
             onBlur={() => setActiveIndex(null)}
           >
             {/* Grille et axe des poids : discrets, derrière la courbe. */}
-            {ticks.map((tick) => (
-              <g key={tick}>
-                <line
-                  x1={MARGIN.left}
-                  x2={width - MARGIN.right}
-                  y1={y(tick)}
-                  y2={y(tick)}
-                  stroke="var(--border)"
-                  strokeOpacity={0.5}
-                  strokeDasharray={tick === lo ? undefined : "2 4"}
-                />
-                <text x={MARGIN.left - 8} y={y(tick)} dy="0.32em" textAnchor="end" fontSize={12} fill="var(--muted)">
-                  {formatKg(tick)}
-                </text>
-              </g>
-            ))}
+            <WeightGrid ticks={ticks} baseline={lo} y={y} left={MARGIN.left} right={width - MARGIN.right} />
 
             {/* Axe du temps : première et dernière date. */}
             {xTicks.map((p, i) => (
