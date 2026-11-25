@@ -124,7 +124,7 @@ export function BarcodeScanPage() {
       {isScanning && (
         <form onSubmit={handleManualSubmit} className="mt-6 space-y-2 text-left" noValidate>
           <label className="block">
-            <span className="text-sm font-medium">Ou saisissez le code</span>
+            <span className="text-sm font-medium">Saisissez le code</span>
             <Input
               type="text"
               inputMode="numeric"
@@ -140,7 +140,7 @@ export function BarcodeScanPage() {
           <Button
             type="submit"
             variant="secondary"
-            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50 mt-2"
             disabled={manualCode.trim() === ""}
           >
             Rechercher

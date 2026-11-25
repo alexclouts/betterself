@@ -90,7 +90,7 @@ export function HomePage() {
             Mes mesures
           </Button>
           <Button className="w-full text-primary font-bold" onClick={() => navigate("/measurements/new")}>
-            Enregistrer mon poids
+            Mettre à jour
           </Button>
         </div>
       </section>

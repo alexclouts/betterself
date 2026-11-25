@@ -15,3 +15,4 @@ Voici la liste des vidéos réalisées lors du développement du projet :
 - [Vidéo 3: Conception des modèles](https://www.youtube.com/watch?v=xKFyHWf_j0A)
 - [Vidéo 4: Processus du Onboarding](https://www.youtube.com/watch?v=sD8Af65OU6c)
 - [Vidéo 5: Ramifications du frontend](https://youtu.be/gS_KuYTpvRI)
+- [Vidéo 6: Lecteur de code barres et la fin qui approche](https://youtu.be/n5oUSrrmOo4)
