@@ -12,8 +12,10 @@ from betterself.schemas.recipe_schemas import (
     RecipeArchiveUpdate,
     RecipeCreate,
     RecipeIngredientCreate,
+    RecipeIngredientFoodRead,
     RecipeIngredientRead,
     RecipeIngredientUpdate,
+    RecipeNutritionRead,
     RecipeRead,
     RecipeUpdate,
 )
@@ -140,13 +142,13 @@ class RecipeService:
         user: User,
         recipe_id: uuid.UUID,
         data: RecipeIngredientCreate,
-    ) -> RecipeIngredient:
+    ) -> RecipeIngredientRead:
         recipe = self._get_recipe_or_404(
             user=user,
             recipe_id=recipe_id,
         )
         # Vérifie que l'aliment existe dans la base de données.
-        self.food_repository.get_food_or_404(
+        food = self.food_repository.get_food_or_404(
             food_id=data.food_id,
         )
         ingredient_exists = self.recipe_repository.ingredient_exists(
@@ -164,7 +166,9 @@ class RecipeService:
             food_id=data.food_id,
             quantity_g=data.quantity_g,
         )
-        return self.recipe_repository.add_ingredient(ingredient)
+        ingredient = self.recipe_repository.add_ingredient(ingredient)
+        ingredient.food = food
+        return self._to_ingredient_read(ingredient)
 
 
     # Récupère un ingrédient d'une recette pour l'utilisateur connecté.
@@ -173,12 +177,13 @@ class RecipeService:
         user: User,
         recipe_id: uuid.UUID,
         ingredient_id: uuid.UUID,
-    ) -> RecipeIngredient:
-        return self._get_ingredient_or_404(
+    ) -> RecipeIngredientRead:
+        ingredient = self._get_ingredient_or_404(
             user=user,
             recipe_id=recipe_id,
             ingredient_id=ingredient_id,
         )
+        return self._to_ingredient_read(ingredient)
 
 
     # Met à jour un ingrédient existant pour une recette de l'utilisateur connecté.
@@ -188,14 +193,14 @@ class RecipeService:
         recipe_id: uuid.UUID,
         ingredient_id: uuid.UUID,
         data: RecipeIngredientUpdate,
-    ) -> RecipeIngredient:
+    ) -> RecipeIngredientRead:
         ingredient = self._get_ingredient_or_404(
             user=user,
             recipe_id=recipe_id,
             ingredient_id=ingredient_id,
         )
         ingredient.quantity_g = data.quantity_g
-        return ingredient
+        return self._to_ingredient_read(ingredient)
 
 
     # Supprime un ingrédient d'une recette pour l'utilisateur connecté.
@@ -249,36 +254,53 @@ class RecipeService:
         return ingredient
 
 
-    # Calcule la valeur nutritionnelle totale d'une recette.
+    # Calcule les valeurs nutritionnelles d'un ingrédient pour sa quantité.
+    def _calculate_ingredient_nutrition(
+        self,
+        ingredient: RecipeIngredient,
+    ) -> RecipeNutritionRead:
+        food = ingredient.food
+        reference_weight = food.reference_weight_g
+        factor = (
+            ingredient.quantity_g / reference_weight
+            if reference_weight > 0
+            else Decimal("0")
+        )
+        return RecipeNutritionRead(
+            calories_kcal=food.calories_kcal * factor,
+            protein_g=food.protein_g * factor,
+            carbohydrates_g=food.carbohydrates_g * factor,
+            fat_g=food.fat_g * factor,
+        )
+
+
+    # Calcule la valeur nutritionnelle totale d'une recette à partir de ses ingrédients.
     def _calculate_recipe_nutrition(
         self,
-        recipe: Recipe,
-    ) -> dict:
-        total_calories = Decimal("0")
-        total_protein = Decimal("0")
-        total_carbohydrates = Decimal("0")
-        total_fat = Decimal("0")
+        ingredients: list[RecipeIngredientRead],
+    ) -> RecipeNutritionRead:
+        return RecipeNutritionRead(
+            calories_kcal=sum((i.nutrition.calories_kcal for i in ingredients), Decimal("0")),
+            protein_g=sum((i.nutrition.protein_g for i in ingredients), Decimal("0")),
+            carbohydrates_g=sum((i.nutrition.carbohydrates_g for i in ingredients), Decimal("0")),
+            fat_g=sum((i.nutrition.fat_g for i in ingredients), Decimal("0")),
+        )
 
-        for ingredient in recipe.ingredients:
-            food = ingredient.food
-            reference_weight = food.reference_weight_g
 
-            if reference_weight <= 0:
-                continue
-
-            factor = ingredient.quantity_g / reference_weight
-
-            total_calories += food.calories_kcal * factor
-            total_protein += food.protein_g * factor
-            total_carbohydrates += food.carbohydrates_g * factor
-            total_fat += food.fat_g * factor
-
-        return {
-            "calories_kcal": total_calories,
-            "protein_g": total_protein,
-            "carbohydrates_g": total_carbohydrates,
-            "fat_g": total_fat,
-        }
+    # Convertit un ingrédient en schéma de lecture, avec son aliment et sa nutrition.
+    def _to_ingredient_read(
+        self,
+        ingredient: RecipeIngredient,
+    ) -> RecipeIngredientRead:
+        return RecipeIngredientRead(
+            id=ingredient.id,
+            recipe_id=ingredient.recipe_id,
+            food=RecipeIngredientFoodRead.model_validate(ingredient.food),
+            quantity_g=ingredient.quantity_g,
+            nutrition=self._calculate_ingredient_nutrition(ingredient),
+            created_at=ingredient.created_at,
+            updated_at=ingredient.updated_at,
+        )
 
 
     # Convertit une instance de recette en un schéma de lecture de recette.
@@ -286,6 +308,10 @@ class RecipeService:
         self,
         recipe: Recipe,
     ) -> RecipeRead:
+        ingredients = [
+            self._to_ingredient_read(ingredient)
+            for ingredient in recipe.ingredients
+        ]
         return RecipeRead(
             id=recipe.id,
             user_id=recipe.user_id,
@@ -296,16 +322,6 @@ class RecipeService:
             is_archived=recipe.is_archived,
             created_at=recipe.created_at,
             updated_at=recipe.updated_at,
-            ingredients=[
-                RecipeIngredientRead(
-                    id=ingredient.id,
-                    recipe_id=ingredient.recipe_id,
-                    food_id=ingredient.food_id,
-                    quantity_g=ingredient.quantity_g,
-                    created_at=ingredient.created_at,
-                    updated_at=ingredient.updated_at,
-                )
-                for ingredient in recipe.ingredients
-            ],
-            nutrition=self._calculate_recipe_nutrition(recipe)
+            ingredients=ingredients,
+            nutrition=self._calculate_recipe_nutrition(ingredients),
         )

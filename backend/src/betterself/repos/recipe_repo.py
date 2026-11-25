@@ -30,6 +30,13 @@ class RecipeRepository:
             )
         query = (
             query
+            # Charge les ingrédients et leurs aliments en une requête
+            # pour calculer la nutrition de chaque recette.
+            .options(
+                selectinload(Recipe.ingredients).selectinload(
+                    RecipeIngredient.food
+                ),
+            )
             .order_by(Recipe.created_at.desc())
             .limit(limit)
             .offset(offset)
