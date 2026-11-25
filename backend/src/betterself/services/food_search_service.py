@@ -43,6 +43,8 @@ class FoodSearchService:
     def find_by_barcode(self, user: User, code: str) -> FoodSearchResult | None:
         # Un UPC-A (12 chiffres) est aussi cherché sous sa forme EAN-13.
         codes = barcode_candidates(code)
+        if len(code) == 13 and code.startswith("0"):
+            codes.append(code[1:])
 
         match = self.foods.find_by_barcode(user, codes)
         if match is not None:
