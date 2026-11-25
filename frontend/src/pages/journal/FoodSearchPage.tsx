@@ -17,7 +17,7 @@ const MIN_SEARCH_LENGTH = 2;
 const SEARCH_DELAY_MS = 300;
 
 // Nombre de résultats affichés avant « Afficher plus ».
-const VISIBLE_RESULTS = 10;
+const VISIBLE_RESULTS = 3;
 
 export function FoodSearchPage() {
   const navigate = useNavigate();

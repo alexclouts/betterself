@@ -86,7 +86,7 @@ export function GoalSection() {
             <DetailList rows={rows} />
 
             {plan ? (
-              <div className="mt-10">
+              <div className="mt-6">
                 <GoalChart plan={plan} measurements={measurements} />
               </div>
             ) : (
