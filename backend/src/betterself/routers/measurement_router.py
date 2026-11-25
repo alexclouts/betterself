@@ -90,7 +90,7 @@ def delete_measurement(
     measurement_id: int,
     service: MeasurementRepository = Depends(get_measurement_service),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    target_service: TargetService = Depends(get_target_service),
 ):
     try:
         service.get_measurement_by_id(user=current_user, measurement_id=measurement_id)
@@ -108,7 +108,7 @@ def delete_measurement(
 
     target_update = None
     if latest_before is not None and latest_before.id == measurement_id:
-        target_update = refresh_active_target(db, current_user)
+        target_update = target_service.refresh_active_target(current_user)
 
     return MeasurementDeletedRead(target_update=target_update)
 
@@ -123,7 +123,7 @@ def update_measurement(
     data: MeasurementUpdate,
     service: MeasurementRepository = Depends(get_measurement_service),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    target_service: TargetService = Depends(get_target_service),
 ):
     latest_before = service.get_latest_measurement(current_user)
 
@@ -138,7 +138,7 @@ def update_measurement(
 
     target_update = None
     if was_latest or is_latest:
-        target_update = refresh_active_target(db, current_user)
+        target_update = target_service.refresh_active_target(current_user)
 
     return MeasurementUpdatedRead.model_validate(measurement).model_copy(
         update={"target_update": target_update}
