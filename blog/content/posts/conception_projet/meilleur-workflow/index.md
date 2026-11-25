@@ -1,7 +1,7 @@
 ---
 title: "Amélioration du workflow"
 header: ""
-date: 2026-11-25T20:00:44.000Z
+date: 2026-11-25T13:20:44.000Z
 description: "J'augmente l'efficacité du workflow, tout en ajoutant les fonctions de mesures de poids."
 tags:
   - IA
