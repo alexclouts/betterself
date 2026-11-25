@@ -33,6 +33,8 @@ export function goalPlan(goal: NutritionGoalRead): GoalPlan | null {
   if (startDay === null || !Number.isFinite(startWeight)) return null;
   const start = { key: goal.start_date, day: startDay, weight: startWeight };
 
+  if (goal.goal_type === "maintain_weight") return { start, end: null };
+
   if (goal.target_date !== null && goal.target_weight_kg !== null) {
     const endDay = dayNumber(goal.target_date);
     const endWeight = Number(goal.target_weight_kg);
@@ -40,7 +42,7 @@ export function goalPlan(goal: NutritionGoalRead): GoalPlan | null {
     return { start, end: { key: goal.target_date, day: endDay, weight: endWeight } };
   }
 
-  return goal.goal_type === "maintain_weight" ? { start, end: null } : null;
+  return null;
 }
 
 // Poids prévu par la trajectoire à un jour donné (le poids visé une fois la date passée).
