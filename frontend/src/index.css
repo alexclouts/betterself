@@ -44,6 +44,10 @@
   --danger: #dc2626;
   --warning: #d97706;
 
+  /* Graphique de l'objectif : poids réel et trajectoire prévue (paire validée daltonisme et contraste). */
+  --chart-actual: var(--primary-dark);
+  --chart-plan: var(--secondary-dark);
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -89,6 +93,10 @@
     --secondary: #e95c2d;
     --secondary-dark: #cc4a1f;
     --secondary-light: #e0e7ff;
+
+    /* En sombre, les teintes plus lumineuses gardent le contraste sur la surface. */
+    --chart-actual: var(--primary);
+    --chart-plan: var(--secondary);
   }
 
   #social .button-icon {

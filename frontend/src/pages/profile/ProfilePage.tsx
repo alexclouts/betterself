@@ -6,11 +6,13 @@ import { Sex } from "../../api/generated/sex";
 import type { UserProfileRead } from "../../api/generated/userProfileRead";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import DetailList from "../../components/ui/DetailList";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
 import { userService } from "../../services/userService";
+import { GoalSection } from "../../components/goal/GoalSection";
 
 const SEX_LABELS: Record<Sex, string> = {
   male: "Homme",
@@ -258,20 +260,15 @@ export function ProfilePage() {
       ) : (
         <>
           <Card className="w-full bg-surface">
-            <dl className="space-y-3 text-left">
-              {rows.map((row) => (
-                <div key={row.label} className="flex justify-between gap-4">
-                  <dt className="text-muted">{row.label}</dt>
-                  <dd className="text-right font-medium text-foreground break-words">{row.value}</dd>
-                </div>
-              ))}
-            </dl>
+            <DetailList rows={rows} />
           </Card>
 
 
           <Button className="mt-4 w-full font-bold" onClick={startEditing}>
             Modifier
           </Button>
+
+          <GoalSection />
         </>
       )}
     </main>
