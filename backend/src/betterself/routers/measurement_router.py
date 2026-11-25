@@ -97,6 +97,7 @@ def delete_measurement(
     except RecordNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mesure introuvable.")
 
+    service.db.refresh(current_user, with_for_update=True)
     if service.count_for_user(current_user) <= 1:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
