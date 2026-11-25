@@ -15,6 +15,8 @@ import { WeightEntryPage } from "../pages/measurements/WeightEntryPage";
 import { MeasurementsPage } from "../pages/measurements/MeasurementsPage";
 import { ProfilePage } from "../pages/profile/ProfilePage";
 import { RecipesPage } from "../pages/recipes/RecipesPage";
+import { RecipeNewPage } from "../pages/recipes/RecipeNewPage";
+import { RecipeEditPage } from "../pages/recipes/RecipeEditPage";
 
 export function AppRoutes() {
     return (
@@ -40,6 +42,8 @@ export function AppRoutes() {
                     <Route path="/measurements/:measurementId/edit" element={<WeightEntryPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/recipes" element={<RecipesPage />} />
+                    <Route path="/recipes/new" element={<RecipeNewPage />} />
+                    <Route path="/recipes/:recipeId" element={<RecipeEditPage />} />
                 </Route>
                 
             </Route>

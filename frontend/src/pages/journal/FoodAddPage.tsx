@@ -20,7 +20,7 @@ import { journalService } from "../../services/journalService";
 import { queryKeys } from "../../lib/queryClient";
 import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
 import { journalUrl, readJournalNavState } from "../../lib/journal";
-import Card from "../../components/ui/Card";
+import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 
 const MAX_QUANTITY_G = 5000;
 
@@ -232,28 +232,7 @@ export function FoodAddPage() {
           ? `Portion suggérée : ${formatNutrient(food.serving_g)} g`
           : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
       </p>
-      <Card className="w-full p-6 mt-6 bg-surface">
-        <dl className="grid grid-cols-3 gap-3">
-          <div className="col-span-3">
-            <dt>Calories</dt>
-            <dd className="text-2xl font-semibold mb-4">
-              {nutrients ? formatNutrient(nutrients.calories_kcal, 0) : "–"} kcal
-            </dd>
-          </div>
-          <div>
-            <dt>Protéines</dt>
-            <dd>{nutrients ? formatNutrient(nutrients.protein_g) : "–"} g</dd>
-          </div>
-          <div>
-            <dt>Glucides</dt>
-            <dd>{nutrients ? formatNutrient(nutrients.carbohydrates_g) : "–"} g</dd>
-          </div>
-          <div>
-            <dt>Lipides</dt>
-            <dd>{nutrients ? formatNutrient(nutrients.fat_g) : "–"} g</dd>
-          </div>
-        </dl>
-      </Card>
+      <NutritionFactsCard nutrients={nutrients} className="mt-6" />
       {dayKey !== todayKey() && (
         <p className="mt-1">
           {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}

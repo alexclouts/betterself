@@ -4,23 +4,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { RecipeRead } from "../../api/generated/recipeRead";
 import Button from "../../components/ui/Button";
 import { useRecipes } from "../../hooks/useRecipes";
-import { formatNutrient, toNumber } from "../../lib/food";
+import { formatNutrient } from "../../lib/food";
 import { queryKeys } from "../../lib/queryClient";
+import { formatCount, perServing, recipeTotals } from "../../lib/recipe";
 import { recipeService } from "../../services/recipeService";
-
-// « 1 portion », « 4 portions »
-function formatCount(count: number, singular: string, plural: string): string {
-  return `${count.toLocaleString("fr-CA")} ${count > 1 ? plural : singular}`;
-}
-
-// Calories et protéines d'une portion : ce que l'utilisateur compare à ses cibles.
-function perServing(recipe: RecipeRead) {
-  const servings = recipe.servings > 0 ? recipe.servings : 1;
-  return {
-    calories: toNumber(recipe.nutrition.calories_kcal) / servings,
-    protein: toNumber(recipe.nutrition.protein_g) / servings,
-  };
-}
 
 /*
  * Recettes de l'utilisateur. Une recette archivée disparaît des choix courants
@@ -56,15 +43,7 @@ export function RecipesPage() {
 
       <h1>Mes recettes</h1>
 
-      <Button
-        type="button"
-        className="w-full font-bold"
-        onClick={() => navigate("/recipes/new")}
-      >
-        Nouvelle recette
-      </Button>
-
-      <label className="mt-4 flex items-center justify-center gap-2 text-sm text-muted">
+      <label className="flex items-center justify-center gap-2 text-sm text-muted">
         <input
           type="checkbox"
           checked={showArchived}
@@ -85,12 +64,12 @@ export function RecipesPage() {
         <p className="mt-6">
           {showArchived
             ? "Aucune recette enregistrée pour l’instant."
-            : "Aucune recette active. Créez-en une pour l’ajouter rapidement à votre journal."}
+            : "Aucune recette active. Créez-en une depuis « Ajouter » dans votre journal."}
         </p>
       ) : (
         <ul className="mt-6 divide-y divide-border text-left">
           {recipes.map((recipe) => {
-            const { calories, protein } = perServing(recipe);
+            const { calories_kcal: calories, protein_g: protein } = perServing(recipeTotals(recipe), recipe.servings);
             const ingredientCount = recipe.ingredients?.length ?? 0;
 
             return (
