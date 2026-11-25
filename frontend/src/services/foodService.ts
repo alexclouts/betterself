@@ -1,4 +1,5 @@
 
+import axios from "axios";
 import { getErrorMessage } from "../api/axios";
 import type { FoodConsumptionCreate } from "../api/generated/foodConsumptionCreate";
 import { getFoodConsumptions } from "../api/generated/endpoints/food-consumptions/food-consumptions";
@@ -6,6 +7,13 @@ import { getFoods } from "../api/generated/endpoints/foods/foods";
 import type { FoodCreate } from "../api/generated/foodCreate";
 import type { FoodRead } from "../api/generated/foodRead";
 import type { FoodSearchRead } from "../api/generated/foodSearchRead";
+import type { FoodSearchResult } from "../api/generated/foodSearchResult";
+
+// Résultat d'un scan : produit trouvé, code inconnu, ou catalogue impossible à consulter.
+export type BarcodeLookup =
+    | { status: "found"; result: FoodSearchResult }
+    | { status: "unknown" }
+    | { status: "catalog_unavailable" };
 
 export const foodService = {
     // Recherche dans tous les aliments, peu importe leur provenance. Sans terme,
@@ -21,6 +29,22 @@ export const foodService = {
         } catch (error) {
             throw new Error(
                 getErrorMessage(error, "Impossible de rechercher les aliments."),
+                { cause: error },
+            );
+        }
+    },
+
+    // Cherche l'aliment ou le produit du catalogue portant ce code-barres.
+    async findByBarcode(code: string): Promise<BarcodeLookup> {
+        try {
+            const { findFoodByBarcodeFoodsBarcodeCodeGet } = getFoods();
+            return { status: "found", result: await findFoodByBarcodeFoodsBarcodeCodeGet(code) };
+        } catch (error) {
+            const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+            if (status === 404) return { status: "unknown" };
+            if (status === 503) return { status: "catalog_unavailable" };
+            throw new Error(
+                getErrorMessage(error, "Impossible de rechercher ce code-barres."),
                 { cause: error },
             );
         }

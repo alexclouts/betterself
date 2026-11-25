@@ -10,6 +10,7 @@ import { FoodJournalPage } from "../pages/journal/FoodJournalPage";
 import { FoodSearchPage } from "../pages/journal/FoodSearchPage";
 import { FoodAddPage } from "../pages/journal/FoodAddPage";
 import { FoodCreatePage } from "../pages/journal/FoodCreatePage";
+import { BarcodeScanPage } from "../pages/journal/BarcodeScanPage";
 import { WeightEntryPage } from "../pages/measurements/WeightEntryPage";
 import { MeasurementsPage } from "../pages/measurements/MeasurementsPage";
 import { ProfilePage } from "../pages/profile/ProfilePage";
@@ -29,6 +30,7 @@ export function AppRoutes() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/journal" element={<FoodJournalPage />} />
                     <Route path="/journal/add" element={<FoodSearchPage />} />
+                    <Route path="/journal/scan" element={<BarcodeScanPage />} />
                     <Route path="/journal/food/new" element={<FoodCreatePage />} />
                     <Route path="/journal/food/:id" element={<FoodAddPage />} />
                     <Route path="/journal/entry/:entryId" element={<FoodAddPage />} />

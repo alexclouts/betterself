@@ -34,6 +34,29 @@ class FoodSearchService:
         self.foods = foods
         self.catalog = catalog
 
+    """
+    Retrouve le produit correspondant à un code-barres scanné : d'abord dans les
+    aliments de la base, puis dans le catalogue Open Food Facts (sans l'importer).
+    Retourne None si le code est inconnu. Lève CatalogUnavailable si le code n'est
+    pas dans la base et que le catalogue ne peut pas être consulté.
+    """
+    def find_by_barcode(self, user: User, code: str) -> FoodSearchResult | None:
+        # Un UPC-A (12 chiffres) est aussi cherché sous sa forme EAN-13.
+        codes = barcode_candidates(code)
+        if len(code) == 13 and code.startswith("0"):
+            codes.append(code[1:])
+
+        match = self.foods.find_by_barcode(user, codes)
+        if match is not None:
+            food, last_used = match
+            return FoodSearchResult.from_food(food, in_history=last_used is not None)
+
+        for candidate in codes:
+            product = self.catalog.get(candidate)
+            if product is not None:
+                return FoodSearchResult.from_product(product)
+        return None
+
     def search(self, user: User, query: str, limit: int = 20) -> FoodSearchRead:
         words = tokenize(query)
 
