@@ -19,6 +19,7 @@ from betterself.schemas.food_schemas import (
     FoodCreate,
     FoodRead,
     FoodSearchRead,
+    FoodSearchResult,
     FoodUpdate,
 )
 from betterself.repos.food_repo import FoodRepository
@@ -106,6 +107,39 @@ def search_all_foods(
     catalog: OffCatalogRepository = Depends(get_off_catalog),
 ):
     return FoodSearchService(foods, catalog).search(current_user, query, limit=limit)
+
+
+# Retrouve l'aliment ou le produit Open Food Facts correspondant à un code-barres scanné
+# (EAN-13, EAN-8, UPC-A). Un produit du catalogue n'est pas importé : le client
+# l'importe s'il est choisi, comme pour la recherche.
+@router.get(
+    "/barcode/{code}",
+    response_model=FoodSearchResult,
+    responses={
+        status.HTTP_404_NOT_FOUND: {"description": "Code-barres inconnu."},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"description": "Catalogue indisponible."},
+    },
+)
+def find_food_by_barcode(
+    code: str = Path(pattern=r"^[0-9]{8,14}$", description="Code-barres de 8 à 14 chiffres."),
+    current_user: User = Depends(get_current_user),
+    foods: FoodRepository = Depends(get_food_service),
+    catalog: OffCatalogRepository = Depends(get_off_catalog),
+):
+    try:
+        result = FoodSearchService(foods, catalog).find_by_barcode(current_user, code)
+    except CatalogUnavailable:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Le catalogue Open Food Facts est indisponible pour le moment.",
+        )
+
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Aucun aliment ne correspond à ce code-barres.",
+        )
+    return result
 
 
 # Fonction pour importer un produit Open Food Facts dans les aliments.

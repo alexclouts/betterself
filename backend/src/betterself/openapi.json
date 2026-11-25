@@ -960,6 +960,62 @@
         }
       }
     },
+    "/foods/barcode/{code}": {
+      "get": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Find Food By Barcode",
+        "operationId": "find_food_by_barcode_foods_barcode__code__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{8,14}$",
+              "description": "Code-barres de 8 à 14 chiffres.",
+              "title": "Code"
+            },
+            "description": "Code-barres de 8 à 14 chiffres."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodSearchResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Code-barres inconnu."
+          },
+          "503": {
+            "description": "Catalogue indisponible."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/foods/catalog/{code}/import": {
       "post": {
         "tags": [

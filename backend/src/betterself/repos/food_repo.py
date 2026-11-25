@@ -129,6 +129,31 @@ class FoodRepository:
 
 
     """
+    Retourne l'aliment portant l'un des codes-barres fournis, avec la date de sa
+    dernière utilisation par l'utilisateur, ou None.
+    Si plusieurs aliments portent ce code, on préfère celui de son historique,
+    puis le produit Open Food Facts importé, puis le plus ancien.
+    """
+    def find_by_barcode(self, user: User, codes: list[str]) -> tuple[Food, datetime | None] | None:
+        if not codes:
+            return None
+
+        statement = self._select_with_last_use(user)
+        last_use = statement.selected_columns.last_use
+        statement = (
+            statement.where(Food.external_reference_id.in_(codes))
+            .order_by(
+                last_use.desc().nulls_last(),
+                case((Food.source == FoodSource.OPEN_FOOD_FACTS, 0), else_=1),
+                Food.created_at.asc(),
+            )
+            .limit(1)
+        )
+        row = self.db.execute(statement).first()
+        return (row[0], row[1]) if row is not None else None
+
+
+    """
     Crée un aliment manuel associé à l'utilisateur connecté.
     La validation de cohérence entre calories et macronutriments est effectuée par le schéma Pydantic `FoodCreate`.
     """
