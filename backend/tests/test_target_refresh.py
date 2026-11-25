@@ -142,3 +142,158 @@ def test_measurement_without_goal_still_created(client):
     created = add_measurement(client, headers, date.today(), 75)
     assert created["target_update"] is None
     assert client.get(TARGET_URL, headers=headers).status_code == 404
+
+
+"""
+Modification et suppression d'une mesure : la cible suit le poids de la mesure
+la plus récente, et seulement lorsque celle-ci est touchée.
+"""
+
+def list_measurements(client, headers: dict) -> list[dict]:
+    response = client.get(MEASUREMENTS_URL, headers=headers)
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+# La mesure créée par l'onboarding (80 kg, la plus récente au départ).
+def onboarding_measurement(client, headers: dict) -> dict:
+    measurements = list_measurements(client, headers)
+    assert len(measurements) == 1
+    return measurements[0]
+
+
+def patch_measurement(client, headers: dict, measurement_id: int, **changes) -> dict:
+    response = client.patch(f"{MEASUREMENTS_URL}/{measurement_id}", json=changes, headers=headers)
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def delete_measurement(client, headers: dict, measurement_id: int) -> dict:
+    response = client.delete(f"{MEASUREMENTS_URL}/{measurement_id}", headers=headers)
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def reference_weight(target: dict) -> Decimal:
+    return Decimal(str(target["reference_weight_kg"]))
+
+
+# Corriger le poids de la mesure la plus récente recalcule la cible.
+def test_update_latest_measurement_weight_recalculates_target(client):
+    headers = onboarded_headers(client)
+    before = active_target(client, headers)
+    latest = onboarding_measurement(client, headers)
+
+    updated = patch_measurement(client, headers, latest["id"], weight_kg=75)
+
+    after = active_target(client, headers)
+    assert reference_weight(after) == Decimal("75")
+    assert after["id"] != before["id"]
+    assert updated["weight_kg"] == 75
+    assert updated["target_update"] == {
+        "status": "updated",
+        "previous_calories_target_kcal": before["calories_target_kcal"],
+        "calories_target_kcal": after["calories_target_kcal"],
+        "message": None,
+    }
+
+
+# Corriger une mesure plus ancienne ne change pas la cible.
+def test_update_older_measurement_keeps_target(client):
+    headers = onboarded_headers(client)
+    older = add_measurement(client, headers, date.today() - timedelta(days=10), 90)
+    before = active_target(client, headers)
+
+    updated = patch_measurement(client, headers, older["id"], weight_kg=88)
+
+    assert updated["target_update"] is None
+    assert active_target(client, headers)["id"] == before["id"]
+
+
+# Avancer la date d'une mesure ancienne pour qu'elle devienne la plus récente
+# fait de son poids le nouveau poids de référence.
+def test_update_measurement_date_making_it_latest_recalculates_target(client):
+    headers = onboarded_headers(client)
+    onboarding = onboarding_measurement(client, headers)
+    older = add_measurement(client, headers, date.fromisoformat(onboarding["date"]) - timedelta(days=10), 75)
+
+    updated = patch_measurement(client, headers, older["id"], date=str(date.today()))
+
+    assert updated["target_update"]["status"] == "updated"
+    assert reference_weight(active_target(client, headers)) == Decimal("75")
+
+
+# Reculer la date de la mesure la plus récente rend la mesure suivante
+# la plus récente : son poids devient le poids de référence.
+def test_update_latest_measurement_date_backwards_recalculates_target(client):
+    headers = onboarded_headers(client)
+    onboarding = onboarding_measurement(client, headers)
+    latest = add_measurement(client, headers, date.today(), 75)
+    assert reference_weight(active_target(client, headers)) == Decimal("75")
+
+    updated = patch_measurement(
+        client, headers, latest["id"], date=str(date.fromisoformat(onboarding["date"]) - timedelta(days=10))
+    )
+
+    assert updated["target_update"]["status"] == "updated"
+    assert reference_weight(active_target(client, headers)) == Decimal("80")
+
+
+# Une correction qui donnerait moins de 1200 kcal : la mesure est modifiée,
+# la cible est conservée et la réponse explique l'échec.
+def test_update_measurement_with_failed_recalculation_keeps_target(client):
+    headers = onboarded_headers(client)
+    update_profile(client, headers, sex="female", year_of_birth=1960, height_cm=150, activity_level="sedentary")
+    before = active_target(client, headers)
+    latest = onboarding_measurement(client, headers)
+
+    updated = patch_measurement(client, headers, latest["id"], weight_kg=35)
+
+    assert updated["weight_kg"] == 35
+    assert updated["target_update"]["status"] == "failed"
+    assert updated["target_update"]["calories_target_kcal"] == before["calories_target_kcal"]
+    assert active_target(client, headers)["id"] == before["id"]
+
+
+# Supprimer la mesure la plus récente recalcule la cible avec la précédente.
+def test_delete_latest_measurement_recalculates_target(client):
+    headers = onboarded_headers(client)
+    latest = add_measurement(client, headers, date.today(), 75)
+    before = active_target(client, headers)
+    assert reference_weight(before) == Decimal("75")
+
+    deleted = delete_measurement(client, headers, latest["id"])
+
+    after = active_target(client, headers)
+    assert reference_weight(after) == Decimal("80")
+    assert deleted["target_update"] == {
+        "status": "updated",
+        "previous_calories_target_kcal": before["calories_target_kcal"],
+        "calories_target_kcal": after["calories_target_kcal"],
+        "message": None,
+    }
+
+
+# Supprimer une mesure plus ancienne ne change pas la cible.
+def test_delete_older_measurement_keeps_target(client):
+    headers = onboarded_headers(client)
+    older = add_measurement(client, headers, date.today() - timedelta(days=10), 90)
+    before = active_target(client, headers)
+
+    deleted = delete_measurement(client, headers, older["id"])
+
+    assert deleted["target_update"] is None
+    assert active_target(client, headers)["id"] == before["id"]
+
+
+# La seule mesure restante ne peut pas être supprimée : la cible reste intacte.
+def test_delete_only_measurement_is_refused(client):
+    headers = onboarded_headers(client)
+    before = active_target(client, headers)
+    only = onboarding_measurement(client, headers)
+
+    response = client.delete(f"{MEASUREMENTS_URL}/{only['id']}", headers=headers)
+
+    assert response.status_code == 409
+    assert active_target(client, headers)["id"] == before["id"]
+    assert len(list_measurements(client, headers)) == 1

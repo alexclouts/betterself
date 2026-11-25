@@ -373,8 +373,15 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "Successful Response"
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeasurementDeletedRead"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -426,7 +433,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MeasurementRead"
+                  "$ref": "#/components/schemas/MeasurementUpdatedRead"
                 }
               }
             }
@@ -3196,6 +3203,22 @@
         ],
         "title": "MeasurementCreatedRead"
       },
+      "MeasurementDeletedRead": {
+        "properties": {
+          "target_update": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetUpdateRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "MeasurementDeletedRead"
+      },
       "MeasurementRead": {
         "properties": {
           "id": {
@@ -3256,6 +3279,46 @@
         },
         "type": "object",
         "title": "MeasurementUpdate"
+      },
+      "MeasurementUpdatedRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "weight_kg": {
+            "type": "number",
+            "title": "Weight Kg"
+          },
+          "target_update": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetUpdateRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "date",
+          "weight_kg"
+        ],
+        "title": "MeasurementUpdatedRead"
       },
       "NutritionGoalCreate": {
         "properties": {

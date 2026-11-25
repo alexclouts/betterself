@@ -84,9 +84,15 @@ export function HomePage() {
           )}
         </Card>
 
-        <Button className="mt-4 w-full text-primary font-bold" onClick={() => navigate("/measurements/new")}>
-          Enregistrer mon poids
-        </Button>
+        {/* Deux boutons de même largeur sur une rangée. */}
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button className="w-full text-primary font-bold" onClick={() => navigate("/measurements")}>
+            Mes mesures
+          </Button>
+          <Button className="w-full text-primary font-bold" onClick={() => navigate("/measurements/new")}>
+            Enregistrer mon poids
+          </Button>
+        </div>
       </section>
     </main>
     );

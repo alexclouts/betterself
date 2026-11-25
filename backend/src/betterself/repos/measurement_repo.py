@@ -1,3 +1,4 @@
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from betterself.models.measurement_models import Measurement
@@ -51,6 +52,12 @@ class MeasurementRepository:
         return self.db.scalar(query)
 
 
+    # Compte les mesures d'un utilisateur.
+    def count_for_user(self, user: User) -> int:
+        query = select(func.count()).select_from(Measurement.for_user(user.id).subquery())
+        return self.db.scalar(query) or 0
+
+
     # Récupère une mesure spécifique par ID pour un utilisateur donné
     def get_measurement_by_id(self, user: User, measurement_id: int) -> Measurement:
         return self._get_measurement_or_404(user, measurement_id)
@@ -75,7 +82,9 @@ class MeasurementRepository:
 
         if data.weight_kg is not None:
             measurement.weight_kg = data.weight_kg
-            
+
+        # Rend la modification visible aux requêtes suivantes (ex. recherche de la mesure la plus récente)
+        self.db.flush()
         return measurement
 
 

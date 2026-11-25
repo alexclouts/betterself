@@ -33,6 +33,22 @@ class MeasurementCreatedRead(MeasurementRead):
     target_update: TargetUpdateRead | None = None
 
 
+"""
+Réponse à la modification d'une mesure : la mesure modifiée, plus le résultat
+du recalcul de la cible (null si la mesure n'est pas, et n'était pas, la plus récente).
+"""
+class MeasurementUpdatedRead(MeasurementRead):
+    target_update: TargetUpdateRead | None = None
+
+
+"""
+Réponse à la suppression d'une mesure : seulement le résultat du recalcul de la
+cible (null si la mesure supprimée n'était pas la plus récente).
+"""
+class MeasurementDeletedRead(BaseModel):
+    target_update: TargetUpdateRead | None = None
+
+
 class MeasurementUpdate(BaseModel):
     date: DateType | None = None
     weight_kg: float | None = Field(default=None, gt=30, le=500)
