@@ -100,7 +100,7 @@ function WeightForm({ measurement }: { measurement?: MeasurementRead }) {
 
   const [date, setDate] = useState(measurement?.date ?? todayKey());
   const [weight, setWeight] = useState(
-    measurement ? measurement.weight_kg.toLocaleString("fr-CA") : "",
+    measurement ? String(measurement.weight_kg).replace(".", ",") : "",
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
