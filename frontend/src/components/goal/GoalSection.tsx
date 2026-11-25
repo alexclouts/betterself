@@ -46,7 +46,9 @@ export function GoalSection() {
   const { measurements, latest } = useMeasurements();
 
   const plan = goal ? goalPlan(goal) : null;
-  const progress = goal ? formatProgress(goal, latest?.weight_kg ?? null) : null;
+  const progress = goal
+    ? formatProgress(goal, latest && latest.date >= goal.start_date ? latest.weight_kg : null)
+    : null;
 
   const rows = goal
     ? [
