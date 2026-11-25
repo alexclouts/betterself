@@ -10,8 +10,8 @@ export type WeightTrend = "toward" | "away" | "neutral";
 
 // Poids visé : le poids cible s'il est défini ; pour un maintien, le poids de départ.
 function referenceWeight(goal: NutritionGoalRead): number | null {
-  if (goal.target_weight_kg !== null) return Number(goal.target_weight_kg);
   if (goal.goal_type === "maintain_weight") return Number(goal.start_weight_kg);
+  if (goal.target_weight_kg !== null) return Number(goal.target_weight_kg);
   return null;
 }
 
