@@ -69,6 +69,10 @@ export function BarcodeScanner({ onDetected }: BarcodeScannerProps) {
           navigator.mediaDevices.getUserMedia({
             video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } },
             audio: false,
+          }).then((mediaStream) => {
+            stream = mediaStream;
+            if (stopped) stop();
+            return mediaStream;
           }),
           getBarcodeDetector(),
         ]);
