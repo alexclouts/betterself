@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from betterself.core.exceptions import (
     DuplicateRecord,
+    RecipeWithoutIngredients,
     RecordNotFound,
 )
 from betterself.repos.food_repo import FoodRepository
@@ -63,19 +64,36 @@ class RecipeService:
         return self._to_recipe_read(recipe)
 
 
-    # Crée une nouvelle recette pour l'utilisateur connecté.
+    # Crée une nouvelle recette et ses ingrédients pour l'utilisateur connecté.
+    # Le poids total est la somme des quantités des ingrédients.
     def create_recipe(
         self,
         user: User,
         data: RecipeCreate,
     ) -> RecipeRead:
+        # Vérifie que chaque aliment existe avant de créer quoi que ce soit.
+        for ingredient in data.ingredients:
+            self.food_repository.get_food_or_404(
+                food_id=ingredient.food_id,
+            )
+
         recipe = Recipe(
             user_id=user.id,
             name=data.name,
             description=data.description,
-            total_weight_g=data.total_weight_g,
+            total_weight_g=sum(
+                (ingredient.quantity_g for ingredient in data.ingredients),
+                Decimal("0"),
+            ),
             servings=data.servings,
             is_archived=False,
+            ingredients=[
+                RecipeIngredient(
+                    food_id=ingredient.food_id,
+                    quantity_g=ingredient.quantity_g,
+                )
+                for ingredient in data.ingredients
+            ],
         )
         recipe = self.recipe_repository.add(recipe)
 
@@ -162,12 +180,14 @@ class RecipeService:
             )
 
         ingredient = RecipeIngredient(
-            recipe_id=recipe.id,
             food_id=data.food_id,
             quantity_g=data.quantity_g,
         )
-        ingredient = self.recipe_repository.add_ingredient(ingredient)
         ingredient.food = food
+        # Passer par la collection garde recipe.ingredients à jour pour le calcul du poids.
+        recipe.ingredients.append(ingredient)
+        ingredient = self.recipe_repository.add_ingredient(ingredient)
+        self._refresh_total_weight(recipe)
         return self._to_ingredient_read(ingredient)
 
 
@@ -200,6 +220,7 @@ class RecipeService:
             ingredient_id=ingredient_id,
         )
         ingredient.quantity_g = data.quantity_g
+        self._refresh_total_weight(ingredient.recipe)
         return self._to_ingredient_read(ingredient)
 
 
@@ -215,7 +236,27 @@ class RecipeService:
             recipe_id=recipe_id,
             ingredient_id=ingredient_id,
         )
+        recipe = ingredient.recipe
+        # Le poids total d'une recette doit rester supérieur à zéro.
+        if len(recipe.ingredients) <= 1:
+            raise RecipeWithoutIngredients(
+                "Le dernier ingrédient d'une recette ne peut pas être retiré."
+            )
+        # Retirer de la collection supprime l'ingrédient (delete-orphan).
+        recipe.ingredients.remove(ingredient)
         self.recipe_repository.delete_ingredient(ingredient)
+        self._refresh_total_weight(recipe)
+
+
+    # Recalcule le poids total d'une recette à partir de ses ingrédients.
+    def _refresh_total_weight(
+        self,
+        recipe: Recipe,
+    ) -> None:
+        recipe.total_weight_g = sum(
+            (ingredient.quantity_g for ingredient in recipe.ingredients),
+            Decimal("0"),
+        )
 
 
     # Récupère une recette pour l'utilisateur connecté ou lève une erreur si elle n'existe pas.

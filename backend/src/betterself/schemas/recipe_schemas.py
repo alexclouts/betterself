@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from betterself.core.custom_types import (
     NonEmptyText,
@@ -11,8 +11,21 @@ from betterself.core.custom_types import (
 
 
 """
-Données nécessaires pour créer une recette.
-Les ingrédients seront gérés séparément dans `RecipeIngredientCreate` lorsque la table `recipe_ingredients` sera intégrée.
+Aliment et quantité d'un ingrédient fourni à la création d'une recette.
+"""
+class RecipeIngredientInput(BaseModel):
+    food_id: UUID
+    quantity_g: Decimal = Field(
+        gt=0,
+        le=100000,
+        examples=[150],
+        description="Quantité de l'aliment utilisée, en grammes.",
+    )
+
+
+"""
+Données nécessaires pour créer une recette avec ses ingrédients.
+Le poids total n'est pas fourni : il est la somme des quantités des ingrédients.
 """
 class RecipeCreate(BaseModel):
     name: NonEmptyText = Field(
@@ -26,18 +39,28 @@ class RecipeCreate(BaseModel):
         ],
     )
 
-    total_weight_g: Decimal = Field(
-        gt=0,
-        le=100000,
-        examples=[800],
-        description="Poids total de la recette préparée, en grammes.",
-    )
-
     servings: int = Field(
         gt=0,
         le=1000,
         examples=[6],
     )
+
+    ingredients: list[RecipeIngredientInput] = Field(
+        min_length=1,
+        description="Ingrédients de la recette; au moins un, sans aliment en double.",
+    )
+
+    # Un aliment ne peut apparaître qu'une fois dans une recette.
+    @field_validator("ingredients")
+    @classmethod
+    def reject_duplicate_foods(
+        cls,
+        ingredients: list[RecipeIngredientInput],
+    ) -> list[RecipeIngredientInput]:
+        food_ids = [ingredient.food_id for ingredient in ingredients]
+        if len(food_ids) != len(set(food_ids)):
+            raise ValueError("Un aliment ne peut apparaître qu'une fois dans une recette.")
+        return ingredients
 
 
 """
@@ -51,12 +74,6 @@ class RecipeUpdate(BaseModel):
     )
 
     description: OptionalLongText = None
-
-    total_weight_g: Decimal | None = Field(
-        default=None,
-        gt=0,
-        le=100000,
-    )
 
     servings: int | None = Field(
         default=None,
@@ -75,7 +92,9 @@ class RecipeRead(BaseModel):
     user_id: UUID
     name: str
     description: str | None
-    total_weight_g: Decimal
+    total_weight_g: Decimal = Field(
+        description="Poids total de la recette : somme des quantités des ingrédients, en grammes.",
+    )
     servings: int
     is_archived: bool
     created_at: datetime

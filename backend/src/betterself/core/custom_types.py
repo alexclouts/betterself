@@ -37,11 +37,17 @@ OptionalText = Annotated[
 ]
 
 
+# Les contraintes s'appliquent à la chaîne seulement : appliquées à `str | None`,
+# elles échoueraient sur None (TypeError, donc une erreur 500).
 OptionalLongText = Annotated[
-    str | None,
+    Optional[
+        Annotated[
+            str,
+            StringConstraints(
+                strip_whitespace=True,
+                max_length=2000,
+            ),
+        ]
+    ],
     BeforeValidator(empty_string_to_none),
-    StringConstraints(
-        strip_whitespace=True,
-        max_length=2000,
-    ),
 ]

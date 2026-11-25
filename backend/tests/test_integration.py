@@ -53,19 +53,14 @@ def test_create_recipe_with_ingredients_and_get_nutrition(
         carbohydrates_g="28",
         fat_g="0.3",
     )
-    # Création de la recette
+    # Création de la recette avec le poulet
     recipe = create_recipe(
         client,
-        headers
-    )
-    # Ajout des ingrédients à la recette
-    create_recipe_ingredient(
-        client,
         headers,
-        recipe_id=recipe["id"],
-        food_id=chicken["id"],
-        quantity_g="400",
+        ingredients=[{"food_id": chicken["id"], "quantity_g": "400"}],
     )
+    assert Decimal(str(recipe["total_weight_g"])) == Decimal("400")
+    # Ajout du riz : le poids total est recalculé
     create_recipe_ingredient(
         client,
         headers,
@@ -293,15 +288,12 @@ def test_create_recipe_and_consume_half_recipe(client):
         carbohydrates_g="28",
         fat_g="0.3",
     )
-    recipe = create_recipe(client, headers)
-
-    create_recipe_ingredient(
+    recipe = create_recipe(
         client,
         headers,
-        recipe_id=recipe["id"],
-        food_id=chicken["id"],
-        quantity_g="400",
+        ingredients=[{"food_id": chicken["id"], "quantity_g": "400"}],
     )
+
     create_recipe_ingredient(
         client,
         headers,

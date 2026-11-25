@@ -49,23 +49,29 @@ def create_food(
 
 """
 Crée une recette et retourne sa représentation JSON.
+Sans ingrédients fournis, la recette contient 800 g d'un aliment créé pour l'occasion.
 """
 def create_recipe(
     client,
     headers: dict,
     name: str = "Bol de poulet et riz",
+    ingredients: list[dict] | None = None,
 ) -> dict:
+    if ingredients is None:
+        base_food = create_food(client, headers, name="Riz brun cuit")
+        ingredients = [{"food_id": base_food["id"], "quantity_g": "800"}]
+
     response = client.post(
         RECIPES_URL,
         json={
             "name": name,
             "description": "Repas riche en protéines.",
-            "total_weight_g": "800",
             "servings": 4,
+            "ingredients": ingredients,
         },
         headers=headers,
     )
-    assert response.status_code == 201
+    assert response.status_code == 201, response.text
     return response.json()
 
 
