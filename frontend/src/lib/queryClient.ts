@@ -33,6 +33,7 @@ export const queryKeys = {
     search: (term: string) => ["foods", "search", term] as const,
   },
   currentTarget: ["nutrition-goal", "current-target"] as const,
+  currentGoal: ["nutrition-goal", "current"] as const,
   profile: ["users", "me", "profile"] as const,
   currentUser: ["users", "me"] as const,
   measurements: {

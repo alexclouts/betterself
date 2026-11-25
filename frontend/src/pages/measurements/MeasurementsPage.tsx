@@ -2,10 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { MeasurementRead } from "../../api/generated/measurementRead";
 import Button from "../../components/ui/Button";
+import { useCurrentGoal } from "../../hooks/useCurrentGoal";
 import { useMeasurements } from "../../hooks/useMeasurements";
 import { formatLongDate } from "../../lib/date";
 import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
+import { weightTrend, type WeightTrend } from "../../lib/weightTrend";
 import { measurementService } from "../../services/measurementService";
 
 function formatWeight(value: number): string {
@@ -15,10 +17,24 @@ function formatWeight(value: number): string {
 // Écart avec la mesure précédente : « +0,4 kg », « −1,2 kg » ou « = » si identique.
 function formatDelta(delta: number): string {
   const rounded = Math.round(delta * 10) / 10;
-  if (rounded === 0) return "=";
+  if (rounded === 0) return "";
   const sign = rounded > 0 ? "+" : "−";
   return `${sign}${Math.abs(rounded).toLocaleString("fr-CA", { minimumFractionDigits: 1 })} kg`;
 }
+
+// Vert si le poids se rapproche de l'objectif, rouge s'il s'en éloigne.
+const TREND_CLASSES: Record<WeightTrend, string> = {
+  toward: "text-primary-dark dark:text-primary",
+  away: "text-danger",
+  neutral: "text-muted",
+};
+
+// Ajouté au libellé de la ligne pour les lecteurs d'écran : la couleur seule ne doit pas porter l'information.
+const TREND_LABELS: Record<WeightTrend, string | undefined> = {
+  toward: "vers votre objectif",
+  away: "s’éloigne de votre objectif",
+  neutral: undefined,
+};
 
 /*
  * Historique des pesées, de la plus récente à la plus ancienne. Chaque mesure
@@ -29,6 +45,8 @@ export function MeasurementsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { history, isLoading, error: loadError } = useMeasurements();
+  // Sans objectif (ou en cas d'erreur), les variations restent en gris.
+  const { goal } = useCurrentGoal();
 
   const deleteMutation = useMutation({
     mutationFn: (measurementId: number) => measurementService.deleteMeasurement(measurementId),
@@ -91,6 +109,7 @@ export function MeasurementsPage() {
             {history.map((measurement, index) => {
               // La liste va de la plus récente à la plus ancienne : la précédente est la suivante.
               const previous = history[index + 1];
+              const trend = previous ? weightTrend(previous.weight_kg, measurement.weight_kg, goal) : "neutral";
               const label = `${formatWeight(measurement.weight_kg)} le ${formatLongDate(measurement.date)}`;
 
               return (
@@ -99,7 +118,11 @@ export function MeasurementsPage() {
                   <button
                     type="button"
                     onClick={() => navigate(`/measurements/${measurement.id}/edit`)}
-                    aria-label={`Modifier la mesure de ${label}`}
+                    aria-label={[
+                      `Modifier la mesure de ${label}`,
+                      previous && formatDelta(measurement.weight_kg - previous.weight_kg),
+                      TREND_LABELS[trend],
+                    ].filter(Boolean).join(", ")}
                     className="flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-lg px-2 py-1 text-left hover:bg-surface-raised"
                   >
                     <span className="min-w-0">
@@ -109,7 +132,7 @@ export function MeasurementsPage() {
                     <span className="shrink-0 text-right">
                       <strong className="block text-foreground">{formatWeight(measurement.weight_kg)}</strong>
                       {previous && (
-                        <span className="text-sm text-muted">
+                        <span className={`text-sm ${TREND_CLASSES[trend]}`}>
                           {formatDelta(measurement.weight_kg - previous.weight_kg)}
                         </span>
                       )}
