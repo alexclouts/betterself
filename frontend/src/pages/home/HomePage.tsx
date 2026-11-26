@@ -73,11 +73,6 @@ export function HomePage() {
             <WeightChart measurements={weight.measurements} />
           )}
         </Card>
-
-        {/* Le suivi détaillé est dans l'onglet « Poids » de la barre. */}
-        <Button className="mt-4 w-full text-primary font-bold" onClick={() => navigate("/measurements/new")}>
-          Mettre à jour mon poids
-        </Button>
       </section>
     </main>
     );

@@ -59,7 +59,7 @@ export function RecipesPage() {
         <p className="mt-6">
           {showArchived
             ? "Aucune recette enregistrée pour l’instant."
-            : "Aucune recette active. Créez-en une avec le bouton +, puis « Créer une recette »."}
+            : "Aucune recette active. Créez-en une avec le bouton +, puis « + Recette »."}
         </p>
       ) : (
         <ul className="mt-6 divide-y divide-border text-left">
@@ -95,12 +95,16 @@ export function RecipesPage() {
                   </span>
                 </button>
 
+                {/* Bouton texte, comme « + Ajouter un aliment » du journal :
+                    Archiver en couleur secondaire, Réactiver en couleur primaire. */}
                 <button
                   type="button"
                   onClick={() => toggleArchive(recipe)}
                   disabled={pendingId === recipe.id}
                   aria-label={`${recipe.is_archived ? "Réactiver" : "Archiver"} la recette ${recipe.name}`}
-                  className="shrink-0 rounded-full px-3 py-1 text-sm text-muted hover:bg-surface-raised hover:text-foreground disabled:opacity-30"
+                  className={`shrink-0 text-sm font-semibold disabled:opacity-30 ${
+                    recipe.is_archived ? "text-primary" : "text-secondary"
+                  }`}
                 >
                   {recipe.is_archived ? "Réactiver" : "Archiver"}
                 </button>

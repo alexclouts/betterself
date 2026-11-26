@@ -1,12 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { RecipeRead } from "../../api/generated/recipeRead";
-import type { RecipeUpdate } from "../../api/generated/recipeUpdate";
 import { IngredientEntry } from "../../components/recipes/IngredientEntry";
 import { IngredientSearch } from "../../components/recipes/IngredientSearch";
 import { RecipeComposition } from "../../components/recipes/RecipeComposition";
-import { RecipeDetailsFields } from "../../components/recipes/RecipeDetailsFields";
 import { RecipeNutritionCard } from "../../components/recipes/RecipeNutritionCard";
 import Button from "../../components/ui/Button";
 import { useIngredientFlow } from "../../hooks/useIngredientFlow";
@@ -14,17 +12,13 @@ import { useRecipe } from "../../hooks/useRecipe";
 import { getDefaultQuantityG, toNumber } from "../../lib/food";
 import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
-import {
-  areDetailsValid,
-  parseDecimal,
-  recipeTotals,
-  type RecipeDetailsValues,
-} from "../../lib/recipe";
+import { recipeTotals } from "../../lib/recipe";
 import { recipeService } from "../../services/recipeService";
-import { useToastStore } from "../../stores/toastStore";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 /*
- * Page d'une recette : valeurs nutritionnelles, ingrédients et détails.
+ * Page d'une recette : valeurs nutritionnelles et ingrédients. Le nom, les
+ * portions et la description se modifient dans RecipeDetailsPage (« Modifier »).
  * Chaque changement d'ingrédient est enregistré aussitôt et le poids total
  * recalculé par l'API.
  */
@@ -40,9 +34,7 @@ export function RecipeEditPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate("/recipes")} className="text-sm">
-        ← Mes recettes
-      </Button>
+      <PageHeader onBack={() => navigate("/recipes")} backLabel="Retour à mes recettes" />
       {isLoading ? (
         <p className="mt-6">Chargement de la recette…</p>
       ) : (
@@ -61,24 +53,10 @@ function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
   // Repas et journée choisis dans le journal, si l'on arrive de « Créer une recette ».
   const journalNavState = readJournalNavState(location.state);
   const { view, showRecipe, showSearch, showEntry } = useIngredientFlow();
-  const [details, setDetails] = useState<RecipeDetailsValues>({
-    name: recipe.name,
-    description: recipe.description ?? "",
-    servings: String(recipe.servings),
-  });
 
   function refresh() {
     return queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
   }
-
-  const updateMutation = useMutation({
-    mutationFn: (payload: RecipeUpdate) => recipeService.updateRecipe(recipe.id, payload),
-    onSuccess: (updated) => {
-      queryClient.setQueryData(queryKeys.recipes.detail(updated.id), updated);
-      void refresh();
-      useToastStore.getState().showToast("La recette a été enregistrée.");
-    },
-  });
 
   const removeMutation = useMutation({
     mutationFn: (ingredientId: string) => recipeService.removeIngredient(recipe.id, ingredientId),
@@ -90,22 +68,6 @@ function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
     () => new Set(ingredients.map((ingredient) => ingredient.food.id)),
     [ingredients],
   );
-
-  const isDirty =
-    details.name.trim() !== recipe.name ||
-    (details.description.trim() || null) !== recipe.description ||
-    parseDecimal(details.servings) !== recipe.servings;
-  const canSave = areDetailsValid(details) && isDirty && !updateMutation.isPending;
-
-  function handleSave(event: React.FormEvent) {
-    event.preventDefault();
-    if (!canSave) return;
-    updateMutation.mutate({
-      name: details.name.trim(),
-      description: details.description.trim() || null,
-      servings: parseDecimal(details.servings),
-    });
-  }
 
   function openIngredient(ingredientId: string) {
     const ingredient = ingredients.find((item) => item.id === ingredientId);
@@ -161,12 +123,27 @@ function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate("/recipes")} className="text-sm">
-        ← Mes recettes
-      </Button>
+      {/* Nom, portions et description se modifient dans une page à part. */}
+      <PageHeader
+        onBack={() => navigate("/recipes")}
+        backLabel="Retour à mes recettes"
+        action={
+          <button
+            type="button"
+            onClick={() => navigate(`/recipes/${recipe.id}/edit`)}
+            aria-label={`Modifier les informations de la recette ${recipe.name}`}
+            className="rounded-full px-3 py-2 text-sm font-semibold text-primary hover:bg-surface-raised"
+          >
+            Modifier
+          </button>
+        }
+      />
 
       <h1 className="break-words">{recipe.name}</h1>
       {recipe.is_archived && <p className="text-sm text-muted">Recette archivée</p>}
+      {recipe.description && (
+        <p className="mb-4 whitespace-pre-line">{recipe.description}</p>
+      )}
 
       <RecipeNutritionCard
         totals={recipeTotals(recipe)}
@@ -205,25 +182,6 @@ function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
           </p>
         )}
       </div>
-
-      <section className="mt-10" aria-labelledby="details-heading">
-        <h2 id="details-heading" className="mt-0 mb-2 text-left text-xl">
-          Détails
-        </h2>
-        <form onSubmit={handleSave}>
-          <RecipeDetailsFields values={details} onChange={setDetails} />
-
-          {updateMutation.error && (
-            <p className="mt-4 text-danger" role="alert">
-              {updateMutation.error.message}
-            </p>
-          )}
-
-          <Button type="submit" className="mt-4 w-full font-bold" disabled={!canSave}>
-            {updateMutation.isPending ? "Enregistrement…" : "Enregistrer"}
-          </Button>
-        </form>
-      </section>
     </main>
   );
 }

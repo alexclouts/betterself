@@ -3,7 +3,17 @@ import { formatNutrient, type FoodNutrients } from "../../lib/food";
 import Card from "../ui/Card";
 
 // Barre de progression d'une valeur consommée par rapport à sa cible.
-function ProgressBar({ value, target }: { value: number; target: number }) {
+// Les calories sont en couleur primaire, les macros en couleur secondaire;
+// une cible dépassée passe en rouge.
+function ProgressBar({
+  value,
+  target,
+  color = "primary",
+}: {
+  value: number;
+  target: number;
+  color?: "primary" | "secondary";
+}) {
   const ratio = target > 0 ? value / target : 0;
   const isOver = ratio > 1;
 
@@ -16,7 +26,7 @@ function ProgressBar({ value, target }: { value: number; target: number }) {
       aria-valuenow={Math.round(value)}
     >
       <div
-        className={`h-full rounded-full ${isOver ? "bg-danger" : "bg-primary"}`}
+        className={`h-full rounded-full ${isOver ? "bg-danger" : color === "secondary" ? "bg-secondary" : "bg-primary"}`}
         style={{ width: `${Math.min(ratio, 1) * 100}%` }}
       />
     </div>
@@ -77,7 +87,7 @@ export function DailySummaryCard({ totals, target, className = "" }: DailySummar
               {macro.target === undefined && " g"}
             </dd>
             {macro.target !== undefined && (
-              <ProgressBar value={macro.value} target={macro.target} />
+              <ProgressBar value={macro.value} target={macro.target} color="secondary" />
             )}
           </div>
         ))}

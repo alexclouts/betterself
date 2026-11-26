@@ -23,6 +23,7 @@ import { queryKeys } from "../../lib/queryClient";
 import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
 import { journalUrl, readJournalNavState } from "../../lib/journal";
 import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 const MAX_QUANTITY_G = 5000;
 
@@ -206,14 +207,7 @@ export function FoodAddPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate(-1)}
-        className="text-sm text-gray-500"
-      >
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>{food.name}</h1>
       {food.brand && <p>{food.brand}</p>}

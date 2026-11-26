@@ -79,17 +79,20 @@ export function MeasurementsPage() {
     deleteMutation.mutate(measurement.id);
   }
 
+  // Sous le graphique, ou sous le message s'il n'y a encore aucune mesure.
+  const updateButton = (
+    <Button
+      type="button"
+      className="mt-4 w-full font-bold"
+      onClick={() => navigate("/measurements/new")}
+    >
+      Mettre à jour
+    </Button>
+  );
+
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
       <h1>Mes mesures</h1>
-
-      <Button
-        type="button"
-        className="w-full font-bold"
-        onClick={() => navigate("/measurements/new")}
-      >
-        Enregistrer mon poids
-      </Button>
 
       {error && (
         <p className="mt-4 text-danger" role="alert">
@@ -100,7 +103,10 @@ export function MeasurementsPage() {
       {isLoading ? (
         <p className="mt-6">Chargement de vos mesures…</p>
       ) : history.length === 0 ? (
-        <p className="mt-6">Aucune mesure enregistrée pour l’instant.</p>
+        <>
+          <p className="mt-6">Aucune mesure enregistrée pour l’instant.</p>
+          {updateButton}
+        </>
       ) : (
         <>
           {/* Même courbe que l'accueil (une mesure par jour), au-dessus de l'historique détaillé. */}
@@ -109,8 +115,9 @@ export function MeasurementsPage() {
               <h2 id="weight-chart-heading" className="mt-0 mb-2 text-left text-xl">
                 Mon poids
               </h2>
-              <WeightChart measurements={measurements} />
+              <WeightChart measurements={measurements} showData={false} />
             </Card>
+            {updateButton}
           </section>
 
           <h2 className="mt-8 mb-0 text-left text-xl">Historique</h2>

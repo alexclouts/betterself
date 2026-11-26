@@ -20,6 +20,7 @@ import { ProfilePage } from "../pages/profile/ProfilePage";
 import { RecipesPage } from "../pages/recipes/RecipesPage";
 import { RecipeNewPage } from "../pages/recipes/RecipeNewPage";
 import { RecipeEditPage } from "../pages/recipes/RecipeEditPage";
+import { RecipeDetailsPage } from "../pages/recipes/RecipeDetailsPage";
 
 /*
  * Routeur de données : nécessaire pour useBlocker (confirmation avant de
@@ -58,6 +59,7 @@ export const router = createBrowserRouter(
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/recipes/new" element={<RecipeNewPage />} />
                     <Route path="/recipes/:recipeId" element={<RecipeEditPage />} />
+                    <Route path="/recipes/:recipeId/edit" element={<RecipeDetailsPage />} />
                 </Route>
                 
             </Route>

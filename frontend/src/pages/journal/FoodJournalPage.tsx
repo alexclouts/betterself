@@ -170,7 +170,7 @@ export function FoodJournalPage() {
                   <h3 id={`meal-${meal}`} className="text-lg font-semibold text-foreground">
                     {MEAL_TYPE_LABELS[meal]}
                   </h3>
-                  <span className="text-sm text-muted">
+                  <span className="text-sm font-bold text-foreground">
                     {formatNutrient(mealCalories, 0)} kcal
                   </span>
                 </div>
@@ -187,13 +187,18 @@ export function FoodJournalPage() {
                           onClick={() => {
                             handleOpen(entry);
                           }}
-                          className="min-w-0 flex-1 rounded-lg px-2 py-1 hover:bg-surface-raised"
+                          className="flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-lg px-2 py-1 text-left hover:bg-surface-raised"
                         >
-                          <span className="block truncate text-foreground">
-                            {entry.item_name_snapshot}
+                          <span className="min-w-0">
+                            <span className="block truncate text-foreground">
+                              {entry.item_name_snapshot}
+                            </span>
+                            <span className="text-sm text-muted">
+                              {formatNutrient(entry.quantity_g)} g
+                            </span>
                           </span>
-                          <span className="text-sm text-muted">
-                            {formatNutrient(entry.quantity_g)} g ·{" "}
+                          {/* Calories en évidence, comme le total du repas. */}
+                          <span className="shrink-0 text-sm font-bold text-foreground">
                             {formatNutrient(entry.calories_kcal, 0)} kcal
                           </span>
                         </button>

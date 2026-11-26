@@ -9,6 +9,7 @@ import {
   validateWeight,
   type PickedFood,
 } from "../../lib/recipe";
+import { PageHeader } from "../navigation/PageHeader";
 
 type IngredientEntryProps = {
   food: PickedFood;
@@ -55,9 +56,11 @@ export function IngredientEntry({
 
   return (
     <>
-      <Button type="button" variant="secondary" onClick={onBack} className="text-sm">
-        ← Retour
-      </Button>
+      {/* Un nouvel ingrédient revient à la recherche, un ingrédient existant à la recette. */}
+      <PageHeader
+        onBack={onBack}
+        backLabel={isEditing ? "Retour à la recette" : "Retour à la recherche"}
+      />
 
       <h1>{food.name}</h1>
       {food.brand && <p>{food.brand}</p>}

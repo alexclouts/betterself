@@ -8,6 +8,7 @@ import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { queryKeys } from "../../lib/queryClient";
 import type { PickedFood } from "../../lib/recipe";
 import { foodService } from "../../services/foodService";
+import { PageHeader } from "../navigation/PageHeader";
 
 // Mêmes réglages que la recherche du journal.
 const MIN_SEARCH_LENGTH = 2;
@@ -74,14 +75,12 @@ export function IngredientSearch({ excludedFoodIds, onPick, onBack }: Ingredient
 
   return (
     <>
-      <Button type="button" variant="secondary" onClick={onBack} className="text-sm">
-        ← Retour à la recette
-      </Button>
+      <PageHeader onBack={onBack} backLabel="Retour à la recette" />
 
       <h1>Ajouter un ingrédient</h1>
 
-      {/* Barre de recherche collée en haut : on peut chercher à nouveau sans remonter. */}
-      <div className="sticky top-0 z-30 -mx-4 mt-2 bg-[var(--bg)] px-4 py-2">
+      {/* Barre de recherche collée sous l'en-tête : on peut chercher à nouveau sans remonter. */}
+      <div className="sticky top-14 z-30 -mx-4 mt-2 bg-[var(--bg)] px-4 py-2">
         <Input
           type="search"
           value={query}

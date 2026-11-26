@@ -27,7 +27,13 @@ function formatDelta(value: number): string {
   return `${sign}${formatKg(Math.abs(value))} kg`;
 }
 
-export function WeightChart({ measurements }: { measurements: MeasurementRead[] }) {
+type WeightChartProps = {
+  measurements: MeasurementRead[];
+  // Tableau « Voir les données » sous la courbe; inutile là où la liste des mesures est déjà affichée.
+  showData?: boolean;
+};
+
+export function WeightChart({ measurements, showData = true }: WeightChartProps) {
   const [containerRef, width] = useElementWidth<HTMLDivElement>();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -198,25 +204,27 @@ export function WeightChart({ measurements }: { measurements: MeasurementRead[] 
         )}
       </div>
 
-      <details className="mt-3 text-sm">
-        <summary className="cursor-pointer text-muted">Voir les données</summary>
-        <table className="mt-2 w-full">
-          <thead>
-            <tr className="text-muted">
-              <th className="py-1 text-left font-normal">Date</th>
-              <th className="py-1 text-right font-normal">Poids</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...points].reverse().map((p) => (
-              <tr key={p.key} className="border-t border-border/50">
-                <td className="py-1">{formatLongDate(p.key)}</td>
-                <td className="py-1 text-right tabular-nums">{formatKg(p.weight)} kg</td>
+      {showData && (
+        <details className="mt-3 text-sm">
+          <summary className="cursor-pointer text-muted">Voir les données</summary>
+          <table className="mt-2 w-full">
+            <thead>
+              <tr className="text-muted">
+                <th className="py-1 text-left font-normal">Date</th>
+                <th className="py-1 text-right font-normal">Poids</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </details>
+            </thead>
+            <tbody>
+              {[...points].reverse().map((p) => (
+                <tr key={p.key} className="border-t border-border/50">
+                  <td className="py-1">{formatLongDate(p.key)}</td>
+                  <td className="py-1 text-right tabular-nums">{formatKg(p.weight)} kg</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
     </div>
   );
 }

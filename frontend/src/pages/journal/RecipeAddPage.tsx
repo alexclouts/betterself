@@ -8,6 +8,7 @@ import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 import { RecipeIngredientsDetails } from "../../components/recipes/RecipeIngredientsDetails";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import { SegmentedControl } from "../../components/ui/SegmentedControl";
 import Select from "../../components/ui/Select";
 import { useRecipe } from "../../hooks/useRecipe";
 import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
@@ -29,6 +30,7 @@ import {
   servingWeightG,
 } from "../../lib/recipe";
 import { journalService } from "../../services/journalService";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 // Quantité maximale acceptée par l'API pour une consommation.
 const MAX_QUANTITY_G = 5000;
@@ -37,6 +39,11 @@ const MAX_QUANTITY_G = 5000;
 const SNAPSHOT_TOLERANCE_KCAL = 1;
 
 type QuantityUnit = "servings" | "grams";
+
+const UNIT_OPTIONS = [
+  { value: "servings", label: "Portions" },
+  { value: "grams", label: "Grammes" },
+] as const;
 
 // L'API accepte au plus deux décimales.
 function roundCents(value: number): number {
@@ -227,14 +234,7 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate(-1)}
-        className="text-sm text-gray-500"
-      >
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1 className="break-words">{recipe.name}</h1>
       <p className="mt-1">
@@ -268,21 +268,7 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
               Quantité ({unit === "servings" ? "portions" : "g"})
             </label>
             {/* Choix de l'unité de saisie. */}
-            <div role="group" aria-label="Unité" className="flex rounded-full border border-border p-0.5 text-sm">
-              {(["servings", "grams"] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => changeUnit(option)}
-                  aria-pressed={unit === option}
-                  className={`rounded-full px-3 py-0.5 ${
-                    unit === option ? "bg-primary text-white" : "text-muted hover:text-foreground"
-                  }`}
-                >
-                  {option === "servings" ? "Portions" : "Grammes"}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl label="Unité" options={UNIT_OPTIONS} value={unit} onChange={changeUnit} />
           </div>
           <Input
             id="recipe-quantity"

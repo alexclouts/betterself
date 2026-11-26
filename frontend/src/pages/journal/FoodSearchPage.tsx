@@ -12,6 +12,7 @@ import { useRecipes } from "../../hooks/useRecipes";
 import { normalizeSearchText } from "../../lib/recipe";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 // Nombre minimal de caractères avant de lancer une recherche.
 const MIN_SEARCH_LENGTH = 2;
@@ -131,21 +132,15 @@ export function FoodSearchPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate(-1)}
-        className="text-sm text-gray-500"
-      >
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>
         Ajouter un aliment
       </h1>
 
-      {/* Barre de recherche collée en haut : on peut chercher à nouveau sans remonter. */}
-      <div className="sticky top-0 z-30 -mx-4 mt-2 bg-[var(--bg)] px-4 py-2">
+      {/* Recherche et raccourcis collés sous l'en-tête : scanner, créer un aliment
+          ou une recette restent accessibles pendant le défilement des résultats. */}
+      <div className="sticky top-14 z-30 -mx-4 mt-2 border-b border-border bg-[var(--bg)] px-4 pt-2 pb-3">
         <Input
           type="search"
           value={query}
@@ -154,16 +149,35 @@ export function FoodSearchPage() {
           aria-label="Rechercher un aliment"
           className="w-full border px-4 py-3"
         />
-      </div>
 
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => navigate("/journal/scan", { state: journalNavState })}
-        className="mt-2 w-full text-sm font-semibold"
-      >
-        Scanner un code-barres
-      </Button>
+        <div className="mt-2 grid grid-cols-3 gap-2 text-sm font-semibold">
+          <button
+            type="button"
+            onClick={() => navigate("/journal/scan", { state: journalNavState })}
+            className="rounded-full border border-border bg-surface px-2 py-2 text-foreground hover:bg-surface-raised"
+          >
+            Scanner
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
+            }
+            aria-label="Créer un aliment"
+            className="rounded-full border border-border bg-surface px-2 py-2 text-primary hover:bg-surface-raised"
+          >
+            + Aliment
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/recipes/new", { state: journalNavState })}
+            aria-label="Créer une recette"
+            className="rounded-full border border-border bg-surface px-2 py-2 text-secondary hover:bg-surface-raised"
+          >
+            + Recette
+          </button>
+        </div>
+      </div>
 
       {isLoading && (
         <p className="mt-4">
@@ -242,26 +256,6 @@ export function FoodSearchPage() {
         </p>
       )}
 
-      {/* Deux boutons de même largeur sur une rangée. */}
-      <div className="mt-6 grid grid-cols-2 gap-2">
-        <Button
-          type="button"
-          onClick={() =>
-            navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
-          }
-          className="w-full py-3 text-primary font-bold"
-        >
-          + Créer un aliment
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => navigate("/recipes/new", { state: journalNavState })}
-          className="w-full py-3 font-bold"
-        >
-          + Créer une recette
-        </Button>
-      </div>
 
       {/* Attribution exigée par la licence ODbL. */}
       {needsAttribution && (

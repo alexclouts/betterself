@@ -13,6 +13,7 @@ import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
 import { userService } from "../../services/userService";
 import { GoalSection } from "../../components/goal/GoalSection";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 const SEX_LABELS: Record<Sex, string> = {
   male: "Homme",
@@ -161,9 +162,7 @@ export function ProfilePage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm">
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>Mon profil</h1>
 

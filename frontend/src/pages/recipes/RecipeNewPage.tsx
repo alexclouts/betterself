@@ -21,6 +21,7 @@ import {
   type RecipeDetailsValues,
 } from "../../lib/recipe";
 import { recipeService } from "../../services/recipeService";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 // Ingrédient du brouillon, pas encore enregistré.
 type DraftIngredient = {
@@ -161,9 +162,7 @@ export function RecipeNewPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm">
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>Créer une recette</h1>
 

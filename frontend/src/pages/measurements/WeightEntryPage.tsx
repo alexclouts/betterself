@@ -10,6 +10,7 @@ import { formatLongDate, parseDateKey, todayKey } from "../../lib/date";
 import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
 import { measurementService } from "../../services/measurementService";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 // Mêmes bornes que le backend (MeasurementCreate et contraintes de la table measurements).
 const MIN_WEIGHT_KG = 30; // exclu
@@ -71,9 +72,7 @@ export function WeightEntryPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm">
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>{isEditing ? "Modifier une mesure" : "Enregistrer mon poids"}</h1>
 
