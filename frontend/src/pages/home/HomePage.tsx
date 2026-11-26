@@ -60,19 +60,6 @@ export function HomePage() {
         ) : (
           <DailySummaryCard totals={totals} target={target} />
         )}
-
-        {/* Deux boutons de même largeur sur une rangée. */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal")}>
-            Mon journal
-          </Button>
-          <Button className="w-full text-primary font-bold" onClick={() => navigate("/journal/add")}>
-            Ajouter
-          </Button>
-        </div>
-        <Button variant="secondary" className="mt-2 w-full font-bold" onClick={() => navigate("/recipes")}>
-          Mes recettes
-        </Button>
       </section>
 
       <section className="mt-8" aria-labelledby="weight-heading">
@@ -87,15 +74,10 @@ export function HomePage() {
           )}
         </Card>
 
-        {/* Deux boutons de même largeur sur une rangée. */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button className="w-full text-primary font-bold" onClick={() => navigate("/measurements")}>
-            Mes mesures
-          </Button>
-          <Button className="w-full text-primary font-bold" onClick={() => navigate("/measurements/new")}>
-            Mettre à jour
-          </Button>
-        </div>
+        {/* Le suivi détaillé est dans l'onglet « Poids » de la barre. */}
+        <Button className="mt-4 w-full text-primary font-bold" onClick={() => navigate("/measurements/new")}>
+          Mettre à jour mon poids
+        </Button>
       </section>
     </main>
     );

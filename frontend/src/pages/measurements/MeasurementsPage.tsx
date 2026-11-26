@@ -79,10 +79,6 @@ export function MeasurementsPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
-      <Button type="button" variant="secondary" onClick={() => navigate("/")} className="text-sm">
-        ← Accueil
-      </Button>
-
       <h1>Mes mesures</h1>
 
       <Button

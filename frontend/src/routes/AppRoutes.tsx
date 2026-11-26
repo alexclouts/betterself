@@ -5,6 +5,7 @@ import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { ProtectedRoute } from "../routes/ProtectedRoutes";
 import { OnboardingGuard } from "../routes/OnboardingGuard";
+import { TabLayout } from "../routes/TabLayout";
 import { HomePage } from "../pages/home/HomePage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { FoodJournalPage } from "../pages/journal/FoodJournalPage";
@@ -36,8 +37,15 @@ export const router = createBrowserRouter(
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 
                 <Route element={<OnboardingGuard />}>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/journal" element={<FoodJournalPage />} />
+                    {/* Onglets principaux, avec la barre de navigation fixe. */}
+                    <Route element={<TabLayout />}>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/journal" element={<FoodJournalPage />} />
+                        <Route path="/recipes" element={<RecipesPage />} />
+                        <Route path="/measurements" element={<MeasurementsPage />} />
+                    </Route>
+
+                    {/* Écrans de saisie, en plein écran. */}
                     <Route path="/journal/add" element={<FoodSearchPage />} />
                     <Route path="/journal/scan" element={<BarcodeScanPage />} />
                     <Route path="/journal/food/new" element={<FoodCreatePage />} />
@@ -45,11 +53,9 @@ export const router = createBrowserRouter(
                     <Route path="/journal/entry/:entryId" element={<FoodAddPage />} />
                     <Route path="/journal/recipe/:recipeId" element={<RecipeAddPage />} />
                     <Route path="/journal/recipe-entry/:entryId" element={<RecipeEntryEditPage />} />
-                    <Route path="/measurements" element={<MeasurementsPage />} />
                     <Route path="/measurements/new" element={<WeightEntryPage />} />
                     <Route path="/measurements/:measurementId/edit" element={<WeightEntryPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/recipes" element={<RecipesPage />} />
                     <Route path="/recipes/new" element={<RecipeNewPage />} />
                     <Route path="/recipes/:recipeId" element={<RecipeEditPage />} />
                 </Route>

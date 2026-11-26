@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { RecipeRead } from "../../api/generated/recipeRead";
-import Button from "../../components/ui/Button";
 import { useRecipes } from "../../hooks/useRecipes";
 import { formatNutrient } from "../../lib/food";
 import { queryKeys } from "../../lib/queryClient";
@@ -37,10 +36,6 @@ export function RecipesPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
-      <Button type="button" variant="secondary" onClick={() => navigate("/")} className="text-sm">
-        ← Accueil
-      </Button>
-
       <h1>Mes recettes</h1>
 
       <label className="flex items-center justify-center gap-2 text-sm text-muted">
@@ -64,7 +59,7 @@ export function RecipesPage() {
         <p className="mt-6">
           {showArchived
             ? "Aucune recette enregistrée pour l’instant."
-            : "Aucune recette active. Créez-en une depuis « Ajouter » dans votre journal."}
+            : "Aucune recette active. Créez-en une avec le bouton +, puis « Créer une recette »."}
         </p>
       ) : (
         <ul className="mt-6 divide-y divide-border text-left">

@@ -97,15 +97,6 @@ export function FoodJournalPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate("/")}
-        className="text-sm"
-      >
-        ← Accueil
-      </Button>
-
       <h1>Journal alimentaire</h1>
 
       {/* Navigation entre les journées */}
