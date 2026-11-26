@@ -18,7 +18,7 @@ export function SegmentedControl<T extends string>({
   color = "secondary",
   className = "",
 }: SegmentedControlProps<T>) {
-  const selectedClass = color === "secondary" ? "bg-secondary text-white" : "bg-primary text-white";
+  const selectedClass = color === "secondary" ? "bg-secondary text-black" : "bg-primary text-black";
 
   return (
     <div
