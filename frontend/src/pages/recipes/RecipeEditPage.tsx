@@ -132,7 +132,7 @@ function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
             type="button"
             onClick={() => navigate(`/recipes/${recipe.id}/edit`)}
             aria-label={`Modifier les informations de la recette ${recipe.name}`}
-            className="rounded-full px-3 py-2 text-sm font-semibold text-primary hover:bg-surface-raised"
+            className="rounded-full px-3 py-2 text-sm font-semibold text-primary-ink hover:bg-surface-raised"
           >
             Modifier
           </button>

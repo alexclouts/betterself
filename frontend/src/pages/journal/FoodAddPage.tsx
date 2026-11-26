@@ -213,7 +213,6 @@ export function FoodAddPage() {
       <PageHeader onBack={() => navigate(-1)} />
 
       <h1>{food.name}</h1>
-      {hasInconsistentCalories(food) && <CalorieWarning className="-mt-3 mb-2 lg:-mt-6" />}
       {food.brand && <p>{food.brand}</p>}
 
       <p className="mt-1">
@@ -222,6 +221,7 @@ export function FoodAddPage() {
           : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
       </p>
       <NutritionFactsCard nutrients={nutrients} className="mt-6" />
+      {hasInconsistentCalories(food) && <CalorieWarning className="mt-2" />}
       {dayKey !== todayKey() && (
         <p className="mt-1">
           {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}

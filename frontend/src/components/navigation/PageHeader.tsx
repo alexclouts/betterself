@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-// Hauteur de l'en-tête : un élément collé sous lui utilise `top-14`.
+// Hauteur de l'en-tête : un élément collé sous lui utilise `top-[calc(3.5rem+var(--safe-top))]`.
 export const PAGE_HEADER_HEIGHT_CLASS = "h-14";
 
 type PageHeaderProps = {
@@ -22,12 +22,12 @@ type PageHeaderProps = {
 export function PageHeader({ onBack, backLabel = "Retour", title, action }: PageHeaderProps) {
   return (
     <header
-      className={`sticky top-0 z-40 -mx-4 -mt-6 grid ${PAGE_HEADER_HEIGHT_CLASS} grid-cols-[auto_1fr_auto] items-center gap-2 bg-[var(--bg)] px-2`}
+      className={`sticky top-[var(--safe-top)] z-40 -mx-4 -mt-6 grid ${PAGE_HEADER_HEIGHT_CLASS} grid-cols-[auto_1fr_auto] items-center gap-2 bg-[var(--bg)] px-2`}
     >
       <button
         type="button"
         onClick={onBack}
-        className="flex h-11 min-w-0 items-center gap-1 rounded-full pr-3 pl-1.5 font-semibold text-secondary transition hover:bg-surface-raised hover:text-secondary-dark active:scale-95"
+        className="flex h-11 min-w-0 items-center gap-1 rounded-full pr-3 pl-1.5 font-semibold text-secondary-ink transition hover:bg-surface-raised hover:text-secondary-ink-hover active:scale-95"
       >
         <svg
           viewBox="0 0 24 24"

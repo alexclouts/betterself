@@ -106,7 +106,7 @@ export function FoodJournalPage() {
           avec les calories de la journée toujours visibles. Le fond couvre
           toute la largeur pour masquer le contenu qui passe dessous. */}
       <nav
-        className={`sticky top-0 z-30 -mx-4 flex items-center justify-between gap-2 border-b bg-[var(--bg)] px-4 py-2 transition-colors ${
+        className={`sticky top-[var(--safe-top)] z-30 -mx-4 flex items-center justify-between gap-2 border-b bg-[var(--bg)] px-4 py-2 transition-colors ${
           hasScrolled ? "border-border" : "border-transparent"
         }`}
         aria-label="Choisir la journée"
@@ -132,7 +132,7 @@ export function FoodJournalPage() {
             <button
               type="button"
               onClick={() => goToDay(todayKey())}
-              className="text-sm text-primary"
+              className="text-sm text-primary-ink"
             >
               Revenir à aujourd’hui
             </button>
@@ -227,7 +227,7 @@ export function FoodJournalPage() {
                 <button
                   type="button"
                   onClick={() => handleAdd(meal)}
-                  className="mt-1 text-sm font-semibold text-primary"
+                  className="mt-1 text-sm font-semibold text-primary-ink"
                 >
                   + Ajouter un aliment
                 </button>

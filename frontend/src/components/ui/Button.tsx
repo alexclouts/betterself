@@ -6,7 +6,7 @@ function Button({ className = "", children, variant = "primary", ...props }: But
     primary: "bg-primary text-white hover:bg-primary-dark",
     secondary: "bg-secondary text-white hover:bg-secondary-dark",
     danger: "bg-danger text-white hover:bg-red-700",
-    ghost: "bg-transparent text-primary hover:bg-primary-light",
+    ghost: "bg-transparent text-primary-ink hover:bg-primary-light",
   }[variant];
 
   return (

@@ -144,7 +144,7 @@ export function FoodSearchPage() {
           ou une recette restent accessibles pendant le défilement des résultats. */}
       {/* La ligne de séparation n'apparaît qu'une fois la page défilée. */}
       <div
-        className={`sticky top-14 z-30 -mx-4 mt-2 border-b bg-[var(--bg)] px-4 pt-2 pb-3 transition-colors ${
+        className={`sticky top-[calc(3.5rem+var(--safe-top))] z-30 -mx-4 mt-2 border-b bg-[var(--bg)] px-4 pt-2 pb-3 transition-colors ${
           hasScrolled ? "border-border" : "border-transparent"
         }`}
       >
@@ -185,7 +185,7 @@ export function FoodSearchPage() {
               navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
             }
             aria-label="Créer un aliment"
-            className="rounded-full bg-surface px-2 py-2 text-primary hover:bg-surface-raised"
+            className="rounded-full bg-surface px-2 py-2 text-primary-ink hover:bg-surface-raised"
           >
             + Aliment
           </button>
@@ -193,7 +193,7 @@ export function FoodSearchPage() {
             type="button"
             onClick={() => navigate("/recipes/new", { state: journalNavState })}
             aria-label="Créer une recette"
-            className="rounded-full bg-surface px-2 py-2 text-secondary hover:bg-surface-raised"
+            className="rounded-full bg-surface px-2 py-2 text-secondary-ink hover:bg-surface-raised"
           >
             + Recette
           </button>

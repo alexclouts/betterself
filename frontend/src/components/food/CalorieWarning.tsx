@@ -9,7 +9,7 @@ export function CalorieWarning({ className = "" }: { className?: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className={`flex items-center justify-center gap-2 text-sm ${className}`}>
+    <div className={`flex items-center gap-2 text-left text-sm ${className}`}>
       <span className="text-foreground">Calories à vérifier sur l’emballage</span>
       <button
         type="button"

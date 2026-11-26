@@ -61,7 +61,7 @@ function Tab({ to, label, icon, end = false }: TabProps) {
       end={end}
       className={({ isActive }) =>
         `flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-xs transition ${
-          isActive ? "font-semibold text-primary" : "text-muted hover:text-foreground"
+          isActive ? "font-semibold text-primary-ink" : "text-muted hover:text-foreground"
         }`
       }
     >
@@ -90,7 +90,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
     >
       <div className="mx-auto flex w-full max-w-md items-center gap-1 px-2 py-1">
         <Tab to="/" end label="Accueil" icon={icons.home} />

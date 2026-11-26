@@ -104,7 +104,7 @@ export function RecipesPage() {
                   disabled={pendingId === recipe.id}
                   aria-label={`${recipe.is_archived ? "Réactiver" : "Archiver"} la recette ${recipe.name}`}
                   className={`shrink-0 text-sm font-semibold disabled:opacity-30 ${
-                    recipe.is_archived ? "text-primary" : "text-secondary"
+                    recipe.is_archived ? "text-primary-ink" : "text-secondary-ink"
                   }`}
                 >
                   {recipe.is_archived ? "Réactiver" : "Archiver"}

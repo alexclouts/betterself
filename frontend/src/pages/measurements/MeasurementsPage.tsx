@@ -27,7 +27,7 @@ function formatDelta(delta: number): string {
 
 // Vert si le poids se rapproche de l'objectif, rouge s'il s'en éloigne.
 const TREND_CLASSES: Record<WeightTrend, string> = {
-  toward: "text-primary-dark dark:text-primary",
+  toward: "text-primary-ink",
   away: "text-danger",
   neutral: "text-muted",
 };

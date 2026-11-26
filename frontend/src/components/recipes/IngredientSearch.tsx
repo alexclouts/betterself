@@ -80,7 +80,7 @@ export function IngredientSearch({ excludedFoodIds, onPick, onBack }: Ingredient
       <h1>Ajouter un ingrédient</h1>
 
       {/* Barre de recherche collée sous l'en-tête : on peut chercher à nouveau sans remonter. */}
-      <div className="sticky top-14 z-30 -mx-4 mt-2 bg-[var(--bg)] px-4 py-2">
+      <div className="sticky top-[calc(3.5rem+var(--safe-top))] z-30 -mx-4 mt-2 bg-[var(--bg)] px-4 py-2">
         <Input
           type="search"
           value={query}

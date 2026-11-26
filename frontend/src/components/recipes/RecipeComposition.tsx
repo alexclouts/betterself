@@ -77,7 +77,7 @@ export function RecipeComposition({
         </ul>
       )}
 
-      <button type="button" onClick={onAdd} className="mt-1 text-sm font-semibold text-primary">
+      <button type="button" onClick={onAdd} className="mt-1 text-sm font-semibold text-primary-ink">
         + Ajouter un ingrédient
       </button>
     </section>

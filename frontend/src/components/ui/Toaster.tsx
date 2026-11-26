@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useToastStore, type Toast } from "../../stores/toastStore";
 
 const VARIANT_STYLES = {
-  success: { accent: "border-l-primary", icon: "✓", iconColor: "text-primary-dark" },
+  success: { accent: "border-l-primary", icon: "✓", iconColor: "text-primary-ink" },
   warning: { accent: "border-l-warning", icon: "⚠", iconColor: "text-warning" },
   error: { accent: "border-l-danger", icon: "!", iconColor: "text-danger" },
 } as const;
@@ -53,7 +53,7 @@ export function Toaster() {
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 top-4 z-50 mx-auto flex w-full max-w-md flex-col gap-2 px-4"
+      className="pointer-events-none fixed inset-x-0 top-[calc(1rem+var(--safe-top))] z-50 mx-auto flex w-full max-w-md flex-col gap-2 px-4"
     >
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} />

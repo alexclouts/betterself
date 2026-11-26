@@ -283,7 +283,7 @@ export function ProfilePage() {
       <button
         type="button"
         onClick={handleLogout}
-        className="mt-8 w-full rounded-full py-2 font-bold text-secondary hover:text-secondary-dark"
+        className="mt-8 w-full rounded-full py-2 font-bold text-secondary-ink hover:text-secondary-ink-hover"
       >
         Se déconnecter
       </button>

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useBlocker, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useBeforeUnload, useBlocker, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { RecipeRead } from "../../api/generated/recipeRead";
 import type { RecipeUpdate } from "../../api/generated/recipeUpdate";
@@ -72,6 +72,11 @@ function RecipeDetailsForm({ recipe }: { recipe: RecipeRead }) {
     ({ currentLocation, nextLocation }) =>
       isDirty && !isSavedRef.current && currentLocation.pathname !== nextLocation.pathname,
   );
+
+  // Recharger la page, fermer l'onglet ou quitter le site : avertissement du navigateur.
+  useBeforeUnload((event) => {
+    if (isDirty && !isSavedRef.current) event.preventDefault();
+  });
 
   const updateMutation = useMutation({
     mutationFn: (payload: RecipeUpdate) => recipeService.updateRecipe(recipe.id, payload),

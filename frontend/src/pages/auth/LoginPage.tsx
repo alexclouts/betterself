@@ -92,7 +92,7 @@ export function LoginPage() {
                     </Button>
 
                     <div className="flex justify-center">
-                        <p className="text-foreground">Pas encore de compte ? <a href="/register" className="text-primary font-bold">Créer un compte</a></p>
+                        <p className="text-foreground">Pas encore de compte ? <a href="/register" className="text-primary-ink font-bold">Créer un compte</a></p>
                     </div>
 
                 </form>
