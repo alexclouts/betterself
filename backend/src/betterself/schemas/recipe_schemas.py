@@ -135,11 +135,31 @@ class RecipeIngredientUpdate(BaseModel):
 Représentation d'un ingrédient de recette renvoyé par l'API.
 """
 class RecipeIngredientRead(BaseModel):
+    id: UUID
+    recipe_id: UUID
+    food: RecipeIngredientFoodRead = Field(
+        description="Aliment utilisé comme ingrédient.",
+    )
+    quantity_g: Decimal
+    nutrition: RecipeNutritionRead = Field(
+        description="Valeurs nutritionnelles pour la quantité de l'ingrédient.",
+    )
+    created_at: datetime
+    updated_at: datetime
+
+
+"""
+Aliment d'un ingrédient de recette, avec ses valeurs nutritionnelles
+pour sa quantité de référence. Évite une requête par aliment côté client.
+"""
+class RecipeIngredientFoodRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
-    recipe_id: UUID
-    food_id: UUID
-    quantity_g: Decimal
-    created_at: datetime
-    updated_at: datetime
+    name: str
+    brand: str | None
+    reference_weight_g: Decimal
+    calories_kcal: Decimal
+    protein_g: Decimal
+    carbohydrates_g: Decimal
+    fat_g: Decimal

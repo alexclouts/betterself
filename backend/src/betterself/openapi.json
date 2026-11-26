@@ -3721,6 +3721,62 @@
         ],
         "title": "RecipeIngredientCreate"
       },
+      "RecipeIngredientFoodRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "reference_weight_g": {
+            "type": "string",
+            "title": "Reference Weight G"
+          },
+          "calories_kcal": {
+            "type": "string",
+            "title": "Calories Kcal"
+          },
+          "protein_g": {
+            "type": "string",
+            "title": "Protein G"
+          },
+          "carbohydrates_g": {
+            "type": "string",
+            "title": "Carbohydrates G"
+          },
+          "fat_g": {
+            "type": "string",
+            "title": "Fat G"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "brand",
+          "reference_weight_g",
+          "calories_kcal",
+          "protein_g",
+          "carbohydrates_g",
+          "fat_g"
+        ],
+        "title": "RecipeIngredientFoodRead"
+      },
       "RecipeIngredientRead": {
         "properties": {
           "id": {
@@ -3733,14 +3789,17 @@
             "format": "uuid",
             "title": "Recipe Id"
           },
-          "food_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Food Id"
+          "food": {
+            "$ref": "#/components/schemas/RecipeIngredientFoodRead",
+            "description": "Aliment utilisé comme ingrédient."
           },
           "quantity_g": {
             "type": "string",
             "title": "Quantity G"
+          },
+          "nutrition": {
+            "$ref": "#/components/schemas/RecipeNutritionRead",
+            "description": "Valeurs nutritionnelles pour la quantité de l'ingrédient."
           },
           "created_at": {
             "type": "string",
@@ -3757,8 +3816,9 @@
         "required": [
           "id",
           "recipe_id",
-          "food_id",
+          "food",
           "quantity_g",
+          "nutrition",
           "created_at",
           "updated_at"
         ],

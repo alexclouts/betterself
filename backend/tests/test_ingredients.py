@@ -49,8 +49,14 @@ def test_create_recipe_ingredient_success(client):
 
     ingredient = response.json()
     assert ingredient["recipe_id"] == recipe["id"]
-    assert ingredient["food_id"] == food["id"]
+    assert ingredient["food"]["id"] == food["id"]
+    assert ingredient["food"]["name"] == food["name"]
     assert Decimal(ingredient["quantity_g"]) == Decimal("150.00")
+    # 150 g d'un aliment à 370 kcal / 20 g P / 50 g G / 10 g L par 100 g
+    assert Decimal(ingredient["nutrition"]["calories_kcal"]) == Decimal("555")
+    assert Decimal(ingredient["nutrition"]["protein_g"]) == Decimal("30")
+    assert Decimal(ingredient["nutrition"]["carbohydrates_g"]) == Decimal("75")
+    assert Decimal(ingredient["nutrition"]["fat_g"]) == Decimal("15")
 
 
 # Test pour vérifier que la création échoue sans authentification
@@ -239,7 +245,9 @@ def test_update_recipe_ingredient_success(client):
     ingredient = response.json()
     # Vérification que la quantité a bien été mise à jour
     assert Decimal(ingredient["quantity_g"]) == Decimal("200.00")
-    assert ingredient["food_id"] == food["id"]
+    assert ingredient["food"]["id"] == food["id"]
+    # La nutrition suit la nouvelle quantité.
+    assert Decimal(ingredient["nutrition"]["calories_kcal"]) == Decimal("740")
 
 
 # Test pour vérifier qu'une quantité invalide est refusée lors de la mise à jour
@@ -295,3 +303,44 @@ def test_delete_recipe_ingredient_success(client):
         headers=headers,
     )
     assert get_response.status_code == 404
+
+# Test pour vérifier que la recette expose ses ingrédients avec leur aliment et le total nutritionnel
+def test_recipe_includes_ingredient_food_and_total_nutrition(client):
+    headers = get_auth_headers(client)
+
+    recipe = create_recipe(client, headers)
+    yogurt = create_food(client, headers)
+    oats = create_food(
+        client,
+        headers,
+        name="Flocons d'avoine",
+        calories_kcal=380,
+        protein_g=13,
+        carbohydrates_g=60,
+        fat_g=7,
+    )
+    for food_id, quantity in ((yogurt["id"], 150), (oats["id"], 50)):
+        response = client.post(
+            ingredients_url(recipe["id"]),
+            json={"recipe_id": recipe["id"], "food_id": food_id, "quantity_g": quantity},
+            headers=headers,
+        )
+        assert response.status_code == 201
+
+    for response in (
+        client.get(f"{RECIPES_URL}/{recipe['id']}", headers=headers),
+        client.get(RECIPES_URL, headers=headers),
+    ):
+        assert response.status_code == 200
+        body = response.json()
+        detail = body[0] if isinstance(body, list) else body
+
+        names = {ingredient["food"]["name"] for ingredient in detail["ingredients"]}
+        assert names == {"Yogourt grec nature", "Flocons d'avoine"}
+
+        # 555 + 190 kcal; 30 + 6,5 g P; 75 + 30 g G; 15 + 3,5 g L
+        nutrition = detail["nutrition"]
+        assert Decimal(nutrition["calories_kcal"]) == Decimal("745")
+        assert Decimal(nutrition["protein_g"]) == Decimal("36.5")
+        assert Decimal(nutrition["carbohydrates_g"]) == Decimal("105")
+        assert Decimal(nutrition["fat_g"]) == Decimal("18.5")

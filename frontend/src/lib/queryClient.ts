@@ -32,6 +32,12 @@ export const queryKeys = {
     all: ["foods"] as const,
     search: (term: string) => ["foods", "search", term] as const,
   },
+  recipes: {
+    // Préfixe commun : invalider cette clé rafraîchit les listes et les détails.
+    all: ["recipes"] as const,
+    list: (includeArchived: boolean) => ["recipes", "list", { includeArchived }] as const,
+    detail: (recipeId: string) => ["recipes", "detail", recipeId] as const,
+  },
   currentTarget: ["nutrition-goal", "current-target"] as const,
   currentGoal: ["nutrition-goal", "current"] as const,
   profile: ["users", "me", "profile"] as const,
