@@ -206,7 +206,7 @@ export function WeightChart({ measurements, showData = true }: WeightChartProps)
 
       {showData && (
         <details className="mt-3 text-sm">
-          <summary className="cursor-pointer text-muted">Voir les données</summary>
+          <summary className="cursor-pointer font-bold text-foreground">Voir les données</summary>
           <table className="mt-2 w-full">
             <thead>
               <tr className="text-muted">

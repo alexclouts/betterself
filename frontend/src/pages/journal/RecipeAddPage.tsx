@@ -7,8 +7,7 @@ import { MealType } from "../../api/generated/mealType";
 import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 import { RecipeIngredientsDetails } from "../../components/recipes/RecipeIngredientsDetails";
 import Button from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
-import { SegmentedControl } from "../../components/ui/SegmentedControl";
+import { QuantityField } from "../../components/ui/QuantityField";
 import Select from "../../components/ui/Select";
 import { useRecipe } from "../../hooks/useRecipe";
 import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
@@ -41,8 +40,8 @@ const SNAPSHOT_TOLERANCE_KCAL = 1;
 type QuantityUnit = "servings" | "grams";
 
 const UNIT_OPTIONS = [
-  { value: "servings", label: "Portions" },
-  { value: "grams", label: "Grammes" },
+  { value: "servings", label: "portions" },
+  { value: "grams", label: "g" },
 ] as const;
 
 // L'API accepte au plus deux décimales.
@@ -261,37 +260,21 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <div className="flex items-baseline justify-between gap-3">
-            <label htmlFor="recipe-quantity" className="text-sm font-medium">
-              Quantité ({unit === "servings" ? "portions" : "g"})
-            </label>
-            {/* Choix de l'unité de saisie. */}
-            <SegmentedControl
-              label="Unité"
-              options={UNIT_OPTIONS}
-              value={unit}
-              onChange={changeUnit}
-            />
-          </div>
-          <Input
-            id="recipe-quantity"
-            type="text"
-            inputMode="decimal"
-            value={quantityInput}
-            onChange={(event) => setQuantityInput(event.target.value)}
-            className="mt-1"
-            aria-invalid={!isQuantityValid}
-          />
-          {!isQuantityValid && quantityInput.trim() !== "" && (
-            <span className="mt-1 block text-sm text-red-600">
-              {isPrecisionValid
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
+        <QuantityField
+          value={quantityInput}
+          onChange={setQuantityInput}
+          unit={unit}
+          units={UNIT_OPTIONS}
+          onUnitChange={changeUnit}
+          error={
+            !isQuantityValid && quantityInput.trim() !== ""
+              ? isPrecisionValid
                 ? `Entrez une quantité supérieure à 0 et d’au plus ${maxInUnit}.`
-                : "Entrez une quantité avec deux décimales au plus."}
-            </span>
-          )}
-        </div>
+                : "Entrez une quantité avec deux décimales au plus."
+              : null
+          }
+        />
 
         <label className="block">
           <span className="text-sm font-medium">Repas</span>

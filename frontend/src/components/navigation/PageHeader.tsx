@@ -1,21 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 // Hauteur de l'en-tête : un élément collé sous lui utilise `top-14`.
 export const PAGE_HEADER_HEIGHT_CLASS = "h-14";
-
-// Vrai dès que la page a défilé : l'en-tête affiche alors sa bordure.
-function useHasScrolled(): boolean {
-  const [hasScrolled, setHasScrolled] = useState(() => window.scrollY > 0);
-
-  useEffect(() => {
-    const onScroll = () => setHasScrolled(window.scrollY > 0);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return hasScrolled;
-}
 
 type PageHeaderProps = {
   onBack: () => void;
@@ -34,13 +20,9 @@ type PageHeaderProps = {
  * haut de l'écran et couvrir toute la largeur.
  */
 export function PageHeader({ onBack, backLabel = "Retour", title, action }: PageHeaderProps) {
-  const hasScrolled = useHasScrolled();
-
   return (
     <header
-      className={`sticky top-0 z-40 -mx-4 -mt-6 grid ${PAGE_HEADER_HEIGHT_CLASS} grid-cols-[auto_1fr_auto] items-center gap-2 border-b bg-[var(--bg)] px-2 transition-colors ${
-        hasScrolled ? "border-border" : "border-transparent"
-      }`}
+      className={`sticky top-0 z-40 -mx-4 -mt-6 grid ${PAGE_HEADER_HEIGHT_CLASS} grid-cols-[auto_1fr_auto] items-center gap-2 bg-[var(--bg)] px-2`}
     >
       <button
         type="button"

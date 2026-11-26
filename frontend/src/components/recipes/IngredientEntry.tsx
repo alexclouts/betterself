@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { NutritionFactsCard } from "../food/NutritionFactsCard";
 import Button from "../ui/Button";
-import Input from "../ui/Input";
 import { computeNutrientsForQuantity, formatNutrient } from "../../lib/food";
 import {
   formatQuantityInput,
@@ -10,6 +9,8 @@ import {
   type PickedFood,
 } from "../../lib/recipe";
 import { PageHeader } from "../navigation/PageHeader";
+import { QuantityField } from "../ui/QuantityField";
+import { GRAM_UNIT_OPTIONS } from "../../lib/units";
 
 type IngredientEntryProps = {
   food: PickedFood;
@@ -74,23 +75,14 @@ export function IngredientEntry({
       <NutritionFactsCard nutrients={nutrients} className="mt-6" />
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <label className="block">
-          <span className="text-sm font-medium">Quantité (g)</span>
-          <Input
-            type="text"
-            inputMode="decimal"
-            value={quantityInput}
-            onChange={(event) => setQuantityInput(event.target.value)}
-            className="mt-1"
-            aria-invalid={quantityError !== null}
-            autoFocus
-          />
-          {quantityError && quantityInput.trim() !== "" && (
-            <span className="mt-1 block text-sm text-danger">
-              {quantityError}
-            </span>
-          )}
-        </label>
+        <QuantityField
+          value={quantityInput}
+          onChange={setQuantityInput}
+          unit="grams"
+          units={GRAM_UNIT_OPTIONS}
+          error={quantityError && quantityInput.trim() !== "" ? quantityError : null}
+          autoFocus
+        />
 
         {error && (
           <p className="text-danger" role="alert">

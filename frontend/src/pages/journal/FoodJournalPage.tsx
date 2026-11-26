@@ -15,9 +15,12 @@ import {
 } from "../../lib/food";
 import { queryKeys } from "../../lib/queryClient";
 import { journalService } from "../../services/journalService";
+import { useHasScrolled } from "../../hooks/useHasScrolled";
 
 export function FoodJournalPage() {
   const navigate = useNavigate();
+  // La ligne sous la date n'apparaît qu'une fois la page défilée.
+  const hasScrolled = useHasScrolled();
   // Recherche des paramètres de l'URL pour déterminer la journée affichée.
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -103,7 +106,9 @@ export function FoodJournalPage() {
           avec les calories de la journée toujours visibles. Le fond couvre
           toute la largeur pour masquer le contenu qui passe dessous. */}
       <nav
-        className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-2 border-b border-border bg-[var(--bg)] px-4 py-2"
+        className={`sticky top-0 z-30 -mx-4 flex items-center justify-between gap-2 border-b bg-[var(--bg)] px-4 py-2 transition-colors ${
+          hasScrolled ? "border-border" : "border-transparent"
+        }`}
         aria-label="Choisir la journée"
       >
         <Button

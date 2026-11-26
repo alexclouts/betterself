@@ -7,6 +7,7 @@ import { useOnboarding } from "../../context/OnboardingContext";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import logo from "../../assets/logo.png";
 
 export function LoginPage() {
     // Navigation du routeur
@@ -60,8 +61,9 @@ export function LoginPage() {
             <Card className="w-full max-w-sm p-6 bg-surface">
                 <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
 
-                    <div className="flex flex-col gap-1">
-                        <h1>BetterSelf</h1>
+                    <div className="flex flex-col items-center gap-1">
+                        <img src={logo} alt="" className="h-28 w-28" />
+                        <h1 className="mt-0 font-semibold tracking-tight text-foreground">BetterSelf</h1>
                     </div>
 
                     <Input
@@ -90,7 +92,7 @@ export function LoginPage() {
                     </Button>
 
                     <div className="flex justify-center">
-                        <p>Pas encore de compte ? <a href="/register" className="text-primary font-bold">Créer un compte</a></p>
+                        <p className="text-foreground">Pas encore de compte ? <a href="/register" className="text-primary font-bold">Créer un compte</a></p>
                     </div>
 
                 </form>

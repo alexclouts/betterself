@@ -7,6 +7,7 @@ import { formatNutrient } from "../../lib/food";
 import { queryKeys } from "../../lib/queryClient";
 import { formatCount, perServing, recipeTotals } from "../../lib/recipe";
 import { recipeService } from "../../services/recipeService";
+import Button from "../../components/ui/Button";
 
 /*
  * Recettes de l'utilisateur. Une recette archivée disparaît des choix courants
@@ -59,7 +60,7 @@ export function RecipesPage() {
         <p className="mt-6">
           {showArchived
             ? "Aucune recette enregistrée pour l’instant."
-            : "Aucune recette active. Créez-en une avec le bouton +, puis « + Recette »."}
+            : "Aucune recette active. Créez-en une avec le bouton « Créer une recette »."}
         </p>
       ) : (
         <ul className="mt-6 divide-y divide-border text-left">
@@ -112,6 +113,12 @@ export function RecipesPage() {
             );
           })}
         </ul>
+      )}
+
+      {!isLoading && (
+        <Button className="mt-6 w-full font-bold" onClick={() => navigate("/recipes/new")}>
+          Créer une recette
+        </Button>
       )}
     </main>
   );

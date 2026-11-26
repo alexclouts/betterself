@@ -6,7 +6,7 @@ import { create } from "zustand";
  * Le store est global : un message ajouté juste avant une redirection
  * reste visible sur la page suivante.
  */
-export type ToastVariant = "success" | "warning";
+export type ToastVariant = "success" | "warning" | "error";
 
 export type Toast = {
   id: number;

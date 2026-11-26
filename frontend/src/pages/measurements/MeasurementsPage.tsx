@@ -11,6 +11,7 @@ import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
 import { weightTrend, type WeightTrend } from "../../lib/weightTrend";
 import { measurementService } from "../../services/measurementService";
+import { useToastStore } from "../../stores/toastStore";
 
 function formatWeight(value: number): string {
   return `${value.toLocaleString("fr-CA", { maximumFractionDigits: 2 })} kg`;
@@ -72,6 +73,13 @@ export function MeasurementsPage() {
   const isOnlyMeasurement = history.length <= 1;
 
   function handleDelete(measurement: MeasurementRead) {
+    if (isOnlyMeasurement) {
+      useToastStore.getState().showToast(
+        "Votre seule mesure ne peut pas être supprimée, puisqu’elle sert au calcul de votre cible. Vous pouvez la modifier.",
+        { variant: "error" },
+      );
+      return;
+    }
     const label = `${formatWeight(measurement.weight_kg)} le ${formatLongDate(measurement.date)}`;
     if (!window.confirm(`Supprimer la mesure de ${label} ?`)) {
       return;
@@ -158,9 +166,8 @@ export function MeasurementsPage() {
                   <button
                     type="button"
                     onClick={() => handleDelete(measurement)}
-                    disabled={isOnlyMeasurement || deletingId === measurement.id}
+                    disabled={deletingId === measurement.id}
                     aria-label={`Supprimer la mesure de ${label}`}
-                    title={isOnlyMeasurement ? "Votre seule mesure ne peut pas être supprimée." : undefined}
                     className="rounded-full px-3 py-1 text-muted hover:bg-surface-raised hover:text-danger disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted"
                   >
                     ✕
@@ -169,13 +176,6 @@ export function MeasurementsPage() {
               );
             })}
           </ul>
-
-          {isOnlyMeasurement && (
-            <p className="mt-4 text-sm text-muted">
-              Votre seule mesure ne peut pas être supprimée, puisqu’elle sert au calcul de votre
-              cible. Vous pouvez la modifier.
-            </p>
-          )}
         </>
       )}
     </main>

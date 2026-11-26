@@ -53,7 +53,7 @@ export function RecipeDetailsFields({ values, onChange }: RecipeDetailsFieldsPro
           onChange={(event) => setValue("description", event.target.value)}
           maxLength={2000}
           rows={3}
-          className="mt-1 w-full rounded-l border border-border bg-surface-raised p-3 outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/30"
+          className="mt-1 w-full rounded-l border border-border bg-field p-3 outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/30"
         />
       </label>
     </div>

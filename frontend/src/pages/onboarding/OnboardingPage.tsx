@@ -93,7 +93,7 @@ export function OnboardingPage() {
   }
 
   return (
-    <main className="onboarding-page">
+    <main className="onboarding-page mx-auto w-full max-w-md px-4 py-6">
       <header className="onboarding-header">
         <h1>Configuration de votre profil</h1>
 

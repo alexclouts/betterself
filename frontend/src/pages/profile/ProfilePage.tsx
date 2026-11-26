@@ -11,6 +11,7 @@ import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
+import { authService } from "../../services/authService";
 import { userService } from "../../services/userService";
 import { GoalSection } from "../../components/goal/GoalSection";
 import { PageHeader } from "../../components/navigation/PageHeader";
@@ -103,6 +104,11 @@ export function ProfilePage() {
 
   const profile = profileQuery.data;
   const loadError = profileQuery.error?.message ?? userQuery.error?.message ?? null;
+
+  function handleLogout() {
+    authService.logout();
+    navigate("/login", { replace: true });
+  }
 
   function startEditing() {
     if (!profile) return;
@@ -268,6 +274,15 @@ export function ProfilePage() {
           </Button>
 
           <GoalSection />
+
+          {/* En bas de page : action rare, à l'écart des modifications du profil. */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-8 w-full rounded-full py-2 font-bold text-secondary hover:text-secondary-dark"
+          >
+            Se déconnecter
+          </button>
         </>
       )}
     </main>

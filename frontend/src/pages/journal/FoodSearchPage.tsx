@@ -13,6 +13,7 @@ import { normalizeSearchText } from "../../lib/recipe";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { PageHeader } from "../../components/navigation/PageHeader";
+import { useHasScrolled } from "../../hooks/useHasScrolled";
 
 // Nombre minimal de caractères avant de lancer une recherche.
 const MIN_SEARCH_LENGTH = 2;
@@ -30,6 +31,7 @@ const HISTORY_RESULTS = 3;
 const RECIPE_RESULTS = 3;
 
 export function FoodSearchPage() {
+  const hasScrolled = useHasScrolled();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -140,7 +142,12 @@ export function FoodSearchPage() {
 
       {/* Recherche et raccourcis collés sous l'en-tête : scanner, créer un aliment
           ou une recette restent accessibles pendant le défilement des résultats. */}
-      <div className="sticky top-14 z-30 -mx-4 mt-2 border-b border-border bg-[var(--bg)] px-4 pt-2 pb-3">
+      {/* La ligne de séparation n'apparaît qu'une fois la page défilée. */}
+      <div
+        className={`sticky top-14 z-30 -mx-4 mt-2 border-b bg-[var(--bg)] px-4 pt-2 pb-3 transition-colors ${
+          hasScrolled ? "border-border" : "border-transparent"
+        }`}
+      >
         <Input
           type="search"
           value={query}
@@ -154,7 +161,7 @@ export function FoodSearchPage() {
           <button
             type="button"
             onClick={() => navigate("/journal/scan", { state: journalNavState })}
-            className="rounded-full border border-border bg-surface px-2 py-2 text-foreground hover:bg-surface-raised"
+            className="rounded-full bg-surface px-2 py-2 text-foreground hover:bg-surface-raised"
           >
             Scanner
           </button>
@@ -164,7 +171,7 @@ export function FoodSearchPage() {
               navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
             }
             aria-label="Créer un aliment"
-            className="rounded-full border border-border bg-surface px-2 py-2 text-primary hover:bg-surface-raised"
+            className="rounded-full bg-surface px-2 py-2 text-primary hover:bg-surface-raised"
           >
             + Aliment
           </button>
@@ -172,7 +179,7 @@ export function FoodSearchPage() {
             type="button"
             onClick={() => navigate("/recipes/new", { state: journalNavState })}
             aria-label="Créer une recette"
-            className="rounded-full border border-border bg-surface px-2 py-2 text-secondary hover:bg-surface-raised"
+            className="rounded-full bg-surface px-2 py-2 text-secondary hover:bg-surface-raised"
           >
             + Recette
           </button>

@@ -19,6 +19,7 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-field: var(--field);
 
 }
 
@@ -32,6 +33,8 @@
   --surface: #ffffff;
   --surface-raised: #F2F2F2;
   --surface-overlay: #ffffff;
+  /* Fond des champs de saisie : blanc sur le fond gris, pour le contraste. */
+  --field: #ffffff;
 
   --primary: #10b981;
   --primary-dark: #059669;
@@ -48,8 +51,9 @@
   --chart-actual: var(--primary-dark);
   --chart-plan: var(--secondary-dark);
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  /* Polices fournies par l'application (main.tsx) : Inter pour le texte, Poppins pour les titres. */
+  --sans: 'Inter Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: Poppins, system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -77,6 +81,7 @@
     --surface: #282828;
     --surface-raised: #353535;
     --surface-overlay: #262626;
+    --field: #353535;
     --border: #525252;
     --code-bg: #1f2028;
     --accent: #c084fc;
