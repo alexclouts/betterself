@@ -5,7 +5,6 @@ import Input from "../ui/Input";
 import { computeNutrientsForQuantity, formatNutrient } from "../../lib/food";
 import {
   formatQuantityInput,
-  MAX_WEIGHT_G,
   parseDecimal,
   validateWeight,
   type PickedFood,
@@ -85,7 +84,7 @@ export function IngredientEntry({
           />
           {quantityError && quantityInput.trim() !== "" && (
             <span className="mt-1 block text-sm text-danger">
-              Entrez une quantité entre 0 et {MAX_WEIGHT_G.toLocaleString("fr-CA")} g.
+              {quantityError}
             </span>
           )}
         </label>

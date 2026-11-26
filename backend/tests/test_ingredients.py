@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+import pytest
+
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
 from tests.api_helpers import create_food, create_recipe
 
@@ -396,3 +398,42 @@ def test_delete_last_recipe_ingredient_is_refused(client):
 
     recipe_response = client.get(f"{RECIPES_URL}/{recipe['id']}", headers=headers)
     assert len(recipe_response.json()["ingredients"]) == 1
+
+
+# Une quantité plus précise que NUMERIC(10, 2) est refusée à l'ajout.
+@pytest.mark.parametrize("quantity_g", ["0.001", "0.014"])
+def test_create_recipe_ingredient_rejects_quantity_over_two_decimals(client, quantity_g):
+    headers = get_auth_headers(client)
+
+    recipe = create_recipe(client, headers)
+    food = create_food(client, headers)
+
+    payload = valid_ingredient_payload(recipe["id"], food["id"])
+    payload["quantity_g"] = quantity_g
+
+    response = client.post(
+        ingredients_url(recipe["id"]),
+        json=payload,
+        headers=headers,
+    )
+    assert response.status_code == 422
+
+
+# Une quantité plus précise que NUMERIC(10, 2) est refusée à la modification.
+def test_update_recipe_ingredient_rejects_quantity_over_two_decimals(client):
+    headers = get_auth_headers(client)
+
+    recipe = create_recipe(client, headers)
+    food = create_food(client, headers)
+    ingredient = client.post(
+        ingredients_url(recipe["id"]),
+        json=valid_ingredient_payload(recipe["id"], food["id"]),
+        headers=headers,
+    ).json()
+
+    response = client.patch(
+        ingredient_url(recipe["id"], ingredient["id"]),
+        json={"quantity_g": "0.001"},
+        headers=headers,
+    )
+    assert response.status_code == 422

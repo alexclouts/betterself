@@ -27,6 +27,12 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
 };
 
 // Vérifie qu'une valeur reçue (URL, état de navigation) est un type de repas.
+// Les quantités sont enregistrées au centième de gramme (NUMERIC(10, 2)) :
+// l'API refuse une valeur plus précise.
+export function hasAtMostTwoDecimals(value: number): boolean {
+  return Number.isFinite(value) && Math.round(value * 100) / 100 === value;
+}
+
 // Propose un repas selon l'heure actuelle.
 export function getDefaultMealType(date = new Date()): MealType {
   const hour = date.getHours();

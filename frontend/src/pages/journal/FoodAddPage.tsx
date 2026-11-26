@@ -12,6 +12,7 @@ import {
   formatNutrient,
   getDefaultMealType,
   getDefaultQuantityG,
+  hasAtMostTwoDecimals,
   MEAL_TYPE_LABELS,
   toNumber,
 } from "../../lib/food"
@@ -132,7 +133,7 @@ export function FoodAddPage() {
 
   // Validation de la quantité saisie.
   const quantityG = Number(quantityInput.replace(",", "."));
-  const isQuantityValid = quantityInput.trim() !== "" && Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G;
+  const isQuantityValid = quantityInput.trim() !== "" && Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && hasAtMostTwoDecimals(quantityG);
 
   // Calcule les nutriments pour la quantité saisie.
   const nutrients = useMemo(() =>
@@ -243,7 +244,7 @@ export function FoodAddPage() {
           />
           {!isQuantityValid && quantityInput.trim() !== "" && (
             <span className="mt-1 block text-sm text-red-600">
-              Entrez une quantité entre 0 et {MAX_QUANTITY_G} g.
+              Entrez une quantité entre 0 et {MAX_QUANTITY_G} g, avec deux décimales au plus.
             </span>
           )}
         </label>

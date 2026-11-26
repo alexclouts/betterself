@@ -480,3 +480,33 @@ def test_delete_food_consumption_success(client):
         headers=headers,
     )
     assert get_response.status_code == 404
+
+
+# Une quantité plus précise que NUMERIC(10, 2) est refusée : 0,001 g deviendrait 0 en base.
+def test_create_consumption_rejects_quantity_over_two_decimals(client):
+    headers = get_auth_headers(client)
+    food = create_food(client, headers)
+
+    payload = food_consumption_payload(food["id"])
+    payload["quantity_g"] = "0.001"
+
+    response = client.post(CONSUMPTIONS_URL, json=payload, headers=headers)
+    assert response.status_code == 422
+
+
+# Même règle à la modification d'une consommation.
+def test_update_consumption_rejects_quantity_over_two_decimals(client):
+    headers = get_auth_headers(client)
+    food = create_food(client, headers)
+    consumption = client.post(
+        CONSUMPTIONS_URL,
+        json=food_consumption_payload(food["id"]),
+        headers=headers,
+    ).json()
+
+    response = client.patch(
+        consumption_url(consumption["id"]),
+        json={"quantity_g": "12.345"},
+        headers=headers,
+    )
+    assert response.status_code == 422

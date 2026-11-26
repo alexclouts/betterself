@@ -18,8 +18,11 @@ class RecipeIngredientInput(BaseModel):
     quantity_g: Decimal = Field(
         gt=0,
         le=100000,
+        # Même précision que la colonne NUMERIC(10, 2) : une valeur plus précise serait
+        # arrondie en base (0,001 g deviendrait 0) et faussait la somme des ingrédients.
+        decimal_places=2,
         examples=[150],
-        description="Quantité de l'aliment utilisée, en grammes.",
+        description="Quantité de l'aliment utilisée, en grammes (deux décimales au plus).",
     )
 
 
@@ -134,8 +137,11 @@ class RecipeIngredientCreate(BaseModel):
     quantity_g: Decimal = Field(
         gt=0,
         le=100000,
+        # Même précision que la colonne NUMERIC(10, 2) : une valeur plus précise serait
+        # arrondie en base (0,001 g deviendrait 0) et faussait la somme des ingrédients.
+        decimal_places=2,
         examples=[150],
-        description="Quantité de l'aliment utilisée, en grammes.",
+        description="Quantité de l'aliment utilisée, en grammes (deux décimales au plus).",
     )
 
 
@@ -146,7 +152,11 @@ class RecipeIngredientUpdate(BaseModel):
     quantity_g: Decimal = Field(
         gt=0,
         le=100000,
+        # Même précision que la colonne NUMERIC(10, 2) : une valeur plus précise serait
+        # arrondie en base (0,001 g deviendrait 0) et faussait la somme des ingrédients.
+        decimal_places=2,
         examples=[200],
+        description="Nouvelle quantité de l'aliment, en grammes (deux décimales au plus).",
     )
 
 

@@ -14,6 +14,7 @@ import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib
 import {
   formatNutrient,
   getDefaultMealType,
+  hasAtMostTwoDecimals,
   MEAL_TYPE_LABELS,
   toNumber,
   type FoodNutrients,
@@ -161,7 +162,11 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
   // La quantité saisie, toujours ramenée en grammes.
   const amount = parseDecimal(quantityInput);
   const quantityG = roundCents(unit === "servings" ? amount * portionG : amount);
-  const isQuantityValid = Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G;
+  // En grammes, la valeur saisie est envoyée telle quelle : deux décimales au plus.
+  // En portions, la conversion en grammes est arrondie au centième.
+  const isPrecisionValid = unit === "servings" || hasAtMostTwoDecimals(amount);
+  const isQuantityValid =
+    Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && isPrecisionValid;
   const isQuantityChanged = !entry || quantityG !== toNumber(entry.quantity_g);
 
   // Quantité inchangée : on montre ce qui est enregistré, même si la recette a changé depuis.
@@ -293,7 +298,9 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
           )}
           {!isQuantityValid && quantityInput.trim() !== "" && (
             <span className="mt-1 block text-sm text-red-600">
-              Entrez une quantité supérieure à 0 et d’au plus {maxInUnit}.
+              {isPrecisionValid
+                ? `Entrez une quantité supérieure à 0 et d’au plus ${maxInUnit}.`
+                : "Entrez une quantité avec deux décimales au plus."}
             </span>
           )}
         </div>

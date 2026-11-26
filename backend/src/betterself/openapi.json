@@ -2312,6 +2312,7 @@
               }
             ],
             "title": "Quantity G",
+            "description": "Quantité consommée, en grammes (deux décimales au plus).",
             "examples": [
               150
             ]
@@ -2477,7 +2478,8 @@
                 "type": "null"
               }
             ],
-            "title": "Quantity G"
+            "title": "Quantity G",
+            "description": "Nouvelle quantité consommée, en grammes (deux décimales au plus)."
           },
           "meal_type": {
             "anyOf": [
@@ -3699,7 +3701,7 @@
               }
             ],
             "title": "Quantity G",
-            "description": "Quantité de l'aliment utilisée, en grammes.",
+            "description": "Quantité de l'aliment utilisée, en grammes (deux décimales au plus).",
             "examples": [
               150
             ]
@@ -3788,7 +3790,7 @@
               }
             ],
             "title": "Quantity G",
-            "description": "Quantité de l'aliment utilisée, en grammes.",
+            "description": "Quantité de l'aliment utilisée, en grammes (deux décimales au plus).",
             "examples": [
               150
             ]
@@ -3862,6 +3864,7 @@
               }
             ],
             "title": "Quantity G",
+            "description": "Nouvelle quantité de l'aliment, en grammes (deux décimales au plus).",
             "examples": [
               200
             ]

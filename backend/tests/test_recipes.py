@@ -534,3 +534,44 @@ def test_delete_recipe_forbidden_for_other_user(client):
         headers=auth_headers(other_token),
     )
     assert delete_response.status_code == 404
+
+
+# Une quantité plus précise que NUMERIC(10, 2) est refusée : arrondie en base,
+# elle fausserait la somme des ingrédients (0,014 + 0,014 enregistrés 0,01 + 0,01,
+# mais un total de 0,03) ou deviendrait nulle (0,001).
+@pytest.mark.parametrize("quantity_g", ["0.001", "0.014", 12.345])
+def test_create_recipe_rejects_ingredient_quantity_over_two_decimals(client, quantity_g):
+    access_token = register_and_login(client)
+
+    payload = valid_recipe_payload(client, access_token)
+    payload["ingredients"][0]["quantity_g"] = quantity_g
+
+    response = client.post(
+        RECIPES_URL,
+        json=payload,
+        headers=auth_headers(access_token),
+    )
+    assert response.status_code == 422
+
+
+# Deux décimales (ou des zéros de fin) sont acceptées, et le poids total
+# est exactement la somme des quantités enregistrées.
+def test_create_recipe_total_weight_matches_two_decimal_quantities(client):
+    access_token = register_and_login(client)
+    headers = auth_headers(access_token)
+    first = create_food(client, headers, name="Sel")
+    second = create_food(client, headers, name="Poivre")
+
+    payload = valid_recipe_payload(client, access_token)
+    payload["ingredients"] = [
+        {"food_id": first["id"], "quantity_g": "0.01"},
+        {"food_id": second["id"], "quantity_g": "0.020"},
+    ]
+
+    response = client.post(RECIPES_URL, json=payload, headers=headers)
+    assert response.status_code == 201, response.text
+
+    recipe = response.json()
+    quantities = [Decimal(item["quantity_g"]) for item in recipe["ingredients"]]
+    assert sorted(quantities) == [Decimal("0.01"), Decimal("0.02")]
+    assert Decimal(recipe["total_weight_g"]) == Decimal("0.03")

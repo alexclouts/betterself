@@ -1,6 +1,6 @@
 import type { RecipeRead } from "../api/generated/recipeRead";
 import type { FoodRead } from "../api/generated/foodRead";
-import { toNumber, type FoodNutrients, type NutritionReference } from "./food";
+import { hasAtMostTwoDecimals, toNumber, type FoodNutrients, type NutritionReference } from "./food";
 
 // Aliment choisi comme ingrédient, avec ce qu'il faut pour calculer sa nutrition.
 export type PickedFood = NutritionReference &
@@ -22,6 +22,7 @@ export function validateWeight(value: string): string | null {
   if (!Number.isFinite(parsed)) return "Valeur invalide.";
   if (parsed <= 0) return "Doit être supérieur à 0.";
   if (parsed > MAX_WEIGHT_G) return `Maximum ${MAX_WEIGHT_G.toLocaleString("fr-CA")} g.`;
+  if (!hasAtMostTwoDecimals(parsed)) return "Deux décimales au plus.";
   return null;
 }
 
