@@ -276,16 +276,17 @@ export function ProfilePage() {
 
           <GoalSection />
 
-          {/* En bas de page : action rare, à l'écart des modifications du profil. */}
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-8 w-full rounded-full py-2 font-bold text-secondary hover:text-secondary-dark"
-          >
-            Se déconnecter
-          </button>
         </>
       )}
+
+      {/* La déconnexion reste disponible même si le profil ne peut pas être chargé. */}
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="mt-8 w-full rounded-full py-2 font-bold text-secondary hover:text-secondary-dark"
+      >
+        Se déconnecter
+      </button>
     </main>
   );
 }
