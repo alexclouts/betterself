@@ -19,8 +19,8 @@ const MIN_SEARCH_LENGTH = 2;
 // Délai sans frappe avant de lancer la recherche.
 const SEARCH_DELAY_MS = 300;
 
-// Nombre de résultats de recherche affichés avant « Afficher plus ».
-const VISIBLE_RESULTS = 10;
+// Nombre de résultats affichés avant « Afficher plus ».
+const VISIBLE_RESULTS = 3;
 
 // Nombre d'aliments de l'historique proposés tant que rien n'est recherché.
 const HISTORY_RESULTS = 3;

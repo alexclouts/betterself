@@ -137,6 +137,20 @@ export function IngredientSearch({ excludedFoodIds, onPick, onBack }: Ingredient
       )}
 
       {hasNoResults && <p className="mt-4">Aucun aliment trouvé pour « {searchTerm} ».</p>}
+
+      {visibleResults.some((food) => food.source === "open_food_facts") && (
+        <p className="mt-12 text-xs">
+          Contient des données d’
+          <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer" className="underline">
+            Open Food Facts
+          </a>
+          , offertes sous la licence{" "}
+          <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noreferrer" className="underline">
+            Open Database License (ODbL)
+          </a>
+          .
+        </p>
+      )}
     </>
   );
 }
