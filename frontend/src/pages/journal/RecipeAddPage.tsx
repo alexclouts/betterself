@@ -129,7 +129,7 @@ function initialQuantity(entry: FoodConsumptionRead, portionG: number): { unit: 
   const quantityG = toNumber(entry.quantity_g);
   if (portionG > 0) {
     const quarters = Math.round((quantityG / portionG) * 4);
-    if (quarters > 0 && Math.abs((quarters / 4) * portionG - quantityG) < 0.5) {
+    if (quarters > 0 && roundCents((quarters / 4) * portionG) === quantityG) {
       return { unit: "servings", input: formatQuantityInput(quarters / 4) };
     }
   }
