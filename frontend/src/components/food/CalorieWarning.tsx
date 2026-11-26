@@ -10,13 +10,13 @@ export function CalorieWarning({ className = "" }: { className?: string }) {
 
   return (
     <div className={`flex items-center justify-center gap-2 text-sm ${className}`}>
-      <span className="text-warning">Calories à vérifier sur l’emballage</span>
+      <span className="text-foreground">Calories à vérifier sur l’emballage</span>
       <button
         type="button"
         onClick={() => setIsOpen(true)}
         aria-haspopup="dialog"
         aria-label="Pourquoi vérifier les calories ?"
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-warning font-serif text-xs font-bold text-warning italic hover:bg-warning hover:text-white"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-warning font-serif text-xs font-bold text-foreground italic hover:bg-surface-raised"
       >
         i
       </button>
