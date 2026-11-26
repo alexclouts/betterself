@@ -11,6 +11,7 @@ import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
 import { measurementService } from "../../services/measurementService";
 import { PageHeader } from "../../components/navigation/PageHeader";
+import { RequiredMark } from "../../components/ui/RequiredMark";
 
 // Mêmes bornes que le backend (MeasurementCreate et contraintes de la table measurements).
 const MIN_WEIGHT_KG = 30; // exclu
@@ -159,7 +160,7 @@ function WeightForm({ measurement }: { measurement?: MeasurementRead }) {
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
       <label className="block">
-        <span className="text-sm font-medium">Date *</span>
+        <span className="text-sm font-medium">Date <RequiredMark /></span>
         <Input
           type="date"
           value={date}
@@ -174,7 +175,7 @@ function WeightForm({ measurement }: { measurement?: MeasurementRead }) {
       </label>
 
       <label className="block">
-        <span className="text-sm font-medium">Poids (kg) *</span>
+        <span className="text-sm font-medium">Poids (kg) <RequiredMark /></span>
         <Input
           type="text"
           inputMode="decimal"

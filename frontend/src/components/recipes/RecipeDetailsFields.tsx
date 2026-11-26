@@ -1,5 +1,6 @@
 import Input from "../ui/Input";
 import { validateServings, type RecipeDetailsValues } from "../../lib/recipe";
+import { RequiredMark } from "../ui/RequiredMark";
 
 type RecipeDetailsFieldsProps = {
   values: RecipeDetailsValues;
@@ -22,7 +23,7 @@ export function RecipeDetailsFields({ values, onChange }: RecipeDetailsFieldsPro
     <div className="space-y-4 text-left">
       <div className="grid grid-cols-[1fr_6rem] gap-3">
         <label className="block">
-          <span className="text-sm font-medium">Nom *</span>
+          <span className="text-sm font-medium">Nom <RequiredMark /></span>
           <Input
             value={values.name}
             onChange={(event) => setValue("name", event.target.value)}
@@ -33,7 +34,7 @@ export function RecipeDetailsFields({ values, onChange }: RecipeDetailsFieldsPro
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium">Portions *</span>
+          <span className="text-sm font-medium">Portions <RequiredMark /></span>
           <Input
             type="text"
             inputMode="numeric"

@@ -15,6 +15,7 @@ import { authService } from "../../services/authService";
 import { userService } from "../../services/userService";
 import { GoalSection } from "../../components/goal/GoalSection";
 import { PageHeader } from "../../components/navigation/PageHeader";
+import { RequiredMark } from "../../components/ui/RequiredMark";
 
 const SEX_LABELS: Record<Sex, string> = {
   male: "Homme",
@@ -194,7 +195,7 @@ export function ProfilePage() {
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium">Année de naissance *</span>
+            <span className="text-sm font-medium">Année de naissance <RequiredMark /></span>
             <Input
               type="text"
               inputMode="numeric"
@@ -210,7 +211,7 @@ export function ProfilePage() {
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium">Sexe *</span>
+            <span className="text-sm font-medium">Sexe <RequiredMark /></span>
             <Select
               value={form.sex}
               onChange={(event) => update("sex", event.target.value as Sex)}
@@ -223,7 +224,7 @@ export function ProfilePage() {
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium">Taille (cm) *</span>
+            <span className="text-sm font-medium">Taille (cm) <RequiredMark /></span>
             <Input
               type="text"
               inputMode="decimal"
@@ -239,7 +240,7 @@ export function ProfilePage() {
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium">Niveau d’activité *</span>
+            <span className="text-sm font-medium">Niveau d’activité <RequiredMark /></span>
             <Select
               value={form.activityLevel}
               onChange={(event) => update("activityLevel", event.target.value as ActivityLevel)}
