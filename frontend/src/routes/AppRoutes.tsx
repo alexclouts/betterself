@@ -11,7 +11,7 @@ import { FoodJournalPage } from "../pages/journal/FoodJournalPage";
 import { FoodSearchPage } from "../pages/journal/FoodSearchPage";
 import { FoodAddPage } from "../pages/journal/FoodAddPage";
 import { FoodCreatePage } from "../pages/journal/FoodCreatePage";
-import { RecipeAddPage } from "../pages/journal/RecipeAddPage";
+import { RecipeAddPage, RecipeEntryEditPage } from "../pages/journal/RecipeAddPage";
 import { BarcodeScanPage } from "../pages/journal/BarcodeScanPage";
 import { WeightEntryPage } from "../pages/measurements/WeightEntryPage";
 import { MeasurementsPage } from "../pages/measurements/MeasurementsPage";
@@ -44,6 +44,7 @@ export const router = createBrowserRouter(
                     <Route path="/journal/food/:id" element={<FoodAddPage />} />
                     <Route path="/journal/entry/:entryId" element={<FoodAddPage />} />
                     <Route path="/journal/recipe/:recipeId" element={<RecipeAddPage />} />
+                    <Route path="/journal/recipe-entry/:entryId" element={<RecipeEntryEditPage />} />
                     <Route path="/measurements" element={<MeasurementsPage />} />
                     <Route path="/measurements/new" element={<WeightEntryPage />} />
                     <Route path="/measurements/:measurementId/edit" element={<WeightEntryPage />} />

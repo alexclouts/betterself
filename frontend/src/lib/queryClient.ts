@@ -26,6 +26,7 @@ export const queryKeys = {
     // Préfixe commun : invalider cette clé rafraîchit toutes les journées.
     all: ["journal"] as const,
     day: (dayKey: string) => ["journal", "day", dayKey] as const,
+    entry: (entryId: string) => ["journal", "entry", entryId] as const,
   },
   foods: {
     // Préfixe commun : invalider cette clé rafraîchit toutes les recherches.

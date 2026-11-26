@@ -85,8 +85,12 @@ export function FoodAddPage() {
       if (entryId) {
         // Modification : charge l'entrée, puis l'aliment correspondant.
         const loadedEntry = entryFromState ?? (await journalService.getEntry(entryId));
+        // Une entrée de recette a sa propre page.
         if (!loadedEntry.food_id) {
-          throw new Error("Cette entrée provient d’une recette et ne peut pas être modifiée ici.");
+          if (!cancelled) {
+            navigate(`/journal/recipe-entry/${loadedEntry.id}`, { replace: true, state: { entry: loadedEntry } });
+          }
+          return;
         }
         const loadedFood = await foodService.getFood(loadedEntry.food_id);
 
@@ -124,7 +128,7 @@ export function FoodAddPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, entryId, food]);
+  }, [id, entryId, food, navigate]);
 
   // Validation de la quantité saisie.
   const quantityG = Number(quantityInput.replace(",", "."));
