@@ -65,6 +65,36 @@ class RecipeRepository:
         return self.db.scalar(query)
 
 
+    """
+    Récupère une recette en verrouillant sa ligne (SELECT ... FOR UPDATE) jusqu'à la fin
+    de la transaction, pour modifier ses ingrédients sans écriture concurrente.
+
+    Le verrou est pris avant de charger les ingrédients : la collection lue reflète
+    les écritures validées par une transaction concurrente qui détenait le verrou.
+    populate_existing remplace un éventuel état déjà chargé dans la session.
+    """
+    def get_for_user_for_update(
+        self,
+        user: User,
+        recipe_id: uuid.UUID,
+    ) -> Recipe | None:
+        query = (
+            select(Recipe)
+            .where(
+                Recipe.id == recipe_id,
+                Recipe.user_id == user.id,
+            )
+            .with_for_update(of=Recipe)
+            .options(
+                selectinload(Recipe.ingredients).selectinload(
+                    RecipeIngredient.food
+                ),
+            )
+            .execution_options(populate_existing=True)
+        )
+        return self.db.scalar(query)
+
+
     # Récupère un ingrédient spécifique pour une recette d'un utilisateur donné.
     def get_ingredient_for_user(
         self,
@@ -82,20 +112,6 @@ class RecipeRepository:
             )
         )
         return self.db.scalar(query)
-
-
-    # Vérifie si un ingrédient existe pour une recette donnée.
-    # Retourne True si l'ingrédient existe, False sinon.
-    def ingredient_exists(
-        self,
-        recipe_id: uuid.UUID,
-        food_id: uuid.UUID,
-    ) -> bool:
-        query = select(RecipeIngredient).where(
-            RecipeIngredient.recipe_id == recipe_id,
-            RecipeIngredient.food_id == food_id,
-        )
-        return self.db.scalar(query) is not None
 
 
     # Ajoute une nouvelle recette à la base de données.

@@ -161,7 +161,7 @@ class RecipeService:
         recipe_id: uuid.UUID,
         data: RecipeIngredientCreate,
     ) -> RecipeIngredientRead:
-        recipe = self._get_recipe_or_404(
+        recipe = self._lock_recipe_or_404(
             user=user,
             recipe_id=recipe_id,
         )
@@ -169,9 +169,9 @@ class RecipeService:
         food = self.food_repository.get_food_or_404(
             food_id=data.food_id,
         )
-        ingredient_exists = self.recipe_repository.ingredient_exists(
-            recipe_id=recipe.id,
-            food_id=data.food_id,
+        # La collection est à jour grâce au verrou : un ajout concurrent du même aliment est vu ici.
+        ingredient_exists = any(
+            ingredient.food_id == data.food_id for ingredient in recipe.ingredients
         )
 
         if ingredient_exists:
@@ -214,13 +214,13 @@ class RecipeService:
         ingredient_id: uuid.UUID,
         data: RecipeIngredientUpdate,
     ) -> RecipeIngredientRead:
-        ingredient = self._get_ingredient_or_404(
+        recipe = self._lock_recipe_or_404(
             user=user,
             recipe_id=recipe_id,
-            ingredient_id=ingredient_id,
         )
+        ingredient = self._find_ingredient_or_404(recipe, ingredient_id)
         ingredient.quantity_g = data.quantity_g
-        self._refresh_total_weight(ingredient.recipe)
+        self._refresh_total_weight(recipe)
         return self._to_ingredient_read(ingredient)
 
 
@@ -231,12 +231,11 @@ class RecipeService:
         recipe_id: uuid.UUID,
         ingredient_id: uuid.UUID,
     ) -> None:
-        ingredient = self._get_ingredient_or_404(
+        recipe = self._lock_recipe_or_404(
             user=user,
             recipe_id=recipe_id,
-            ingredient_id=ingredient_id,
         )
-        recipe = ingredient.recipe
+        ingredient = self._find_ingredient_or_404(recipe, ingredient_id)
         # Le poids total d'une recette doit rester supérieur à zéro.
         if len(recipe.ingredients) <= 1:
             raise RecipeWithoutIngredients(
@@ -274,6 +273,44 @@ class RecipeService:
                 "Aucune recette n'a été trouvée."
             )
         return recipe
+
+
+    """
+    Verrouille une recette de l'utilisateur et charge ses ingrédients, ou lève une erreur.
+
+    Toute écriture sur les ingrédients passe par ce verrou, conservé jusqu'au commit :
+    deux requêtes concurrentes sur la même recette s'exécutent l'une après l'autre.
+    Sinon, chacune calculerait le poids total à partir d'une collection périmée, et deux
+    suppressions pourraient toutes deux passer la vérification du dernier ingrédient.
+    """
+    def _lock_recipe_or_404(
+        self,
+        user: User,
+        recipe_id: uuid.UUID,
+    ) -> Recipe:
+        recipe = self.recipe_repository.get_for_user_for_update(
+            user=user,
+            recipe_id=recipe_id,
+        )
+        if recipe is None:
+            raise RecordNotFound(
+                "Aucune recette n'a été trouvée."
+            )
+        return recipe
+
+
+    # Cherche un ingrédient dans la collection d'une recette verrouillée.
+    def _find_ingredient_or_404(
+        self,
+        recipe: Recipe,
+        ingredient_id: uuid.UUID,
+    ) -> RecipeIngredient:
+        for ingredient in recipe.ingredients:
+            if ingredient.id == ingredient_id:
+                return ingredient
+        raise RecordNotFound(
+            "Aucun ingrédient de recette n'a été trouvé."
+        )
 
 
     # Récupère un ingrédient de recette pour l'utilisateur connecté ou lève une erreur si il n'existe pas.
