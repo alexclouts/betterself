@@ -103,7 +103,9 @@ function RecipeDetailsForm({ recipe }: { recipe: RecipeRead }) {
       <h1 className="break-words">Modifier la recette</h1>
 
       <form onSubmit={handleSubmit}>
-        <RecipeDetailsFields values={details} onChange={setDetails} />
+        <fieldset disabled={updateMutation.isPending} className="min-w-0">
+          <RecipeDetailsFields values={details} onChange={setDetails} />
+        </fieldset>
 
         {updateMutation.error && (
           <p className="mt-4 text-danger" role="alert">
