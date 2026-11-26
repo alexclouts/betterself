@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+import pytest
+
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
 from tests.api_helpers import create_food, create_recipe
 
@@ -308,7 +310,6 @@ def test_delete_recipe_ingredient_success(client):
 def test_recipe_includes_ingredient_food_and_total_nutrition(client):
     headers = get_auth_headers(client)
 
-    recipe = create_recipe(client, headers)
     yogurt = create_food(client, headers)
     oats = create_food(
         client,
@@ -319,13 +320,18 @@ def test_recipe_includes_ingredient_food_and_total_nutrition(client):
         carbohydrates_g=60,
         fat_g=7,
     )
-    for food_id, quantity in ((yogurt["id"], 150), (oats["id"], 50)):
-        response = client.post(
-            ingredients_url(recipe["id"]),
-            json={"recipe_id": recipe["id"], "food_id": food_id, "quantity_g": quantity},
-            headers=headers,
-        )
-        assert response.status_code == 201
+    # Le yogourt à la création, l'avoine ajoutée ensuite.
+    recipe = create_recipe(
+        client,
+        headers,
+        ingredients=[{"food_id": yogurt["id"], "quantity_g": 150}],
+    )
+    response = client.post(
+        ingredients_url(recipe["id"]),
+        json={"recipe_id": recipe["id"], "food_id": oats["id"], "quantity_g": 50},
+        headers=headers,
+    )
+    assert response.status_code == 201
 
     for response in (
         client.get(f"{RECIPES_URL}/{recipe['id']}", headers=headers),
@@ -344,3 +350,90 @@ def test_recipe_includes_ingredient_food_and_total_nutrition(client):
         assert Decimal(nutrition["protein_g"]) == Decimal("36.5")
         assert Decimal(nutrition["carbohydrates_g"]) == Decimal("105")
         assert Decimal(nutrition["fat_g"]) == Decimal("18.5")
+
+
+# Test pour vérifier que le poids total suit l'ajout, la modification et le retrait d'ingrédients
+def test_recipe_total_weight_follows_ingredients(client):
+    headers = get_auth_headers(client)
+
+    # La recette de base contient 800 g d'un aliment.
+    recipe = create_recipe(client, headers)
+    food = create_food(client, headers, name="Fromage")
+
+    def total_weight() -> Decimal:
+        response = client.get(f"{RECIPES_URL}/{recipe['id']}", headers=headers)
+        return Decimal(response.json()["total_weight_g"])
+
+    created = client.post(
+        ingredients_url(recipe["id"]),
+        json=valid_ingredient_payload(recipe["id"], food["id"]),
+        headers=headers,
+    ).json()
+    assert total_weight() == Decimal("950")
+
+    client.patch(
+        ingredient_url(recipe["id"], created["id"]),
+        json={"quantity_g": 100},
+        headers=headers,
+    )
+    assert total_weight() == Decimal("900")
+
+    response = client.delete(ingredient_url(recipe["id"], created["id"]), headers=headers)
+    assert response.status_code == 204
+    assert total_weight() == Decimal("800")
+
+
+# Test pour vérifier que le dernier ingrédient d'une recette ne peut pas être retiré
+def test_delete_last_recipe_ingredient_is_refused(client):
+    headers = get_auth_headers(client)
+
+    recipe = create_recipe(client, headers)
+    last_ingredient = recipe["ingredients"][0]
+
+    response = client.delete(
+        ingredient_url(recipe["id"], last_ingredient["id"]),
+        headers=headers,
+    )
+    assert response.status_code == 409
+
+    recipe_response = client.get(f"{RECIPES_URL}/{recipe['id']}", headers=headers)
+    assert len(recipe_response.json()["ingredients"]) == 1
+
+
+# Une quantité plus précise que NUMERIC(10, 2) est refusée à l'ajout.
+@pytest.mark.parametrize("quantity_g", ["0.001", "0.014"])
+def test_create_recipe_ingredient_rejects_quantity_over_two_decimals(client, quantity_g):
+    headers = get_auth_headers(client)
+
+    recipe = create_recipe(client, headers)
+    food = create_food(client, headers)
+
+    payload = valid_ingredient_payload(recipe["id"], food["id"])
+    payload["quantity_g"] = quantity_g
+
+    response = client.post(
+        ingredients_url(recipe["id"]),
+        json=payload,
+        headers=headers,
+    )
+    assert response.status_code == 422
+
+
+# Une quantité plus précise que NUMERIC(10, 2) est refusée à la modification.
+def test_update_recipe_ingredient_rejects_quantity_over_two_decimals(client):
+    headers = get_auth_headers(client)
+
+    recipe = create_recipe(client, headers)
+    food = create_food(client, headers)
+    ingredient = client.post(
+        ingredients_url(recipe["id"]),
+        json=valid_ingredient_payload(recipe["id"], food["id"]),
+        headers=headers,
+    ).json()
+
+    response = client.patch(
+        ingredient_url(recipe["id"], ingredient["id"]),
+        json={"quantity_g": "0.001"},
+        headers=headers,
+    )
+    assert response.status_code == 422

@@ -160,7 +160,7 @@ Contient les informations générales d’une recette. Une recette archivée res
 | `user_id`        | UUID                   | Clé étrangère vers `users.id`, propriétaire |
 | `name`           | VARCHAR(255)           | Nom obligatoire                             |
 | `description`    | TEXT, nullable         | Description ou instructions                 |
-| `total_weight_g` | NUMERIC(10,2)          | Poids préparé, supérieur à zéro             |
+| `total_weight_g` | NUMERIC(10,2)          | Somme des quantités des ingrédients, calculée par l’API; supérieur à zéro |
 | `servings`       | NUMERIC(6,2), nullable | Nombre de portions, si renseigné            |
 | `is_archived`    | BOOLEAN                | Masquer des choix courants sans supprimer   |
 | `created_at`     | TIMESTAMPTZ            | Date de création                            |
@@ -177,6 +177,8 @@ Table de liaison entre les recettes et les aliments. Elle permet à une recette 
 | `food_id`    | UUID          | Clé étrangère vers `foods.id`, obligatoire       |
 | `quantity_g` | NUMERIC(10,2) | Quantité utilisée, strictement supérieure à zéro |
 | `created_at` | TIMESTAMPTZ   | Date d’ajout                                     |
+
+Une recette est créée avec au moins un ingrédient, et son dernier ingrédient ne peut pas être retiré : `total_weight_g` reste ainsi supérieur à zéro. L’API le recalcule à chaque ajout, modification ou retrait d’ingrédient.
 
 La suppression d’une recette entraînera la suppression des lignes d’ingrédients en cascade. Pour cette raison, l'archivage est une option plus sûr. Un aliment ne devrait pas être supprimé physiquement sans traiter les recettes qui le référencent non plus.
 

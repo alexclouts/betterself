@@ -82,12 +82,9 @@ export function FoodJournalPage() {
 
   // Ouvre le détail d'une entrée du journal.
   function handleOpen(entry: FoodConsumptionRead) {
-    console.log(entry);
-
-    if (!entry.food_id) 
-      return;
-
-    navigate(`/journal/entry/${entry.id}`, { state: { entry } });
+    // Une entrée provient d'un aliment ou d'une recette, chacun avec sa page.
+    const path = entry.recipe_id ? `/journal/recipe-entry/${entry.id}` : `/journal/entry/${entry.id}`;
+    navigate(path, { state: { entry } });
   }
 
   // Supprime une entrée du journal, après confirmation.
@@ -182,15 +179,13 @@ export function FoodJournalPage() {
                   <ul className="divide-y divide-border">
                     {mealEntries.map((entry) => (
                       <li key={entry.id} className="flex items-center gap-3 py-3">
-                        {/* Un clic ouvre la page de l'aliment pour modifier l'entrée
-                            (les entrées de recettes ne sont pas modifiables ici). */}
+                        {/* Un clic ouvre la page de l'aliment ou de la recette pour modifier l'entrée. */}
                         <button
                           type="button"
                           onClick={() => {
                             handleOpen(entry);
                           }}
-                          disabled={!entry.food_id}
-                          className="min-w-0 flex-1 rounded-lg px-2 py-1 hover:bg-surface-raised disabled:cursor-default disabled:hover:bg-transparent"
+                          className="min-w-0 flex-1 rounded-lg px-2 py-1 hover:bg-surface-raised"
                         >
                           <span className="block truncate text-foreground">
                             {entry.item_name_snapshot}

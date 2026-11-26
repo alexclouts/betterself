@@ -11,7 +11,7 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 from betterself.core.database import get_db
-from betterself.core.exceptions import DuplicateRecord, RecordNotFound
+from betterself.core.exceptions import DuplicateRecord, RecipeWithoutIngredients, RecordNotFound
 from betterself.schemas.recipe_schemas import (
     RecipeArchiveUpdate,
     RecipeCreate,
@@ -81,10 +81,16 @@ def create_recipe(
     current_user: User = Depends(get_current_user),
     service: RecipeService = Depends(get_recipe_service),
 ):
-    return service.create_recipe(
-        user=current_user,
-        data=data,
-    )
+    try:
+        return service.create_recipe(
+            user=current_user,
+            data=data,
+        )
+    except RecordNotFound as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        )
 
 
 # Fonction pour récupérer une recette par son identifiant
@@ -279,6 +285,11 @@ def delete_recipe_ingredient(
     except RecordNotFound as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        )
+    except RecipeWithoutIngredients as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(error),
         )
     return Response(status_code=status.HTTP_204_NO_CONTENT)

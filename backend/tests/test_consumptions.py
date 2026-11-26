@@ -370,6 +370,66 @@ def test_update_food_consumption_meal_type(client):
     assert consumption["meal_type"] == "lunch"
 
 
+# Test pour vérifier que modifier la quantité d'une recette recalcule
+# l'instantané au prorata du poids total de la recette
+def test_update_recipe_consumption_recalculates_nutrition(client):
+    headers = get_auth_headers(client)
+    recipe = create_recipe(client, headers)
+
+    creation_response = client.post(
+        CONSUMPTIONS_URL,
+        json=recipe_consumption_payload(recipe["id"]),
+        headers=headers,
+    )
+    assert creation_response.status_code == 201, creation_response.text
+    created_consumption = creation_response.json()
+
+    response = client.patch(
+        consumption_url(created_consumption["id"]),
+        json={"quantity_g": 400, "meal_type": "dinner"},
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+
+    consumption = response.json()
+    assert consumption["recipe_id"] == recipe["id"]
+    assert consumption["meal_type"] == "dinner"
+    assert Decimal(consumption["quantity_g"]) == Decimal("400.00")
+
+    # 400 g d'une recette de `total_weight_g` grammes.
+    ratio = Decimal("400") / Decimal(recipe["total_weight_g"])
+    for field in ("calories_kcal", "protein_g", "carbohydrates_g", "fat_g"):
+        expected = Decimal(recipe["nutrition"][field]) * ratio
+        assert abs(Decimal(consumption[field]) - expected) <= Decimal("0.01"), field
+
+
+# Test pour vérifier que changer seulement le repas d'une recette
+# conserve l'instantané nutritionnel
+def test_update_recipe_consumption_meal_type_keeps_snapshot(client):
+    headers = get_auth_headers(client)
+    recipe = create_recipe(client, headers)
+
+    created_consumption = client.post(
+        CONSUMPTIONS_URL,
+        json=recipe_consumption_payload(recipe["id"]),
+        headers=headers,
+    ).json()
+
+    response = client.patch(
+        consumption_url(created_consumption["id"]),
+        json={"meal_type": "snack"},
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+
+    consumption = response.json()
+    assert consumption["meal_type"] == "snack"
+    for field in ("quantity_g", "calories_kcal", "protein_g", "carbohydrates_g", "fat_g"):
+        # La réponse de création n'est pas encore arrondie comme la colonne (2 décimales).
+        cent = Decimal("0.01")
+        assert Decimal(consumption[field]) == Decimal(created_consumption[field]).quantize(cent), field
+
+
 # Test pour vérifier qu'un utilisateur ne peut pas modifier
 # la consommation d'un autre utilisateur
 def test_update_food_consumption_forbidden_for_other_user(client):
@@ -420,3 +480,33 @@ def test_delete_food_consumption_success(client):
         headers=headers,
     )
     assert get_response.status_code == 404
+
+
+# Une quantité plus précise que NUMERIC(10, 2) est refusée : 0,001 g deviendrait 0 en base.
+def test_create_consumption_rejects_quantity_over_two_decimals(client):
+    headers = get_auth_headers(client)
+    food = create_food(client, headers)
+
+    payload = food_consumption_payload(food["id"])
+    payload["quantity_g"] = "0.001"
+
+    response = client.post(CONSUMPTIONS_URL, json=payload, headers=headers)
+    assert response.status_code == 422
+
+
+# Même règle à la modification d'une consommation.
+def test_update_consumption_rejects_quantity_over_two_decimals(client):
+    headers = get_auth_headers(client)
+    food = create_food(client, headers)
+    consumption = client.post(
+        CONSUMPTIONS_URL,
+        json=food_consumption_payload(food["id"]),
+        headers=headers,
+    ).json()
+
+    response = client.patch(
+        consumption_url(consumption["id"]),
+        json={"quantity_g": "12.345"},
+        headers=headers,
+    )
+    assert response.status_code == 422

@@ -17,7 +17,11 @@ class FoodConsumptionCreate(BaseModel):
     quantity_g: Decimal = Field(
         gt=0,
         le=5000,
+        # Même précision que la colonne NUMERIC(10, 2) : une valeur plus précise serait
+        # arrondie en base (0,001 g deviendrait 0 et violerait quantity_g > 0).
+        decimal_places=2,
         examples=[150],
+        description="Quantité consommée, en grammes (deux décimales au plus).",
     )
 
     meal_type: MealType
@@ -62,6 +66,10 @@ class FoodConsumptionUpdate(BaseModel):
         default=None,
         gt=0,
         le=100000,
+        # Même précision que la colonne NUMERIC(10, 2) : une valeur plus précise serait
+        # arrondie en base (0,001 g deviendrait 0 et violerait quantity_g > 0).
+        decimal_places=2,
+        description="Nouvelle quantité consommée, en grammes (deux décimales au plus).",
     )
     meal_type: MealType | None = None
     consumed_at: datetime | None = None

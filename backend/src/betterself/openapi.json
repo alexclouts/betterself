@@ -2312,6 +2312,7 @@
               }
             ],
             "title": "Quantity G",
+            "description": "Quantité consommée, en grammes (deux décimales au plus).",
             "examples": [
               150
             ]
@@ -2477,7 +2478,8 @@
                 "type": "null"
               }
             ],
-            "title": "Quantity G"
+            "title": "Quantity G",
+            "description": "Nouvelle quantité consommée, en grammes (deux décimales au plus)."
           },
           "meal_type": {
             "anyOf": [
@@ -2540,13 +2542,13 @@
           "description": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 2000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 2000,
             "title": "Description"
           },
           "category": {
@@ -2940,13 +2942,13 @@
           "description": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 2000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 2000,
             "title": "Description"
           }
         },
@@ -3636,33 +3638,16 @@
           "description": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 2000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 2000,
             "title": "Description",
             "examples": [
               "Faire cuire le riz, puis ajouter le poulet et les légumes."
-            ]
-          },
-          "total_weight_g": {
-            "anyOf": [
-              {
-                "type": "number",
-                "maximum": 100000.0,
-                "exclusiveMinimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Total Weight G",
-            "description": "Poids total de la recette préparée, en grammes.",
-            "examples": [
-              800
             ]
           },
           "servings": {
@@ -3673,13 +3658,22 @@
             "examples": [
               6
             ]
+          },
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/RecipeIngredientInput"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Ingredients",
+            "description": "Ingrédients de la recette; au moins un, sans aliment en double."
           }
         },
         "type": "object",
         "required": [
           "name",
-          "total_weight_g",
-          "servings"
+          "servings",
+          "ingredients"
         ],
         "title": "RecipeCreate"
       },
@@ -3707,7 +3701,7 @@
               }
             ],
             "title": "Quantity G",
-            "description": "Quantité de l'aliment utilisée, en grammes.",
+            "description": "Quantité de l'aliment utilisée, en grammes (deux décimales au plus).",
             "examples": [
               150
             ]
@@ -3777,6 +3771,38 @@
         ],
         "title": "RecipeIngredientFoodRead"
       },
+      "RecipeIngredientInput": {
+        "properties": {
+          "food_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Food Id"
+          },
+          "quantity_g": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantity G",
+            "description": "Quantité de l'aliment utilisée, en grammes (deux décimales au plus).",
+            "examples": [
+              150
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "food_id",
+          "quantity_g"
+        ],
+        "title": "RecipeIngredientInput"
+      },
       "RecipeIngredientRead": {
         "properties": {
           "id": {
@@ -3838,6 +3864,7 @@
               }
             ],
             "title": "Quantity G",
+            "description": "Nouvelle quantité de l'aliment, en grammes (deux décimales au plus).",
             "examples": [
               200
             ]
@@ -3906,7 +3933,8 @@
           },
           "total_weight_g": {
             "type": "string",
-            "title": "Total Weight G"
+            "title": "Total Weight G",
+            "description": "Poids total de la recette : somme des quantités des ingrédients, en grammes."
           },
           "servings": {
             "type": "integer",
@@ -3975,30 +4003,14 @@
           "description": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 2000
               },
               {
                 "type": "null"
               }
             ],
-            "maxLength": 2000,
             "title": "Description"
-          },
-          "total_weight_g": {
-            "anyOf": [
-              {
-                "type": "number",
-                "maximum": 100000.0,
-                "exclusiveMinimum": 0.0
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total Weight G"
           },
           "servings": {
             "anyOf": [

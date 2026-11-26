@@ -7,6 +7,9 @@ import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { FoodResultItem } from "../../components/journal/FoodResultItem";
+import { RecipeResultItem } from "../../components/journal/RecipeResultItem";
+import { useRecipes } from "../../hooks/useRecipes";
+import { normalizeSearchText } from "../../lib/recipe";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 
@@ -18,6 +21,12 @@ const SEARCH_DELAY_MS = 300;
 
 // Nombre de résultats affichés avant « Afficher plus ».
 const VISIBLE_RESULTS = 3;
+
+// Nombre d'aliments de l'historique proposés tant que rien n'est recherché.
+const HISTORY_RESULTS = 3;
+
+// Nombre de recettes proposées, avec ou sans recherche.
+const RECIPE_RESULTS = 3;
 
 export function FoodSearchPage() {
   const navigate = useNavigate();
@@ -68,8 +77,13 @@ export function FoodSearchPage() {
   const [expandedTerm, setExpandedTerm] = useState<string | null>(null);
 
   const results = searchQuery.data?.results ?? [];
-  const visibleResults = expandedTerm === apiTerm ? results : results.slice(0, VISIBLE_RESULTS);
-  const hiddenCount = results.length - visibleResults.length;
+  // Sans recherche, seuls les derniers aliments de l'historique sont proposés, sans « Afficher plus ».
+  const visibleResults = !isSearching
+    ? results.slice(0, HISTORY_RESULTS)
+    : expandedTerm === apiTerm
+      ? results
+      : results.slice(0, VISIBLE_RESULTS);
+  const hiddenCount = isSearching ? results.length - visibleResults.length : 0;
   const isLoading = isSearching && searchQuery.isFetching;
   const error = searchQuery.error?.message ?? null;
   const hasCurrentResults = searchQuery.isSuccess && !searchQuery.isPlaceholderData;
@@ -77,6 +91,32 @@ export function FoodSearchPage() {
   // « Aucun résultat » seulement quand la réponse du terme en cours est arrivée.
   const hasNoResults = isSearching && hasCurrentResults && results.length === 0;
   const isCatalogUnavailable = hasCurrentResults && !searchQuery.data.catalog_available;
+
+  // Recettes actives : les plus récentes sans recherche, sinon celles dont le nom correspond.
+  const { recipes } = useRecipes();
+  const normalizedTerm = normalizeSearchText(searchTerm);
+  const visibleRecipes = (
+    isSearching
+      ? recipes.filter((recipe) => normalizeSearchText(recipe.name).includes(normalizedTerm))
+      : recipes
+  ).slice(0, RECIPE_RESULTS);
+
+  const recipeSection = visibleRecipes.length > 0 && (
+    <>
+      <h2 id="recipes-heading" className="mt-6 mb-2 text-left text-xl">
+        Mes recettes
+      </h2>
+      <ul aria-labelledby="recipes-heading" className="divide-y divide-border overflow-hidden bg-surface">
+        {visibleRecipes.map((recipe) => (
+          <RecipeResultItem
+            key={recipe.id}
+            recipe={recipe}
+            onSelect={() => navigate(`/journal/recipe/${recipe.id}`, { state: journalNavState })}
+          />
+        ))}
+      </ul>
+    </>
+  );
 
   // L'attribution est exigée dès qu'une donnée d'Open Food Facts est affichée.
   const needsAttribution = visibleResults.some((food) => food.source === "open_food_facts");
@@ -139,10 +179,25 @@ export function FoodSearchPage() {
         </p>
       )}
 
+      {isSearching && recipeSection}
+
+      {!isSearching && results.length > 0 && (
+        <h2 id="history-heading" className="mt-6 mb-2 text-left text-xl">
+          Historique
+        </h2>
+      )}
+
+      {/* Les aliments suivent les recettes : un titre les sépare. */}
+      {isSearching && visibleRecipes.length > 0 && results.length > 0 && (
+        <h2 className="mt-6 mb-2 text-left text-xl">Aliments</h2>
+      )}
+
       {results.length > 0 && (
         <ul
-          aria-label={isSearching ? "Résultats de la recherche" : "Aliments récents"}
-          className="mt-6 divide-y divide-border overflow-hidden bg-surface"
+          {...(isSearching
+            ? { "aria-label": "Résultats de la recherche" }
+            : { "aria-labelledby": "history-heading" })}
+          className={`${isSearching && visibleRecipes.length === 0 ? "mt-6" : ""} divide-y divide-border overflow-hidden bg-surface`}
         >
           {visibleResults.map((food) => (
             <FoodResultItem
@@ -157,6 +212,8 @@ export function FoodSearchPage() {
           ))}
         </ul>
       )}
+
+      {!isSearching && recipeSection}
 
       {hiddenCount > 0 && (
         <Button
@@ -181,15 +238,26 @@ export function FoodSearchPage() {
         </p>
       )}
 
+      {/* Deux boutons de même largeur sur une rangée. */}
+      <div className="mt-6 grid grid-cols-2 gap-2">
         <Button
           type="button"
           onClick={() =>
             navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
           }
-          className="mt-6 w-full py-3 text-primary font-bold"
+          className="w-full py-3 text-primary font-bold"
         >
           + Créer un aliment
         </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => navigate("/recipes/new", { state: journalNavState })}
+          className="w-full py-3 font-bold"
+        >
+          + Créer une recette
+        </Button>
+      </div>
 
       {/* Attribution exigée par la licence ODbL. */}
       {needsAttribution && (

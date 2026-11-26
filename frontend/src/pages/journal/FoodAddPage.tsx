@@ -10,7 +10,9 @@ import Select from "../../components/ui/Select";
 import {
   computeNutrientsForQuantity,
   formatNutrient,
+  getDefaultMealType,
   getDefaultQuantityG,
+  hasAtMostTwoDecimals,
   MEAL_TYPE_LABELS,
   toNumber,
 } from "../../lib/food"
@@ -20,24 +22,9 @@ import { journalService } from "../../services/journalService";
 import { queryKeys } from "../../lib/queryClient";
 import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
 import { journalUrl, readJournalNavState } from "../../lib/journal";
-import Card from "../../components/ui/Card";
+import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 
 const MAX_QUANTITY_G = 5000;
-
-// Propose un repas selon l'heure actuelle.
-function getDefaultMealType(date = new Date()): MealType {
-  const hour = date.getHours();
-  
-  if (hour < 10) 
-    return MealType.breakfast;
-  if (hour < 14) 
-    return MealType.lunch;
-  if (hour >= 17 && hour < 21) 
-    return MealType.dinner;
-
-  return MealType.snack;
-}
-
 
 export function FoodAddPage() {
   /*
@@ -99,8 +86,12 @@ export function FoodAddPage() {
       if (entryId) {
         // Modification : charge l'entrée, puis l'aliment correspondant.
         const loadedEntry = entryFromState ?? (await journalService.getEntry(entryId));
+        // Une entrée de recette a sa propre page.
         if (!loadedEntry.food_id) {
-          throw new Error("Cette entrée provient d’une recette et ne peut pas être modifiée ici.");
+          if (!cancelled) {
+            navigate(`/journal/recipe-entry/${loadedEntry.id}`, { replace: true, state: { entry: loadedEntry } });
+          }
+          return;
         }
         const loadedFood = await foodService.getFood(loadedEntry.food_id);
 
@@ -138,11 +129,11 @@ export function FoodAddPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, entryId, food]);
+  }, [id, entryId, food, navigate]);
 
   // Validation de la quantité saisie.
   const quantityG = Number(quantityInput.replace(",", "."));
-  const isQuantityValid = quantityInput.trim() !== "" && Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G;
+  const isQuantityValid = quantityInput.trim() !== "" && Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && hasAtMostTwoDecimals(quantityG);
 
   // Calcule les nutriments pour la quantité saisie.
   const nutrients = useMemo(() =>
@@ -232,28 +223,7 @@ export function FoodAddPage() {
           ? `Portion suggérée : ${formatNutrient(food.serving_g)} g`
           : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
       </p>
-      <Card className="w-full p-6 mt-6 bg-surface">
-        <dl className="grid grid-cols-3 gap-3">
-          <div className="col-span-3">
-            <dt>Calories</dt>
-            <dd className="text-2xl font-semibold mb-4">
-              {nutrients ? formatNutrient(nutrients.calories_kcal, 0) : "–"} kcal
-            </dd>
-          </div>
-          <div>
-            <dt>Protéines</dt>
-            <dd>{nutrients ? formatNutrient(nutrients.protein_g) : "–"} g</dd>
-          </div>
-          <div>
-            <dt>Glucides</dt>
-            <dd>{nutrients ? formatNutrient(nutrients.carbohydrates_g) : "–"} g</dd>
-          </div>
-          <div>
-            <dt>Lipides</dt>
-            <dd>{nutrients ? formatNutrient(nutrients.fat_g) : "–"} g</dd>
-          </div>
-        </dl>
-      </Card>
+      <NutritionFactsCard nutrients={nutrients} className="mt-6" />
       {dayKey !== todayKey() && (
         <p className="mt-1">
           {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}
@@ -274,7 +244,7 @@ export function FoodAddPage() {
           />
           {!isQuantityValid && quantityInput.trim() !== "" && (
             <span className="mt-1 block text-sm text-red-600">
-              Entrez une quantité entre 0 et {MAX_QUANTITY_G} g.
+              Entrez une quantité entre 0 et {MAX_QUANTITY_G} g, avec deux décimales au plus.
             </span>
           )}
         </label>

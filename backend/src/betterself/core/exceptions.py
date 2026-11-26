@@ -8,6 +8,12 @@ class DuplicateRecord(Exception):
         self.message = message
         super().__init__(self.message)
 
+# L'opération laisserait une recette sans ingrédient.
+class RecipeWithoutIngredients(Exception):
+    def __init__(self, message="Une recette doit contenir au moins un ingrédient."):
+        self.message = message
+        super().__init__(self.message)
+
 # Le catalogue Open Food Facts est absent ou illisible.
 class CatalogUnavailable(Exception):
     def __init__(self, message="Le catalogue Open Food Facts est indisponible"):

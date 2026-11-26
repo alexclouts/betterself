@@ -1,12 +1,12 @@
 import { OnboardingProvider } from "./context/OnboardingContext";
-import { AppRoutes } from "./routes/AppRoutes";
+import { Outlet } from "react-router-dom";
 import { Toaster } from "./components/ui/Toaster";
 
-// Composant principal de l'application BetterSelf.
+// Mise en page commune à toutes les routes de BetterSelf.
 function App() {
   return (
     <OnboardingProvider>
-      <AppRoutes />
+      <Outlet />
       {/* Pop-ups temporaires, visibles sur toutes les pages. */}
       <Toaster />
     </OnboardingProvider>

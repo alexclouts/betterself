@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from betterself.core.exceptions import (
     DuplicateRecord,
+    RecipeWithoutIngredients,
     RecordNotFound,
 )
 from betterself.repos.food_repo import FoodRepository
@@ -63,19 +64,36 @@ class RecipeService:
         return self._to_recipe_read(recipe)
 
 
-    # Crée une nouvelle recette pour l'utilisateur connecté.
+    # Crée une nouvelle recette et ses ingrédients pour l'utilisateur connecté.
+    # Le poids total est la somme des quantités des ingrédients.
     def create_recipe(
         self,
         user: User,
         data: RecipeCreate,
     ) -> RecipeRead:
+        # Vérifie que chaque aliment existe avant de créer quoi que ce soit.
+        for ingredient in data.ingredients:
+            self.food_repository.get_food_or_404(
+                food_id=ingredient.food_id,
+            )
+
         recipe = Recipe(
             user_id=user.id,
             name=data.name,
             description=data.description,
-            total_weight_g=data.total_weight_g,
+            total_weight_g=sum(
+                (ingredient.quantity_g for ingredient in data.ingredients),
+                Decimal("0"),
+            ),
             servings=data.servings,
             is_archived=False,
+            ingredients=[
+                RecipeIngredient(
+                    food_id=ingredient.food_id,
+                    quantity_g=ingredient.quantity_g,
+                )
+                for ingredient in data.ingredients
+            ],
         )
         recipe = self.recipe_repository.add(recipe)
 
@@ -143,7 +161,7 @@ class RecipeService:
         recipe_id: uuid.UUID,
         data: RecipeIngredientCreate,
     ) -> RecipeIngredientRead:
-        recipe = self._get_recipe_or_404(
+        recipe = self._lock_recipe_or_404(
             user=user,
             recipe_id=recipe_id,
         )
@@ -151,9 +169,9 @@ class RecipeService:
         food = self.food_repository.get_food_or_404(
             food_id=data.food_id,
         )
-        ingredient_exists = self.recipe_repository.ingredient_exists(
-            recipe_id=recipe.id,
-            food_id=data.food_id,
+        # La collection est à jour grâce au verrou : un ajout concurrent du même aliment est vu ici.
+        ingredient_exists = any(
+            ingredient.food_id == data.food_id for ingredient in recipe.ingredients
         )
 
         if ingredient_exists:
@@ -162,12 +180,14 @@ class RecipeService:
             )
 
         ingredient = RecipeIngredient(
-            recipe_id=recipe.id,
             food_id=data.food_id,
             quantity_g=data.quantity_g,
         )
-        ingredient = self.recipe_repository.add_ingredient(ingredient)
         ingredient.food = food
+        # Passer par la collection garde recipe.ingredients à jour pour le calcul du poids.
+        recipe.ingredients.append(ingredient)
+        ingredient = self.recipe_repository.add_ingredient(ingredient)
+        self._refresh_total_weight(recipe)
         return self._to_ingredient_read(ingredient)
 
 
@@ -194,12 +214,13 @@ class RecipeService:
         ingredient_id: uuid.UUID,
         data: RecipeIngredientUpdate,
     ) -> RecipeIngredientRead:
-        ingredient = self._get_ingredient_or_404(
+        recipe = self._lock_recipe_or_404(
             user=user,
             recipe_id=recipe_id,
-            ingredient_id=ingredient_id,
         )
+        ingredient = self._find_ingredient_or_404(recipe, ingredient_id)
         ingredient.quantity_g = data.quantity_g
+        self._refresh_total_weight(recipe)
         return self._to_ingredient_read(ingredient)
 
 
@@ -210,12 +231,31 @@ class RecipeService:
         recipe_id: uuid.UUID,
         ingredient_id: uuid.UUID,
     ) -> None:
-        ingredient = self._get_ingredient_or_404(
+        recipe = self._lock_recipe_or_404(
             user=user,
             recipe_id=recipe_id,
-            ingredient_id=ingredient_id,
         )
+        ingredient = self._find_ingredient_or_404(recipe, ingredient_id)
+        # Le poids total d'une recette doit rester supérieur à zéro.
+        if len(recipe.ingredients) <= 1:
+            raise RecipeWithoutIngredients(
+                "Le dernier ingrédient d'une recette ne peut pas être retiré."
+            )
+        # Retirer de la collection supprime l'ingrédient (delete-orphan).
+        recipe.ingredients.remove(ingredient)
         self.recipe_repository.delete_ingredient(ingredient)
+        self._refresh_total_weight(recipe)
+
+
+    # Recalcule le poids total d'une recette à partir de ses ingrédients.
+    def _refresh_total_weight(
+        self,
+        recipe: Recipe,
+    ) -> None:
+        recipe.total_weight_g = sum(
+            (ingredient.quantity_g for ingredient in recipe.ingredients),
+            Decimal("0"),
+        )
 
 
     # Récupère une recette pour l'utilisateur connecté ou lève une erreur si elle n'existe pas.
@@ -233,6 +273,44 @@ class RecipeService:
                 "Aucune recette n'a été trouvée."
             )
         return recipe
+
+
+    """
+    Verrouille une recette de l'utilisateur et charge ses ingrédients, ou lève une erreur.
+
+    Toute écriture sur les ingrédients passe par ce verrou, conservé jusqu'au commit :
+    deux requêtes concurrentes sur la même recette s'exécutent l'une après l'autre.
+    Sinon, chacune calculerait le poids total à partir d'une collection périmée, et deux
+    suppressions pourraient toutes deux passer la vérification du dernier ingrédient.
+    """
+    def _lock_recipe_or_404(
+        self,
+        user: User,
+        recipe_id: uuid.UUID,
+    ) -> Recipe:
+        recipe = self.recipe_repository.get_for_user_for_update(
+            user=user,
+            recipe_id=recipe_id,
+        )
+        if recipe is None:
+            raise RecordNotFound(
+                "Aucune recette n'a été trouvée."
+            )
+        return recipe
+
+
+    # Cherche un ingrédient dans la collection d'une recette verrouillée.
+    def _find_ingredient_or_404(
+        self,
+        recipe: Recipe,
+        ingredient_id: uuid.UUID,
+    ) -> RecipeIngredient:
+        for ingredient in recipe.ingredients:
+            if ingredient.id == ingredient_id:
+                return ingredient
+        raise RecordNotFound(
+            "Aucun ingrédient de recette n'a été trouvé."
+        )
 
 
     # Récupère un ingrédient de recette pour l'utilisateur connecté ou lève une erreur si il n'existe pas.

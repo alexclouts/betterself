@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getErrorMessage } from "../api/axios";
 import { getFoodConsumptions } from "../api/generated/endpoints/food-consumptions/food-consumptions";
+import type { FoodConsumptionCreate } from "../api/generated/foodConsumptionCreate";
 import type { FoodConsumptionRead } from "../api/generated/foodConsumptionRead";
 import type { FoodConsumptionUpdate } from "../api/generated/foodConsumptionUpdate";
 import type { GoalTargetRead } from "../api/generated/goalTargetRead";
@@ -36,6 +37,19 @@ export const journalService = {
         } catch (error) {
             throw new Error(
                 getErrorMessage(error, "Impossible de charger cette entrée.")
+            );
+        }
+    },
+
+    // Ajoute une consommation (aliment ou recette) ; l'API calcule les nutriments.
+    async addEntry(payload: FoodConsumptionCreate): Promise<FoodConsumptionRead> {
+        try {
+            const { createFoodConsumptionFoodConsumptionsPost } = getFoodConsumptions();
+            return await createFoodConsumptionFoodConsumptionsPost(payload);
+        } catch (error) {
+            throw new Error(
+                getErrorMessage(error, "Impossible d’ajouter cette entrée au journal."),
+                { cause: error },
             );
         }
     },
