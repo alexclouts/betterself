@@ -80,17 +80,21 @@ export function IngredientSearch({ excludedFoodIds, onPick, onBack }: Ingredient
 
       <h1>Ajouter un ingrédient</h1>
 
-      <Input
-        type="search"
-        value={query}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setIsExpanded(false);
-        }}
-        placeholder="Rechercher un aliment"
-        className="mt-4 w-full border px-4 py-3"
-        autoFocus
-      />
+      {/* Barre de recherche collée en haut : on peut chercher à nouveau sans remonter. */}
+      <div className="sticky top-0 z-30 -mx-4 mt-2 bg-[var(--bg)] px-4 py-2">
+        <Input
+          type="search"
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setIsExpanded(false);
+          }}
+          placeholder="Rechercher un aliment"
+          aria-label="Rechercher un aliment"
+          className="w-full border px-4 py-3"
+          autoFocus
+        />
+      </div>
 
       {isSearching && searchQuery.isFetching && <p className="mt-4">Recherche…</p>}
 

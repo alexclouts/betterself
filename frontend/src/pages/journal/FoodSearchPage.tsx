@@ -144,13 +144,17 @@ export function FoodSearchPage() {
         Ajouter un aliment
       </h1>
 
-      <Input
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Rechercher un aliment"
-        className="mt-4 w-full border px-4 py-3"
-      />
+      {/* Barre de recherche collée en haut : on peut chercher à nouveau sans remonter. */}
+      <div className="sticky top-0 z-30 -mx-4 mt-2 bg-[var(--bg)] px-4 py-2">
+        <Input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Rechercher un aliment"
+          aria-label="Rechercher un aliment"
+          className="w-full border px-4 py-3"
+        />
+      </div>
 
       <Button
         type="button"

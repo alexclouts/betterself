@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { MeasurementRead } from "../../api/generated/measurementRead";
+import { WeightChart } from "../../components/measurements/WeightChart";
 import Button from "../../components/ui/Button";
+import Card from "../../components/ui/Card";
 import { useCurrentGoal } from "../../hooks/useCurrentGoal";
 import { useMeasurements } from "../../hooks/useMeasurements";
 import { formatLongDate } from "../../lib/date";
@@ -44,7 +46,7 @@ const TREND_LABELS: Record<WeightTrend, string | undefined> = {
 export function MeasurementsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { history, isLoading, error: loadError } = useMeasurements();
+  const { measurements, history, isLoading, error: loadError } = useMeasurements();
   // Sans objectif (ou en cas d'erreur), les variations restent en gris.
   const { goal } = useCurrentGoal();
 
@@ -101,7 +103,18 @@ export function MeasurementsPage() {
         <p className="mt-6">Aucune mesure enregistrée pour l’instant.</p>
       ) : (
         <>
-          <ul className="mt-6 divide-y divide-border text-left">
+          {/* Même courbe que l'accueil (une mesure par jour), au-dessus de l'historique détaillé. */}
+          <section className="mt-6" aria-labelledby="weight-chart-heading">
+            <Card className="w-full bg-surface">
+              <h2 id="weight-chart-heading" className="mt-0 mb-2 text-left text-xl">
+                Mon poids
+              </h2>
+              <WeightChart measurements={measurements} />
+            </Card>
+          </section>
+
+          <h2 className="mt-8 mb-0 text-left text-xl">Historique</h2>
+          <ul className="mt-2 divide-y divide-border text-left">
             {history.map((measurement, index) => {
               // La liste va de la plus récente à la plus ancienne : la précédente est la suivante.
               const previous = history[index + 1];

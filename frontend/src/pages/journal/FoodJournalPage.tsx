@@ -99,8 +99,13 @@ export function FoodJournalPage() {
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
       <h1>Journal alimentaire</h1>
 
-      {/* Navigation entre les journées */}
-      <nav className="flex items-center justify-between gap-2" aria-label="Choisir la journée">
+      {/* Navigation entre les journées, collée en haut pendant le défilement,
+          avec les calories de la journée toujours visibles. Le fond couvre
+          toute la largeur pour masquer le contenu qui passe dessous. */}
+      <nav
+        className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-2 border-b border-border bg-[var(--bg)] px-4 py-2"
+        aria-label="Choisir la journée"
+      >
         <Button
           type="button"
           variant="ghost"
@@ -112,6 +117,12 @@ export function FoodJournalPage() {
 
         <div className="text-center">
           <strong className="block text-lg text-foreground">{formatDayLabel(dayKey)}</strong>
+          {!isLoading && (
+            <span className="block text-sm text-muted">
+              {formatNutrient(totals.calories_kcal, 0)}
+              {target ? ` / ${formatNutrient(target.calories_target_kcal, 0)}` : ""} kcal
+            </span>
+          )}
           {!isToday && (
             <button
               type="button"
