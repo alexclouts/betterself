@@ -161,8 +161,22 @@ export function FoodSearchPage() {
           <button
             type="button"
             onClick={() => navigate("/journal/scan", { state: journalNavState })}
-            className="rounded-full bg-surface px-2 py-2 text-foreground hover:bg-surface-raised"
+            className="flex items-center justify-center gap-1.5 rounded-full bg-surface px-2 py-2 text-foreground hover:bg-surface-raised"
           >
+            {/* Code-barres dans un cadre de visée. */}
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+              <path d="M7 8v8M10 8v8M13 8v8M17 8v8" />
+            </svg>
             Scanner
           </button>
           <button
