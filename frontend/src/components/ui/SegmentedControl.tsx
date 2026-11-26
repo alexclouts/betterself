@@ -4,7 +4,7 @@ type SegmentedControlProps<T extends string> = {
   options: readonly { value: T; label: string }[];
   value: T;
   onChange: (value: T) => void;
-  // Couleur de l'option choisie.
+  // Couleur de l'option choisie (secondaire par défaut, pour tous les boutons à bascule).
   color?: "primary" | "secondary";
   className?: string;
 };
@@ -15,7 +15,7 @@ export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
-  color = "primary",
+  color = "secondary",
   className = "",
 }: SegmentedControlProps<T>) {
   const selectedClass = color === "secondary" ? "bg-secondary text-white" : "bg-primary text-white";

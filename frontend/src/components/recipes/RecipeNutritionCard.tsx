@@ -39,7 +39,6 @@ export function RecipeNutritionCard({ totals, servings, totalWeightG }: RecipeNu
         options={SCOPE_OPTIONS}
         value={scope}
         onChange={setScope}
-        color="secondary"
       />
 
       {/* Annoncé aux lecteurs d'écran quand on change de vue. */}

@@ -268,7 +268,12 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
               Quantité ({unit === "servings" ? "portions" : "g"})
             </label>
             {/* Choix de l'unité de saisie. */}
-            <SegmentedControl label="Unité" options={UNIT_OPTIONS} value={unit} onChange={changeUnit} />
+            <SegmentedControl
+              label="Unité"
+              options={UNIT_OPTIONS}
+              value={unit}
+              onChange={changeUnit}
+            />
           </div>
           <Input
             id="recipe-quantity"
@@ -279,9 +284,6 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
             className="mt-1"
             aria-invalid={!isQuantityValid}
           />
-          {isQuantityValid && unit === "servings" && (
-            <span className="mt-1 block text-sm text-muted">{formatNutrient(quantityG, 0)} g</span>
-          )}
           {!isQuantityValid && quantityInput.trim() !== "" && (
             <span className="mt-1 block text-sm text-red-600">
               {isPrecisionValid
