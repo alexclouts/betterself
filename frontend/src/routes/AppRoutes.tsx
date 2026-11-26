@@ -1,5 +1,6 @@
 // src/routes/AppRoutes.tsx
-import { Route, Routes } from "react-router-dom";
+import { createBrowserRouter, createRoutesFromElements, Route } from "react-router-dom";
+import App from "../App";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { ProtectedRoute } from "../routes/ProtectedRoutes";
@@ -19,9 +20,13 @@ import { RecipesPage } from "../pages/recipes/RecipesPage";
 import { RecipeNewPage } from "../pages/recipes/RecipeNewPage";
 import { RecipeEditPage } from "../pages/recipes/RecipeEditPage";
 
-export function AppRoutes() {
-    return (
-        <Routes>
+/*
+ * Routeur de données : nécessaire pour useBlocker (confirmation avant de
+ * quitter un formulaire non enregistré). App sert de mise en page commune.
+ */
+export const router = createBrowserRouter(
+    createRoutesFromElements(
+        <Route element={<App />}>
             {/* Route publique pour la page de connexion */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -49,6 +54,6 @@ export function AppRoutes() {
                 </Route>
                 
             </Route>
-        </Routes>
-    );
-}
+        </Route>
+    )
+);

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useMemo, useRef, useState } from "react";
+import { useBeforeUnload, useBlocker, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { RecipeCreate } from "../../api/generated/recipeCreate";
 import { IngredientEntry } from "../../components/recipes/IngredientEntry";
@@ -8,6 +8,7 @@ import { RecipeComposition } from "../../components/recipes/RecipeComposition";
 import { RecipeDetailsFields } from "../../components/recipes/RecipeDetailsFields";
 import { RecipeNutritionCard } from "../../components/recipes/RecipeNutritionCard";
 import Button from "../../components/ui/Button";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { useIngredientFlow } from "../../hooks/useIngredientFlow";
 import { computeNutrientsForQuantity, getDefaultQuantityG } from "../../lib/food";
 import { readJournalNavState } from "../../lib/journal";
@@ -55,9 +56,29 @@ export function RecipeNewPage() {
   );
   const totalWeightG = ingredients.reduce((total, ingredient) => total + ingredient.quantityG, 0);
 
+  // Le brouillon contient quelque chose qui serait perdu en quittant la page.
+  const hasDraft =
+    details.name.trim() !== "" || details.description.trim() !== "" || ingredients.length > 0;
+  // Une fois la recette créée, la redirection vers sa page ne doit pas être bloquée.
+  const isCreatedRef = useRef(false);
+
+  // Quitter la page (bouton retour du téléphone, lien…) demande une confirmation.
+  // Les écrans internes (recherche, fiche d'ingrédient) gardent le même chemin
+  // et ne sont pas bloqués.
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasDraft && !isCreatedRef.current && currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  // Fermer ou recharger l'onglet : avertissement du navigateur.
+  useBeforeUnload((event) => {
+    if (hasDraft && !isCreatedRef.current) event.preventDefault();
+  });
+
   const createMutation = useMutation({
     mutationFn: (payload: RecipeCreate) => recipeService.createRecipe(payload),
     onSuccess: (recipe) => {
+      isCreatedRef.current = true;
       void queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
       queryClient.setQueryData(queryKeys.recipes.detail(recipe.id), recipe);
       navigate(`/recipes/${recipe.id}`, { replace: true, state: journalNavState });
@@ -97,6 +118,18 @@ export function RecipeNewPage() {
     });
   }
 
+  const leaveDialog = (
+    <ConfirmDialog
+      open={blocker.state === "blocked"}
+      title="Quitter sans enregistrer ?"
+      message="La recette n’a pas été créée. Son nom et ses ingrédients seront perdus."
+      confirmLabel="Quitter"
+      cancelLabel="Continuer"
+      onConfirm={() => blocker.proceed?.()}
+      onCancel={() => blocker.reset?.()}
+    />
+  );
+
   if (view.kind === "search") {
     return (
       <main className="mx-auto w-full max-w-md px-4 py-6">
@@ -105,6 +138,7 @@ export function RecipeNewPage() {
           onPick={(food) => showEntry(food, getDefaultQuantityG(food))}
           onBack={showRecipe}
         />
+        {leaveDialog}
       </main>
     );
   }
@@ -120,6 +154,7 @@ export function RecipeNewPage() {
           // Nouvel ingrédient : retour à la recherche, comme dans le journal.
           onBack={view.key !== undefined ? showRecipe : showSearch}
         />
+        {leaveDialog}
       </main>
     );
   }
@@ -174,6 +209,7 @@ export function RecipeNewPage() {
           <p className="mt-2 text-center text-sm text-muted">Ajoutez au moins un ingrédient.</p>
         )}
       </form>
+      {leaveDialog}
     </main>
   );
 }
