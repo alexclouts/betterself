@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { RecipeRead } from "../../api/generated/recipeRead";
 import type { RecipeUpdate } from "../../api/generated/recipeUpdate";
@@ -12,6 +12,7 @@ import Button from "../../components/ui/Button";
 import { useIngredientFlow } from "../../hooks/useIngredientFlow";
 import { useRecipe } from "../../hooks/useRecipe";
 import { getDefaultQuantityG, toNumber } from "../../lib/food";
+import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
 import {
   areDetailsValid,
@@ -56,6 +57,9 @@ export function RecipeEditPage() {
 function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  // Repas et journée choisis dans le journal, si l'on arrive de « Créer une recette ».
+  const journalNavState = readJournalNavState(location.state);
   const { view, showRecipe, showSearch, showEntry } = useIngredientFlow();
   const [details, setDetails] = useState<RecipeDetailsValues>({
     name: recipe.name,
@@ -169,6 +173,17 @@ function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
         servings={recipe.servings}
         totalWeightG={toNumber(recipe.total_weight_g)}
       />
+
+      {/* Une recette archivée n'est plus proposée pour le journal. */}
+      {!recipe.is_archived && (
+        <Button
+          type="button"
+          onClick={() => navigate(`/journal/recipe/${recipe.id}`, { state: journalNavState })}
+          className="mt-4 w-full font-bold"
+        >
+          Ajouter au journal
+        </Button>
+      )}
 
       <div className="mt-8">
         <RecipeComposition

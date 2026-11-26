@@ -10,6 +10,7 @@ import Select from "../../components/ui/Select";
 import {
   computeNutrientsForQuantity,
   formatNutrient,
+  getDefaultMealType,
   getDefaultQuantityG,
   MEAL_TYPE_LABELS,
   toNumber,
@@ -23,21 +24,6 @@ import { journalUrl, readJournalNavState } from "../../lib/journal";
 import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 
 const MAX_QUANTITY_G = 5000;
-
-// Propose un repas selon l'heure actuelle.
-function getDefaultMealType(date = new Date()): MealType {
-  const hour = date.getHours();
-  
-  if (hour < 10) 
-    return MealType.breakfast;
-  if (hour < 14) 
-    return MealType.lunch;
-  if (hour >= 17 && hour < 21) 
-    return MealType.dinner;
-
-  return MealType.snack;
-}
-
 
 export function FoodAddPage() {
   /*

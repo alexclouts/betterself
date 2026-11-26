@@ -27,6 +27,17 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
 };
 
 // Vérifie qu'une valeur reçue (URL, état de navigation) est un type de repas.
+// Propose un repas selon l'heure actuelle.
+export function getDefaultMealType(date = new Date()): MealType {
+  const hour = date.getHours();
+
+  if (hour < 10) return MealType.breakfast;
+  if (hour < 14) return MealType.lunch;
+  if (hour >= 17 && hour < 21) return MealType.dinner;
+
+  return MealType.snack;
+}
+
 export function isMealType(value: unknown): value is MealType {
   return typeof value === "string" && (MEAL_TYPE_ORDER as string[]).includes(value);
 }

@@ -92,3 +92,26 @@ export function recipeTotals(recipe: RecipeRead): FoodNutrients {
     fat_g: toNumber(recipe.nutrition.fat_g),
   };
 }
+
+// Poids d'une portion d'une recette enregistrée.
+export function servingWeightG(recipe: RecipeRead): number {
+  return recipe.servings > 0 ? toNumber(recipe.total_weight_g) / recipe.servings : 0;
+}
+
+// Valeurs nutritionnelles d'une quantité (g) d'une recette, au prorata de son poids total.
+export function recipeNutrientsForQuantity(recipe: RecipeRead, quantityG: number): FoodNutrients {
+  const totalWeight = toNumber(recipe.total_weight_g);
+  const ratio = totalWeight > 0 ? quantityG / totalWeight : 0;
+  const totals = recipeTotals(recipe);
+  return {
+    calories_kcal: totals.calories_kcal * ratio,
+    protein_g: totals.protein_g * ratio,
+    carbohydrates_g: totals.carbohydrates_g * ratio,
+    fat_g: totals.fat_g * ratio,
+  };
+}
+
+// Compare des noms sans tenir compte des majuscules ni des accents.
+export function normalizeSearchText(value: string): string {
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+}
