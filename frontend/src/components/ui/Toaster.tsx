@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useToastStore, type Toast } from "../../stores/toastStore";
 
+const VARIANT_STYLES = {
+  success: { accent: "border-l-primary", icon: "✓", iconColor: "text-primary-ink" },
+  warning: { accent: "border-l-warning", icon: "⚠", iconColor: "text-warning" },
+  error: { accent: "border-l-danger", icon: "!", iconColor: "text-danger" },
+} as const;
+
 // Un message : disparaît seul après `duration`, ou en cliquant sur ×.
 function ToastItem({ toast }: { toast: Toast }) {
   const dismissToast = useToastStore((state) => state.dismissToast);
@@ -13,13 +19,11 @@ function ToastItem({ toast }: { toast: Toast }) {
     return () => clearTimeout(timer);
   }, [toast.id, toast.duration, dismissToast, isHovered, isFocused]);
 
-  const accent = toast.variant === "warning" ? "border-l-warning" : "border-l-primary";
-  const icon = toast.variant === "warning" ? "⚠" : "✓";
-  const iconColor = toast.variant === "warning" ? "text-warning" : "text-primary-dark";
+  const { accent, icon, iconColor } = VARIANT_STYLES[toast.variant];
 
   return (
     <div
-      role={toast.variant === "warning" ? "alert" : "status"}
+      role={toast.variant === "success" ? "status" : "alert"}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsFocused(true)}
@@ -49,7 +53,7 @@ export function Toaster() {
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 top-4 z-50 mx-auto flex w-full max-w-md flex-col gap-2 px-4"
+      className="pointer-events-none fixed inset-x-0 top-[calc(1rem+var(--safe-top))] z-50 mx-auto flex w-full max-w-md flex-col gap-2 px-4"
     >
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} />

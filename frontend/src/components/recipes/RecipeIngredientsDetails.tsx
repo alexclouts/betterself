@@ -20,15 +20,15 @@ export function RecipeIngredientsDetails({ recipe, quantityG, className = "" }: 
   if (ingredients.length === 0) return null;
 
   return (
-    <details className={`text-sm ${className}`}>
-      <summary className="cursor-pointer text-muted">Voir les ingrédients</summary>
+    <details className={`text-left text-sm ${className}`}>
+      <summary className="cursor-pointer font-bold text-foreground">Voir les ingrédients</summary>
       <table className="mt-2 w-full">
         <caption className="sr-only">Ingrédients pour la quantité saisie</caption>
         <thead>
           <tr className="text-muted">
             <th className="py-1 text-left font-normal">Ingrédient</th>
             <th className="py-1 text-right font-normal">Quantité</th>
-            <th className="py-1 text-right font-normal">Calories</th>
+            <th className="py-1 pl-4 text-right font-normal">Calories</th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +38,7 @@ export function RecipeIngredientsDetails({ recipe, quantityG, className = "" }: 
               <td className="py-1 text-right whitespace-nowrap tabular-nums">
                 {ratio === null ? "–" : formatNutrient(toNumber(ingredient.quantity_g) * ratio)} g
               </td>
-              <td className="py-1 pl-2 text-right whitespace-nowrap tabular-nums">
+              <td className="py-1 pl-4 text-right font-bold whitespace-nowrap text-foreground tabular-nums">
                 {ratio === null
                   ? "–"
                   : formatNutrient(toNumber(ingredient.nutrition.calories_kcal) * ratio, 0)}{" "}

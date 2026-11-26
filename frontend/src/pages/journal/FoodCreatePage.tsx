@@ -10,6 +10,8 @@ import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
 import { foodService } from "../../services/foodService";
 import Card from "../../components/ui/Card";
+import { PageHeader } from "../../components/navigation/PageHeader";
+import { RequiredMark } from "../../components/ui/RequiredMark";
 
 // Les catégories d'aliments et leurs libellés affichés.
 const CATEGORY_LABELS: Record<FoodCategory, string> = {
@@ -158,9 +160,7 @@ export function FoodCreatePage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm text-gray-500">
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>Créer un aliment</h1>
 
@@ -172,7 +172,7 @@ export function FoodCreatePage() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <label className="block">
-          <span className="text-sm font-medium">Nom *</span>
+          <span className="text-sm font-medium">Nom <RequiredMark /></span>
           <Input
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -217,7 +217,7 @@ export function FoodCreatePage() {
             {NUMERIC_FIELDS.map(({ key, label, unit }) => (
               <label key={key} className="block">
                 <span className="text-sm">
-                  {label} ({unit}) *
+                  {label} ({unit}) <RequiredMark />
                 </span>
                 <Input
                   type="text"

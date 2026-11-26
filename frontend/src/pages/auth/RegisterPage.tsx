@@ -99,8 +99,8 @@ export function RegisterPage() {
                     </Button>
 
                     <div className="flex justify-center">
-                        <p>
-                            Déjà un compte ? <a href="/login" className="text-primary font-bold">Se connecter</a>
+                        <p className="text-foreground">
+                            Déjà un compte ? <a href="/login" className="text-primary-ink font-bold">Se connecter</a>
                         </p>
                     </div>
                 </form>

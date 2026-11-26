@@ -1,0 +1,52 @@
+import type { ReactNode } from "react";
+
+// Hauteur de l'en-tête : un élément collé sous lui utilise `top-[calc(3.5rem+var(--safe-top))]`.
+export const PAGE_HEADER_HEIGHT_CLASS = "h-14";
+
+type PageHeaderProps = {
+  onBack: () => void;
+  // Texte affiché à côté de la flèche : « Retour », « Retour à mes recettes »…
+  backLabel?: string;
+  // Titre court, centré; facultatif quand la page a déjà un grand titre.
+  title?: string;
+  // Action à droite, par exemple « Modifier ».
+  action?: ReactNode;
+};
+
+/*
+ * En-tête des écrans de saisie : bouton de retour (flèche et texte) à gauche, titre et action
+ * facultatifs. Il reste collé en haut pendant le défilement. À placer en premier
+ * dans un <main className="px-4 py-6"> : il compense ces marges pour toucher le
+ * haut de l'écran et couvrir toute la largeur.
+ */
+export function PageHeader({ onBack, backLabel = "Retour", title, action }: PageHeaderProps) {
+  return (
+    <header
+      className={`sticky top-[var(--safe-top)] z-40 -mx-4 -mt-6 grid ${PAGE_HEADER_HEIGHT_CLASS} grid-cols-[auto_1fr_auto] items-center gap-2 bg-[var(--bg)] px-2`}
+    >
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex h-11 min-w-0 items-center gap-1 rounded-full pr-3 pl-1.5 font-semibold text-secondary-ink transition hover:bg-surface-raised hover:text-secondary-ink-hover active:scale-95"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M15 5l-7 7 7 7" />
+        </svg>
+        <span className="truncate">{backLabel}</span>
+      </button>
+
+      <p className="truncate text-center font-semibold text-foreground">{title}</p>
+
+      <div className="flex justify-end">{action}</div>
+    </header>
+  );
+}

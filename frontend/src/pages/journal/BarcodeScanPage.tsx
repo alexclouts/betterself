@@ -8,6 +8,7 @@ import { normalizeBarcode } from "../../lib/barcode";
 import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
 import { foodService, type BarcodeLookup } from "../../services/foodService";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 /*
  * Ajout d'un aliment par son code-barres (scanné ou saisi).
@@ -76,9 +77,7 @@ export function BarcodeScanPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm">
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>Scanner un code-barres</h1>
 

@@ -5,7 +5,6 @@ import type { FoodConsumptionRead } from "../../api/generated/foodConsumptionRea
 import type { FoodRead } from "../../api/generated/foodRead";
 import { MealType } from "../../api/generated/mealType";
 import Button from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import {
   computeNutrientsForQuantity,
@@ -13,6 +12,7 @@ import {
   getDefaultMealType,
   getDefaultQuantityG,
   hasAtMostTwoDecimals,
+  hasInconsistentCalories,
   MEAL_TYPE_LABELS,
   toNumber,
 } from "../../lib/food"
@@ -23,6 +23,10 @@ import { queryKeys } from "../../lib/queryClient";
 import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
 import { journalUrl, readJournalNavState } from "../../lib/journal";
 import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
+import { PageHeader } from "../../components/navigation/PageHeader";
+import { QuantityField } from "../../components/ui/QuantityField";
+import { GRAM_UNIT_OPTIONS } from "../../lib/units";
+import { CalorieWarning } from "../../components/food/CalorieWarning";
 
 const MAX_QUANTITY_G = 5000;
 
@@ -206,14 +210,7 @@ export function FoodAddPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate(-1)}
-        className="text-sm text-gray-500"
-      >
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>{food.name}</h1>
       {food.brand && <p>{food.brand}</p>}
@@ -224,6 +221,7 @@ export function FoodAddPage() {
           : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
       </p>
       <NutritionFactsCard nutrients={nutrients} className="mt-6" />
+      {hasInconsistentCalories(food) && <CalorieWarning className="mt-2" />}
       {dayKey !== todayKey() && (
         <p className="mt-1">
           {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}
@@ -231,23 +229,18 @@ export function FoodAddPage() {
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <label className="block">
-          <span className="text-sm font-medium">Quantité (g)</span>
-          <Input
-            type="text"
-            inputMode="decimal"
-            value={quantityInput}
-            onChange={(event) => setQuantityInput(event.target.value)}
-            className="mt-1"
-            aria-invalid={!isQuantityValid}
-          />
-          {!isQuantityValid && quantityInput.trim() !== "" && (
-            <span className="mt-1 block text-sm text-red-600">
-              Entrez une quantité entre 0 et {MAX_QUANTITY_G} g, avec deux décimales au plus.
-            </span>
-          )}
-        </label>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
+        <QuantityField
+          value={quantityInput}
+          onChange={setQuantityInput}
+          unit="grams"
+          units={GRAM_UNIT_OPTIONS}
+          error={
+            !isQuantityValid && quantityInput.trim() !== ""
+              ? `Entrez une quantité entre 0 et ${MAX_QUANTITY_G} g, avec deux décimales au plus.`
+              : null
+          }
+        />
 
         <label className="block">
           <span className="text-sm font-medium">Repas</span>

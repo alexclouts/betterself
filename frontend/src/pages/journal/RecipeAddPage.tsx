@@ -7,7 +7,7 @@ import { MealType } from "../../api/generated/mealType";
 import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 import { RecipeIngredientsDetails } from "../../components/recipes/RecipeIngredientsDetails";
 import Button from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
+import { QuantityField } from "../../components/ui/QuantityField";
 import Select from "../../components/ui/Select";
 import { useRecipe } from "../../hooks/useRecipe";
 import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
@@ -29,6 +29,7 @@ import {
   servingWeightG,
 } from "../../lib/recipe";
 import { journalService } from "../../services/journalService";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 // Quantité maximale acceptée par l'API pour une consommation.
 const MAX_QUANTITY_G = 5000;
@@ -37,6 +38,11 @@ const MAX_QUANTITY_G = 5000;
 const SNAPSHOT_TOLERANCE_KCAL = 1;
 
 type QuantityUnit = "servings" | "grams";
+
+const UNIT_OPTIONS = [
+  { value: "servings", label: "portions" },
+  { value: "grams", label: "g" },
+] as const;
 
 // L'API accepte au plus deux décimales.
 function roundCents(value: number): number {
@@ -227,14 +233,7 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate(-1)}
-        className="text-sm text-gray-500"
-      >
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1 className="break-words">{recipe.name}</h1>
       <p className="mt-1">
@@ -261,49 +260,21 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <div className="flex items-baseline justify-between gap-3">
-            <label htmlFor="recipe-quantity" className="text-sm font-medium">
-              Quantité ({unit === "servings" ? "portions" : "g"})
-            </label>
-            {/* Choix de l'unité de saisie. */}
-            <div role="group" aria-label="Unité" className="flex rounded-full border border-border p-0.5 text-sm">
-              {(["servings", "grams"] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => changeUnit(option)}
-                  aria-pressed={unit === option}
-                  className={`rounded-full px-3 py-0.5 ${
-                    unit === option ? "bg-primary text-white" : "text-muted hover:text-foreground"
-                  }`}
-                >
-                  {option === "servings" ? "Portions" : "Grammes"}
-                </button>
-              ))}
-            </div>
-          </div>
-          <Input
-            id="recipe-quantity"
-            type="text"
-            inputMode="decimal"
-            value={quantityInput}
-            onChange={(event) => setQuantityInput(event.target.value)}
-            className="mt-1"
-            aria-invalid={!isQuantityValid}
-          />
-          {isQuantityValid && unit === "servings" && (
-            <span className="mt-1 block text-sm text-muted">{formatNutrient(quantityG, 0)} g</span>
-          )}
-          {!isQuantityValid && quantityInput.trim() !== "" && (
-            <span className="mt-1 block text-sm text-red-600">
-              {isPrecisionValid
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
+        <QuantityField
+          value={quantityInput}
+          onChange={setQuantityInput}
+          unit={unit}
+          units={UNIT_OPTIONS}
+          onUnitChange={changeUnit}
+          error={
+            !isQuantityValid && quantityInput.trim() !== ""
+              ? isPrecisionValid
                 ? `Entrez une quantité supérieure à 0 et d’au plus ${maxInUnit}.`
-                : "Entrez une quantité avec deux décimales au plus."}
-            </span>
-          )}
-        </div>
+                : "Entrez une quantité avec deux décimales au plus."
+              : null
+          }
+        />
 
         <label className="block">
           <span className="text-sm font-medium">Repas</span>

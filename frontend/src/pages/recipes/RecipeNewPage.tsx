@@ -21,6 +21,8 @@ import {
   type RecipeDetailsValues,
 } from "../../lib/recipe";
 import { recipeService } from "../../services/recipeService";
+import { useToastStore } from "../../stores/toastStore";
+import { PageHeader } from "../../components/navigation/PageHeader";
 
 // Ingrédient du brouillon, pas encore enregistré.
 type DraftIngredient = {
@@ -85,7 +87,8 @@ export function RecipeNewPage() {
     },
   });
 
-  const canSubmit = areDetailsValid(details) && ingredients.length > 0 && !createMutation.isPending;
+  // Sans ingrédient, le bouton reste actif : l'envoi affiche un message d'erreur.
+  const canSubmit = areDetailsValid(details) && !createMutation.isPending;
 
   // Ajoute l'ingrédient, ou remplace la quantité s'il est déjà dans le brouillon.
   function saveIngredient(food: PickedFood, quantityG: number) {
@@ -107,6 +110,12 @@ export function RecipeNewPage() {
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!canSubmit) return;
+    if (ingredients.length === 0) {
+      useToastStore.getState().showToast("Ajoutez au moins un ingrédient pour créer la recette.", {
+        variant: "error",
+      });
+      return;
+    }
     createMutation.mutate({
       name: details.name.trim(),
       description: details.description.trim() || null,
@@ -161,9 +170,7 @@ export function RecipeNewPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="text-sm">
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>Créer une recette</h1>
 
@@ -205,9 +212,6 @@ export function RecipeNewPage() {
         <Button type="submit" className="mt-6 w-full font-bold" disabled={!canSubmit}>
           {createMutation.isPending ? "Création…" : "Créer la recette"}
         </Button>
-        {ingredients.length === 0 && (
-          <p className="mt-2 text-center text-sm text-muted">Ajoutez au moins un ingrédient.</p>
-        )}
       </form>
       {leaveDialog}
     </main>

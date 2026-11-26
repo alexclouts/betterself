@@ -10,6 +10,12 @@
   --color-secondary-dark: var(--secondary-dark);
   --color-secondary-light: var(--secondary-light);
 
+  /* Texte et icônes en couleur de marque : contraste d'au moins 4,5:1 sur les fonds. */
+  --color-primary-ink: var(--primary-ink);
+  --color-primary-ink-hover: var(--primary-ink-hover);
+  --color-secondary-ink: var(--secondary-ink);
+  --color-secondary-ink-hover: var(--secondary-ink-hover);
+
   --color-danger: var(--danger);
   --color-warning: var(--warning);
 
@@ -19,6 +25,7 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-field: var(--field);
 
 }
 
@@ -32,6 +39,8 @@
   --surface: #ffffff;
   --surface-raised: #F2F2F2;
   --surface-overlay: #ffffff;
+  /* Fond des champs de saisie : blanc sur le fond gris, pour le contraste. */
+  --field: #ffffff;
 
   --primary: #10b981;
   --primary-dark: #059669;
@@ -41,6 +50,13 @@
   --secondary-dark: #d65930;
   --secondary-light: #e0e7ff;
 
+  /* Variantes plus foncées pour le texte : les teintes de remplissage
+     (--primary, --secondary) n'atteignent pas 4,5:1 sur fond clair. */
+  --primary-ink: #047857;
+  --primary-ink-hover: #065f46;
+  --secondary-ink: #c2410c;
+  --secondary-ink-hover: #9a3412;
+
   --danger: #dc2626;
   --warning: #d97706;
 
@@ -48,9 +64,13 @@
   --chart-actual: var(--primary-dark);
   --chart-plan: var(--secondary-dark);
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  /* Polices fournies par l'application (main.tsx) : Inter pour le texte, Poppins pour les titres. */
+  --sans: 'Inter Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: Poppins, system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
+
+  /* Hauteur de la barre d'état (encoche); les éléments collés en haut s'arrêtent sous elle. */
+  --safe-top: env(safe-area-inset-top);
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
@@ -77,6 +97,7 @@
     --surface: #282828;
     --surface-raised: #353535;
     --surface-overlay: #262626;
+    --field: #353535;
     --border: #525252;
     --code-bg: #1f2028;
     --accent: #c084fc;
@@ -93,6 +114,12 @@
     --secondary: #e95c2d;
     --secondary-dark: #cc4a1f;
     --secondary-light: #e0e7ff;
+
+    /* En sombre, le texte prend des teintes plus claires que le remplissage. */
+    --primary-ink: #10b981;
+    --primary-ink-hover: #34d399;
+    --secondary-ink: #f78a5f;
+    --secondary-ink-hover: #fba684;
 
     /* En sombre, les teintes plus lumineuses gardent le contraste sur la surface. */
     --chart-actual: var(--primary);
@@ -121,6 +148,10 @@ body,
 
 body {
   margin: 0;
+  /* viewport-fit=cover : le contenu évite l'encoche, la barre d'état et les bords arrondis. */
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Apparition des pop-ups (components/ui/Toaster.tsx). */

@@ -12,6 +12,8 @@ import { useRecipes } from "../../hooks/useRecipes";
 import { normalizeSearchText } from "../../lib/recipe";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import { PageHeader } from "../../components/navigation/PageHeader";
+import { useHasScrolled } from "../../hooks/useHasScrolled";
 
 // Nombre minimal de caractères avant de lancer une recherche.
 const MIN_SEARCH_LENGTH = 2;
@@ -29,6 +31,7 @@ const HISTORY_RESULTS = 3;
 const RECIPE_RESULTS = 3;
 
 export function FoodSearchPage() {
+  const hasScrolled = useHasScrolled();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -131,35 +134,71 @@ export function FoodSearchPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate(-1)}
-        className="text-sm text-gray-500"
-      >
-        ← Retour
-      </Button>
+      <PageHeader onBack={() => navigate(-1)} />
 
       <h1>
         Ajouter un aliment
       </h1>
 
-      <Input
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Rechercher un aliment"
-        className="mt-4 w-full border px-4 py-3"
-      />
-
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => navigate("/journal/scan", { state: journalNavState })}
-        className="mt-2 w-full text-sm font-semibold"
+      {/* Recherche et raccourcis collés sous l'en-tête : scanner, créer un aliment
+          ou une recette restent accessibles pendant le défilement des résultats. */}
+      {/* La ligne de séparation n'apparaît qu'une fois la page défilée. */}
+      <div
+        className={`sticky top-[calc(3.5rem+var(--safe-top))] z-30 -mx-4 mt-2 border-b bg-[var(--bg)] px-4 pt-2 pb-3 transition-colors ${
+          hasScrolled ? "border-border" : "border-transparent"
+        }`}
       >
-        Scanner un code-barres
-      </Button>
+        <Input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Rechercher un aliment"
+          aria-label="Rechercher un aliment"
+          className="w-full border px-4 py-3"
+        />
+
+        <div className="mt-2 grid grid-cols-3 gap-2 text-sm font-semibold">
+          <button
+            type="button"
+            onClick={() => navigate("/journal/scan", { state: journalNavState })}
+            className="flex items-center justify-center gap-1.5 rounded-full bg-surface px-2 py-2 text-foreground hover:bg-surface-raised"
+          >
+            {/* Code-barres dans un cadre de visée. */}
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+              <path d="M7 8v8M10 8v8M13 8v8M17 8v8" />
+            </svg>
+            Scanner
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
+            }
+            aria-label="Créer un aliment"
+            className="rounded-full bg-surface px-2 py-2 text-primary-ink hover:bg-surface-raised"
+          >
+            + Aliment
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/recipes/new", { state: journalNavState })}
+            aria-label="Créer une recette"
+            className="rounded-full bg-surface px-2 py-2 text-secondary-ink hover:bg-surface-raised"
+          >
+            + Recette
+          </button>
+        </div>
+      </div>
 
       {isLoading && (
         <p className="mt-4">
@@ -238,26 +277,6 @@ export function FoodSearchPage() {
         </p>
       )}
 
-      {/* Deux boutons de même largeur sur une rangée. */}
-      <div className="mt-6 grid grid-cols-2 gap-2">
-        <Button
-          type="button"
-          onClick={() =>
-            navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
-          }
-          className="w-full py-3 text-primary font-bold"
-        >
-          + Créer un aliment
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => navigate("/recipes/new", { state: journalNavState })}
-          className="w-full py-3 font-bold"
-        >
-          + Créer une recette
-        </Button>
-      </div>
 
       {/* Attribution exigée par la licence ODbL. */}
       {needsAttribution && (

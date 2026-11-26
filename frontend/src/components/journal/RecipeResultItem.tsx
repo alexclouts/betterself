@@ -21,7 +21,7 @@ export function RecipeResultItem({ recipe, onSelect }: RecipeResultItemProps) {
         <span className="min-w-0 flex-1">
           <span className="line-clamp-2 font-medium text-foreground">{recipe.name}</span>
           <span className="block text-sm text-muted">
-            Recette · {formatCount(recipe.servings, "portion", "portions")}
+            {formatCount(recipe.servings, "portion", "portions")}
           </span>
           <span className="mt-1 block text-sm text-muted">
             P {formatNutrient(nutrients.protein_g)} g · G {formatNutrient(nutrients.carbohydrates_g)} g

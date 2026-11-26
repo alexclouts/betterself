@@ -15,9 +15,12 @@ import {
 } from "../../lib/food";
 import { queryKeys } from "../../lib/queryClient";
 import { journalService } from "../../services/journalService";
+import { useHasScrolled } from "../../hooks/useHasScrolled";
 
 export function FoodJournalPage() {
   const navigate = useNavigate();
+  // La ligne sous la date n'apparaît qu'une fois la page défilée.
+  const hasScrolled = useHasScrolled();
   // Recherche des paramètres de l'URL pour déterminer la journée affichée.
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -97,19 +100,17 @@ export function FoodJournalPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => navigate("/")}
-        className="text-sm"
-      >
-        ← Accueil
-      </Button>
-
       <h1>Journal alimentaire</h1>
 
-      {/* Navigation entre les journées */}
-      <nav className="flex items-center justify-between gap-2" aria-label="Choisir la journée">
+      {/* Navigation entre les journées, collée en haut pendant le défilement,
+          avec les calories de la journée toujours visibles. Le fond couvre
+          toute la largeur pour masquer le contenu qui passe dessous. */}
+      <nav
+        className={`sticky top-[var(--safe-top)] z-30 -mx-4 flex items-center justify-between gap-2 border-b bg-[var(--bg)] px-4 py-2 transition-colors ${
+          hasScrolled ? "border-border" : "border-transparent"
+        }`}
+        aria-label="Choisir la journée"
+      >
         <Button
           type="button"
           variant="ghost"
@@ -121,11 +122,17 @@ export function FoodJournalPage() {
 
         <div className="text-center">
           <strong className="block text-lg text-foreground">{formatDayLabel(dayKey)}</strong>
+          {!isLoading && (
+            <span className="block text-sm text-muted">
+              {formatNutrient(totals.calories_kcal, 0)}
+              {target ? ` / ${formatNutrient(target.calories_target_kcal, 0)}` : ""} kcal
+            </span>
+          )}
           {!isToday && (
             <button
               type="button"
               onClick={() => goToDay(todayKey())}
-              className="text-sm text-primary"
+              className="text-sm text-primary-ink"
             >
               Revenir à aujourd’hui
             </button>
@@ -168,7 +175,7 @@ export function FoodJournalPage() {
                   <h3 id={`meal-${meal}`} className="text-lg font-semibold text-foreground">
                     {MEAL_TYPE_LABELS[meal]}
                   </h3>
-                  <span className="text-sm text-muted">
+                  <span className="text-sm font-bold text-foreground">
                     {formatNutrient(mealCalories, 0)} kcal
                   </span>
                 </div>
@@ -185,13 +192,18 @@ export function FoodJournalPage() {
                           onClick={() => {
                             handleOpen(entry);
                           }}
-                          className="min-w-0 flex-1 rounded-lg px-2 py-1 hover:bg-surface-raised"
+                          className="flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-lg px-2 py-1 text-left hover:bg-surface-raised"
                         >
-                          <span className="block truncate text-foreground">
-                            {entry.item_name_snapshot}
+                          <span className="min-w-0">
+                            <span className="block truncate text-foreground">
+                              {entry.item_name_snapshot}
+                            </span>
+                            <span className="text-sm text-muted">
+                              {formatNutrient(entry.quantity_g)} g
+                            </span>
                           </span>
-                          <span className="text-sm text-muted">
-                            {formatNutrient(entry.quantity_g)} g ·{" "}
+                          {/* Calories en évidence, comme le total du repas. */}
+                          <span className="shrink-0 text-sm font-bold text-foreground">
                             {formatNutrient(entry.calories_kcal, 0)} kcal
                           </span>
                         </button>
@@ -215,7 +227,7 @@ export function FoodJournalPage() {
                 <button
                   type="button"
                   onClick={() => handleAdd(meal)}
-                  className="mt-1 text-sm font-semibold text-primary"
+                  className="mt-1 text-sm font-semibold text-primary-ink"
                 >
                   + Ajouter un aliment
                 </button>

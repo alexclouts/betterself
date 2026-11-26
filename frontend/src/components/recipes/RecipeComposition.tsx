@@ -37,7 +37,7 @@ export function RecipeComposition({
         <h3 id="composition-heading" className="text-lg font-semibold text-foreground">
           Ingrédients
         </h3>
-        <span className="text-sm text-muted">{formatNutrient(totalCalories, 0)} kcal</span>
+        <span className="text-sm font-bold text-foreground">{formatNutrient(totalCalories, 0)} kcal</span>
       </div>
 
       {items.length === 0 ? (
@@ -50,11 +50,15 @@ export function RecipeComposition({
               <button
                 type="button"
                 onClick={() => onOpen(item.key)}
-                className="min-w-0 flex-1 rounded-lg px-2 py-1 hover:bg-surface-raised"
+                className="flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-lg px-2 py-1 text-left hover:bg-surface-raised"
               >
-                <span className="block truncate text-foreground">{item.name}</span>
-                <span className="text-sm text-muted">
-                  {formatNutrient(item.quantityG)} g · {formatNutrient(item.caloriesKcal, 0)} kcal
+                <span className="min-w-0">
+                  <span className="block truncate text-foreground">{item.name}</span>
+                  <span className="text-sm text-muted">{formatNutrient(item.quantityG)} g</span>
+                </span>
+                {/* Calories en évidence, comme dans le journal. */}
+                <span className="shrink-0 text-sm font-bold text-foreground">
+                  {formatNutrient(item.caloriesKcal, 0)} kcal
                 </span>
               </button>
 
@@ -73,7 +77,7 @@ export function RecipeComposition({
         </ul>
       )}
 
-      <button type="button" onClick={onAdd} className="mt-1 text-sm font-semibold text-primary">
+      <button type="button" onClick={onAdd} className="mt-1 text-sm font-semibold text-primary-ink">
         + Ajouter un ingrédient
       </button>
     </section>

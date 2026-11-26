@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { RecipeRead } from "../../api/generated/recipeRead";
-import Button from "../../components/ui/Button";
 import { useRecipes } from "../../hooks/useRecipes";
 import { formatNutrient } from "../../lib/food";
 import { queryKeys } from "../../lib/queryClient";
 import { formatCount, perServing, recipeTotals } from "../../lib/recipe";
 import { recipeService } from "../../services/recipeService";
+import Button from "../../components/ui/Button";
 
 /*
  * Recettes de l'utilisateur. Une recette archivée disparaît des choix courants
@@ -37,10 +37,6 @@ export function RecipesPage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
-      <Button type="button" variant="secondary" onClick={() => navigate("/")} className="text-sm">
-        ← Accueil
-      </Button>
-
       <h1>Mes recettes</h1>
 
       <label className="flex items-center justify-center gap-2 text-sm text-muted">
@@ -64,7 +60,7 @@ export function RecipesPage() {
         <p className="mt-6">
           {showArchived
             ? "Aucune recette enregistrée pour l’instant."
-            : "Aucune recette active. Créez-en une depuis « Ajouter » dans votre journal."}
+            : "Aucune recette active. Créez-en une avec le bouton « Créer une recette »."}
         </p>
       ) : (
         <ul className="mt-6 divide-y divide-border text-left">
@@ -100,12 +96,16 @@ export function RecipesPage() {
                   </span>
                 </button>
 
+                {/* Bouton texte, comme « + Ajouter un aliment » du journal :
+                    Archiver en couleur secondaire, Réactiver en couleur primaire. */}
                 <button
                   type="button"
                   onClick={() => toggleArchive(recipe)}
                   disabled={pendingId === recipe.id}
                   aria-label={`${recipe.is_archived ? "Réactiver" : "Archiver"} la recette ${recipe.name}`}
-                  className="shrink-0 rounded-full px-3 py-1 text-sm text-muted hover:bg-surface-raised hover:text-foreground disabled:opacity-30"
+                  className={`shrink-0 text-sm font-semibold disabled:opacity-30 ${
+                    recipe.is_archived ? "text-primary-ink" : "text-secondary-ink"
+                  }`}
                 >
                   {recipe.is_archived ? "Réactiver" : "Archiver"}
                 </button>
@@ -113,6 +113,12 @@ export function RecipesPage() {
             );
           })}
         </ul>
+      )}
+
+      {!isLoading && (
+        <Button className="mt-6 w-full font-bold" onClick={() => navigate("/recipes/new")}>
+          Créer une recette
+        </Button>
       )}
     </main>
   );

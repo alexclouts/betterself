@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { MeasurementRead } from "../../api/generated/measurementRead";
+import { WeightChart } from "../../components/measurements/WeightChart";
 import Button from "../../components/ui/Button";
+import Card from "../../components/ui/Card";
 import { useCurrentGoal } from "../../hooks/useCurrentGoal";
 import { useMeasurements } from "../../hooks/useMeasurements";
 import { formatLongDate } from "../../lib/date";
@@ -9,6 +11,7 @@ import { queryKeys } from "../../lib/queryClient";
 import { notifySaveResult } from "../../lib/targetUpdate";
 import { weightTrend, type WeightTrend } from "../../lib/weightTrend";
 import { measurementService } from "../../services/measurementService";
+import { useToastStore } from "../../stores/toastStore";
 
 function formatWeight(value: number): string {
   return `${value.toLocaleString("fr-CA", { maximumFractionDigits: 2 })} kg`;
@@ -24,7 +27,7 @@ function formatDelta(delta: number): string {
 
 // Vert si le poids se rapproche de l'objectif, rouge s'il s'en éloigne.
 const TREND_CLASSES: Record<WeightTrend, string> = {
-  toward: "text-primary-dark dark:text-primary",
+  toward: "text-primary-ink",
   away: "text-danger",
   neutral: "text-muted",
 };
@@ -44,7 +47,7 @@ const TREND_LABELS: Record<WeightTrend, string | undefined> = {
 export function MeasurementsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { history, isLoading, error: loadError } = useMeasurements();
+  const { measurements, history, isLoading, error: loadError } = useMeasurements();
   // Sans objectif (ou en cas d'erreur), les variations restent en gris.
   const { goal } = useCurrentGoal();
 
@@ -70,6 +73,13 @@ export function MeasurementsPage() {
   const isOnlyMeasurement = history.length <= 1;
 
   function handleDelete(measurement: MeasurementRead) {
+    if (isOnlyMeasurement) {
+      useToastStore.getState().showToast(
+        "Votre seule mesure ne peut pas être supprimée, puisqu’elle sert au calcul de votre cible. Vous pouvez la modifier.",
+        { variant: "error" },
+      );
+      return;
+    }
     const label = `${formatWeight(measurement.weight_kg)} le ${formatLongDate(measurement.date)}`;
     if (!window.confirm(`Supprimer la mesure de ${label} ?`)) {
       return;
@@ -77,21 +87,20 @@ export function MeasurementsPage() {
     deleteMutation.mutate(measurement.id);
   }
 
+  // Sous le graphique, ou sous le message s'il n'y a encore aucune mesure.
+  const updateButton = (
+    <Button
+      type="button"
+      className="mt-4 w-full font-bold"
+      onClick={() => navigate("/measurements/new")}
+    >
+      Mettre à jour
+    </Button>
+  );
+
   return (
     <main className="mx-auto w-full max-w-md px-4 py-6 text-center">
-      <Button type="button" variant="secondary" onClick={() => navigate("/")} className="text-sm">
-        ← Accueil
-      </Button>
-
       <h1>Mes mesures</h1>
-
-      <Button
-        type="button"
-        className="w-full font-bold"
-        onClick={() => navigate("/measurements/new")}
-      >
-        Enregistrer mon poids
-      </Button>
 
       {error && (
         <p className="mt-4 text-danger" role="alert">
@@ -102,10 +111,25 @@ export function MeasurementsPage() {
       {isLoading ? (
         <p className="mt-6">Chargement de vos mesures…</p>
       ) : history.length === 0 ? (
-        <p className="mt-6">Aucune mesure enregistrée pour l’instant.</p>
+        <>
+          <p className="mt-6">Aucune mesure enregistrée pour l’instant.</p>
+          {updateButton}
+        </>
       ) : (
         <>
-          <ul className="mt-6 divide-y divide-border text-left">
+          {/* Même courbe que l'accueil (une mesure par jour), au-dessus de l'historique détaillé. */}
+          <section className="mt-6" aria-labelledby="weight-chart-heading">
+            <Card className="w-full bg-surface">
+              <h2 id="weight-chart-heading" className="mt-0 mb-2 text-left text-xl">
+                Mon poids
+              </h2>
+              <WeightChart measurements={measurements} showData={false} />
+            </Card>
+            {updateButton}
+          </section>
+
+          <h2 className="mt-8 mb-0 text-left text-xl">Historique</h2>
+          <ul className="mt-2 divide-y divide-border text-left">
             {history.map((measurement, index) => {
               // La liste va de la plus récente à la plus ancienne : la précédente est la suivante.
               const previous = history[index + 1];
@@ -142,9 +166,8 @@ export function MeasurementsPage() {
                   <button
                     type="button"
                     onClick={() => handleDelete(measurement)}
-                    disabled={isOnlyMeasurement || deletingId === measurement.id}
+                    disabled={deletingId === measurement.id}
                     aria-label={`Supprimer la mesure de ${label}`}
-                    title={isOnlyMeasurement ? "Votre seule mesure ne peut pas être supprimée." : undefined}
                     className="rounded-full px-3 py-1 text-muted hover:bg-surface-raised hover:text-danger disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted"
                   >
                     ✕
@@ -153,13 +176,6 @@ export function MeasurementsPage() {
               );
             })}
           </ul>
-
-          {isOnlyMeasurement && (
-            <p className="mt-4 text-sm text-muted">
-              Votre seule mesure ne peut pas être supprimée, puisqu’elle sert au calcul de votre
-              cible. Vous pouvez la modifier.
-            </p>
-          )}
         </>
       )}
     </main>
