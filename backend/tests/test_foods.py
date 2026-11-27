@@ -1,5 +1,9 @@
 from decimal import Decimal
 
+import pytest
+from sqlalchemy.exc import IntegrityError
+
+from betterself.models.food_models import Food
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
 from tests.api_helpers import FOODS_URL, USERS_URL
 
@@ -521,3 +525,28 @@ def test_delete_food_forbidden_for_other_user(client):
         headers=auth_headers(other_token),
     )
     assert delete_response.status_code == 403
+
+# Un aliment créé à la main n'a pas d'unité ni de poids estimé.
+def test_create_food_has_no_unit(client):
+    headers = auth_headers(register_and_login(client))
+    food = client.post(FOODS_URL, json=valid_food_payload(), headers=headers).json()
+    assert (food["unit_name"], food["unit_name_plural"], food["unit_g"]) == (None, None, None)
+    assert food["weight_is_estimated"] is False
+
+
+# L'unité, son pluriel et son poids sont présents ensemble ou absents ensemble.
+@pytest.mark.parametrize(
+    "unit",
+    [
+        {"unit_name": "tranche", "unit_name_plural": "tranches"},
+        {"unit_name": "tranche", "unit_g": Decimal("25")},
+        {"unit_name": "tranche", "unit_name_plural": "tranches", "unit_g": Decimal("0")},
+    ],
+)
+def test_incomplete_unit_is_rejected(test_session, unit):
+    test_session.add(Food(
+        name="Pain", reference_weight_g=Decimal("100"), calories_kcal=Decimal("250"),
+        protein_g=Decimal("8"), carbohydrates_g=Decimal("48"), fat_g=Decimal("3"), **unit,
+    ))
+    with pytest.raises(IntegrityError):
+        test_session.commit()

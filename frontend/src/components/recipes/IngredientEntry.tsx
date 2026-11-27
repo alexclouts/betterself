@@ -5,12 +5,20 @@ import { computeNutrientsForQuantity, hasInconsistentCalories } from "../../lib/
 import {
   formatQuantityInput,
   parseDecimal,
-  validateWeight,
+  validateGrams,
   type PickedFood,
 } from "../../lib/recipe";
 import { PageHeader } from "../navigation/PageHeader";
 import { QuantityField } from "../ui/QuantityField";
-import { GRAM_UNIT_OPTIONS } from "../../lib/units";
+import {
+  findUnit,
+  getFoodUnits,
+  hasValidPrecision,
+  initialQuantity,
+  toGrams,
+  unitOptions,
+  type QuantityUnit,
+} from "../../lib/units";
 import { FoodSubtitle } from "../food/FoodSubtitle";
 
 type IngredientEntryProps = {
@@ -34,12 +42,28 @@ export function IngredientEntry({
   onSubmit,
   onBack,
 }: IngredientEntryProps) {
-  const [quantityInput, setQuantityInput] = useState(() => formatQuantityInput(initialQuantityG));
+  const foodUnits = getFoodUnits(food);
+  // Dans une unité de l'aliment si la quantité y tombe (« 2 tranches »), sinon en grammes.
+  const [initial] = useState(() => initialQuantity(initialQuantityG, foodUnits));
+  const [unit, setUnit] = useState<QuantityUnit>(initial.unit);
+  const foodUnit = findUnit(foodUnits, unit);
+  const [quantityInput, setQuantityInput] = useState(() => formatQuantityInput(initial.amount));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const quantityError = validateWeight(quantityInput);
-  const quantityG = parseDecimal(quantityInput);
+  // La quantité saisie, toujours ramenée en grammes.
+  const amount = parseDecimal(quantityInput);
+  const quantityG = toGrams(amount, foodUnit);
+  const quantityError = !Number.isFinite(amount)
+    ? "Valeur invalide."
+    : hasValidPrecision(amount, foodUnit)
+      ? validateGrams(quantityG)
+      : "Deux décimales au plus.";
+
+  // Changer d'unité garde la valeur saisie : les nutriments suivent la nouvelle mesure.
+  function changeUnit(next: QuantityUnit) {
+    setUnit(next);
+  }
   const nutrients = quantityError === null ? computeNutrientsForQuantity(food, quantityG) : null;
 
   async function handleSubmit(event: React.FormEvent) {
@@ -65,11 +89,19 @@ export function IngredientEntry({
       />
 
       <h1>{food.name}</h1>
-      <FoodSubtitle brand={food.brand} serving_g={food.serving_g} reference_weight_g={food.reference_weight_g} />
+      <FoodSubtitle
+        brand={food.brand}
+        serving_g={food.serving_g}
+        reference_weight_g={food.reference_weight_g}
+        unit_name={food.unit_name}
+        unit_name_plural={food.unit_name_plural}
+        unit_g={food.unit_g}
+      />
 
       <NutritionFactsCard
         nutrients={nutrients}
         showCalorieWarning={hasInconsistentCalories(food)}
+        showWeightWarning={food.weight_is_estimated}
         className="mt-6"
       />
 
@@ -77,8 +109,9 @@ export function IngredientEntry({
         <QuantityField
           value={quantityInput}
           onChange={setQuantityInput}
-          unit="grams"
-          units={GRAM_UNIT_OPTIONS}
+          unit={unit}
+          units={unitOptions(foodUnits, amount)}
+          onUnitChange={changeUnit}
           error={quantityError && quantityInput.trim() !== "" ? quantityError : null}
           autoFocus
         />

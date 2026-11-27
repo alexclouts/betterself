@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import type { FoodConsumptionRead } from "../../api/generated/foodConsumptionRead";
@@ -8,9 +8,8 @@ import Button from "../../components/ui/Button";
 import Select from "../../components/ui/Select";
 import {
   computeNutrientsForQuantity,
+  formatNutrient,
   getDefaultMealType,
-  getDefaultQuantityG,
-  hasAtMostTwoDecimals,
   hasInconsistentCalories,
   MEAL_TYPE_LABELS,
   toNumber,
@@ -24,11 +23,36 @@ import { journalUrl, readJournalNavState } from "../../lib/journal";
 import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 import { PageHeader } from "../../components/navigation/PageHeader";
 import { QuantityField } from "../../components/ui/QuantityField";
-import { GRAM_UNIT_OPTIONS } from "../../lib/units";
+import {
+  findUnit,
+  getFoodUnits,
+  GRAMS,
+  hasValidPrecision,
+  initialQuantity,
+  suggestedQuantity,
+  toGrams,
+  unitOptions,
+  type QuantityUnit,
+} from "../../lib/units";
+import { formatQuantityInput, parseDecimal } from "../../lib/recipe";
 import { FoodSubtitle } from "../../components/food/FoodSubtitle";
 import { JournalDayBadge } from "../../components/journal/JournalDayBadge";
 
 const MAX_QUANTITY_G = 5000;
+
+type QuantityState = { unit: QuantityUnit; input: string };
+
+// Quantité proposée à l'ajout, dans l'unité qui correspond le mieux à l'aliment.
+function defaultQuantity(food: FoodRead): QuantityState {
+  const { unit, amount } = suggestedQuantity(food);
+  return { unit: unit?.key ?? GRAMS, input: formatQuantityInput(amount) };
+}
+
+// Quantité en grammes affichée dans l'unité de l'aliment si possible.
+function quantityState(quantityG: number, food: FoodRead): QuantityState {
+  const { unit, amount } = initialQuantity(quantityG, getFoodUnits(food));
+  return { unit, input: formatQuantityInput(amount) };
+}
 
 export function FoodAddPage() {
   /*
@@ -59,9 +83,11 @@ export function FoodAddPage() {
   // Déclaration des variables d'état pour l'aliment, l'entrée, la quantité et le type de repas.
   const [food, setFood] = useState<FoodRead | null>(initialFood);
   const [entry, setEntry] = useState<FoodConsumptionRead | null>(null);
-  const [quantityInput, setQuantityInput] = useState(
-    initialFood ? String(getDefaultQuantityG(initialFood)) : "",
+  const [initialQuantityState] = useState<QuantityState>(() =>
+    initialFood ? defaultQuantity(initialFood) : { unit: GRAMS, input: "" },
   );
+  const [quantityInput, setQuantityInput] = useState(initialQuantityState.input);
+  const [unit, setUnit] = useState<QuantityUnit>(initialQuantityState.unit);
   const [mealType, setMealType] = useState<MealType>(
     () => journalState.mealType ?? getDefaultMealType(),
   );
@@ -103,9 +129,11 @@ export function FoodAddPage() {
           return;
 
         // Mise à jour de l'état avec l'entrée et l'aliment chargés.
+        const quantity = quantityState(toNumber(loadedEntry.quantity_g), loadedFood);
         setEntry(loadedEntry);
         setFood(loadedFood);
-        setQuantityInput(String(toNumber(loadedEntry.quantity_g)));
+        setQuantityInput(quantity.input);
+        setUnit(quantity.unit);
         setMealType(loadedEntry.meal_type);
 
       } else if (id) {
@@ -114,8 +142,10 @@ export function FoodAddPage() {
         if (cancelled) 
           return;
         
+        const quantity = defaultQuantity(loadedFood);
         setFood(loadedFood);
-        setQuantityInput(String(getDefaultQuantityG(loadedFood)));
+        setQuantityInput(quantity.input);
+        setUnit(quantity.unit);
       }
     }
     // On veut charger l'aliment et l'entrée lorsque l'utilisateur accède à cette page
@@ -135,15 +165,27 @@ export function FoodAddPage() {
     };
   }, [id, entryId, food, navigate]);
 
-  // Validation de la quantité saisie.
-  const quantityG = Number(quantityInput.replace(",", "."));
-  const isQuantityValid = quantityInput.trim() !== "" && Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && hasAtMostTwoDecimals(quantityG);
+  // Validation de la quantité saisie, toujours ramenée en grammes.
+  const foodUnits = food ? getFoodUnits(food) : [];
+  const foodUnit = findUnit(foodUnits, unit);
+  const amount = parseDecimal(quantityInput);
+  const quantityG = toGrams(amount, foodUnit);
+  const isPrecisionValid = hasValidPrecision(amount, foodUnit);
+  const isQuantityValid =
+    Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && isPrecisionValid;
+
+  // Changer d'unité garde la valeur saisie : les nutriments suivent la nouvelle mesure.
+  function changeUnit(next: QuantityUnit) {
+    setUnit(next);
+  }
+
+  const maxInUnit =
+    foodUnit
+      ? `${formatNutrient(MAX_QUANTITY_G / foodUnit.grams)} ${foodUnit.plural}`
+      : `${formatNutrient(MAX_QUANTITY_G)} g`;
 
   // Calcule les nutriments pour la quantité saisie.
-  const nutrients = useMemo(() =>
-    food && isQuantityValid ? computeNutrientsForQuantity(food, quantityG) : null,
-    [food, isQuantityValid, quantityG],
-  );
+  const nutrients = food && isQuantityValid ? computeNutrientsForQuantity(food, quantityG) : null;
 
   // Gestion de la soumission du formulaire.
   async function handleSubmit(event: React.SubmitEvent) {
@@ -213,11 +255,19 @@ export function FoodAddPage() {
       <PageHeader onBack={() => navigate(-1)} />
 
       <h1>{food.name}</h1>
-      <FoodSubtitle brand={food.brand} serving_g={food.serving_g} reference_weight_g={food.reference_weight_g} />
+      <FoodSubtitle
+        brand={food.brand}
+        serving_g={food.serving_g}
+        reference_weight_g={food.reference_weight_g}
+        unit_name={food.unit_name}
+        unit_name_plural={food.unit_name_plural}
+        unit_g={food.unit_g}
+      />
       {dayKey !== todayKey() && <JournalDayBadge dayKey={dayKey} isEntry={entry !== null} className="mt-3" />}
       <NutritionFactsCard
         nutrients={nutrients}
         showCalorieWarning={hasInconsistentCalories(food)}
+        showWeightWarning={food.weight_is_estimated}
         className="mt-6"
       />
 
@@ -225,11 +275,14 @@ export function FoodAddPage() {
         <QuantityField
           value={quantityInput}
           onChange={setQuantityInput}
-          unit="grams"
-          units={GRAM_UNIT_OPTIONS}
+          unit={unit}
+          units={unitOptions(foodUnits, amount)}
+          onUnitChange={changeUnit}
           error={
             !isQuantityValid && quantityInput.trim() !== ""
-              ? `Entrez une quantité entre 0 et ${MAX_QUANTITY_G} g, avec deux décimales au plus.`
+              ? isPrecisionValid
+                ? `Entrez une quantité supérieure à 0 et d’au plus ${maxInUnit}.`
+                : "Entrez une quantité avec deux décimales au plus."
               : null
           }
         />

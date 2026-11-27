@@ -14,7 +14,6 @@ import { consumedAtForDay, toDateKey, todayKey } from "../../lib/date";
 import {
   formatNutrient,
   getDefaultMealType,
-  hasAtMostTwoDecimals,
   MEAL_TYPE_LABELS,
   toNumber,
   type FoodNutrients,
@@ -31,6 +30,16 @@ import {
 import { journalService } from "../../services/journalService";
 import { PageHeader } from "../../components/navigation/PageHeader";
 import { JournalDayBadge } from "../../components/journal/JournalDayBadge";
+import {
+  findUnit,
+  GRAMS,
+  hasValidPrecision,
+  initialQuantity,
+  toGrams,
+  unitOptions,
+  type FoodUnit,
+  type QuantityUnit,
+} from "../../lib/units";
 
 // Quantité maximale acceptée par l'API pour une consommation.
 const MAX_QUANTITY_G = 5000;
@@ -38,16 +47,9 @@ const MAX_QUANTITY_G = 5000;
 // Écart (kcal) au-delà duquel l'instantané d'une entrée ne correspond plus à la recette.
 const SNAPSHOT_TOLERANCE_KCAL = 1;
 
-type QuantityUnit = "servings" | "grams";
-
-const UNIT_OPTIONS = [
-  { value: "servings", label: "portions" },
-  { value: "grams", label: "g" },
-] as const;
-
-// L'API accepte au plus deux décimales.
-function roundCents(value: number): number {
-  return Math.round(value * 100) / 100;
+// La portion de la recette est l'unité de saisie, à côté des grammes.
+function portionUnits(portionG: number): FoodUnit[] {
+  return portionG > 0 ? [{ key: "portion", singular: "portion", plural: "portions", grams: portionG }] : [];
 }
 
 /*
@@ -132,15 +134,9 @@ function entryNutrients(entry: FoodConsumptionRead): FoodNutrients {
 }
 
 // Quantité initiale d'une entrée : en portions si elle tombe sur un quart de portion, sinon en grammes.
-function initialQuantity(entry: FoodConsumptionRead, portionG: number): { unit: QuantityUnit; input: string } {
-  const quantityG = toNumber(entry.quantity_g);
-  if (portionG > 0) {
-    const quarters = Math.round((quantityG / portionG) * 4);
-    if (quarters > 0 && roundCents((quarters / 4) * portionG) === quantityG) {
-      return { unit: "servings", input: formatQuantityInput(quarters / 4) };
-    }
-  }
-  return { unit: "grams", input: formatQuantityInput(quantityG) };
+function entryQuantity(entry: FoodConsumptionRead, portionG: number): { unit: QuantityUnit; input: string } {
+  const { unit, amount } = initialQuantity(toNumber(entry.quantity_g), portionUnits(portionG));
+  return { unit, input: formatQuantityInput(amount) };
 }
 
 /*
@@ -158,7 +154,7 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
 
   const portionG = servingWeightG(recipe);
   const [initial] = useState(() =>
-    entry ? initialQuantity(entry, portionG) : { unit: "servings" as const, input: "1" },
+    entry ? entryQuantity(entry, portionG) : { unit: portionG > 0 ? "portion" : GRAMS, input: portionG > 0 ? "1" : "" },
   );
   const [unit, setUnit] = useState<QuantityUnit>(initial.unit);
   const [quantityInput, setQuantityInput] = useState(initial.input);
@@ -168,10 +164,10 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
 
   // La quantité saisie, toujours ramenée en grammes.
   const amount = parseDecimal(quantityInput);
-  const quantityG = roundCents(unit === "servings" ? amount * portionG : amount);
-  // En grammes, la valeur saisie est envoyée telle quelle : deux décimales au plus.
-  // En portions, la conversion en grammes est arrondie au centième.
-  const isPrecisionValid = unit === "servings" || hasAtMostTwoDecimals(amount);
+  const units = portionUnits(portionG);
+  const portion = findUnit(units, unit);
+  const quantityG = toGrams(amount, portion);
+  const isPrecisionValid = hasValidPrecision(amount, portion);
   const isQuantityValid =
     Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && isPrecisionValid;
   const isQuantityChanged = !entry || quantityG !== toNumber(entry.quantity_g);
@@ -191,13 +187,8 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
         toNumber(entry.calories_kcal),
     ) > SNAPSHOT_TOLERANCE_KCAL;
 
-  // Changer d'unité convertit la valeur saisie pour garder la même quantité.
+  // Changer d'unité garde la valeur saisie : les nutriments suivent la nouvelle mesure.
   function changeUnit(next: QuantityUnit) {
-    if (next === unit) return;
-    if (Number.isFinite(amount) && amount > 0 && portionG > 0) {
-      const converted = next === "grams" ? amount * portionG : amount / portionG;
-      setQuantityInput(formatQuantityInput(roundCents(converted)));
-    }
     setUnit(next);
   }
 
@@ -228,7 +219,7 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
   }
 
   const maxInUnit =
-    unit === "servings" && portionG > 0
+    portion
       ? `${formatNutrient(MAX_QUANTITY_G / portionG)} portions`
       : `${formatNutrient(MAX_QUANTITY_G)} g`;
 
@@ -263,7 +254,7 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
           value={quantityInput}
           onChange={setQuantityInput}
           unit={unit}
-          units={UNIT_OPTIONS}
+          units={unitOptions(units, amount)}
           onUnitChange={changeUnit}
           error={
             !isQuantityValid && quantityInput.trim() !== ""

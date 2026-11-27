@@ -9,7 +9,8 @@ import { RecipeNutritionCard } from "../../components/recipes/RecipeNutritionCar
 import Button from "../../components/ui/Button";
 import { useIngredientFlow } from "../../hooks/useIngredientFlow";
 import { useRecipe } from "../../hooks/useRecipe";
-import { getDefaultQuantityG, toNumber } from "../../lib/food";
+import { toNumber } from "../../lib/food";
+import { suggestedQuantity } from "../../lib/units";
 import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
 import { recipeTotals } from "../../lib/recipe";
@@ -99,7 +100,7 @@ function RecipeEditor({ recipe }: { recipe: RecipeRead }) {
       <main className="mx-auto w-full max-w-md px-4 py-6">
         <IngredientSearch
           excludedFoodIds={excludedFoodIds}
-          onPick={(food) => showEntry(food, getDefaultQuantityG(food))}
+          onPick={(food) => showEntry(food, suggestedQuantity(food).grams)}
           onBack={showRecipe}
         />
       </main>

@@ -4,7 +4,10 @@ import { hasAtMostTwoDecimals, toNumber, type FoodNutrients, type NutritionRefer
 
 // Aliment choisi comme ingrédient, avec ce qu'il faut pour calculer sa nutrition.
 export type PickedFood = NutritionReference &
-  Pick<FoodRead, "id" | "name" | "brand" | "serving_g">;
+  Pick<
+    FoodRead,
+    "id" | "name" | "brand" | "serving_g" | "unit_name" | "unit_name_plural" | "unit_g" | "weight_is_estimated"
+  >;
 
 // Bornes acceptées par l'API.
 export const MAX_WEIGHT_G = 100000;
@@ -18,7 +21,11 @@ export function parseDecimal(value: string): number {
 
 // Valide une quantité en grammes; retourne un message d'erreur ou null.
 export function validateWeight(value: string): string | null {
-  const parsed = parseDecimal(value);
+  return validateGrams(parseDecimal(value));
+}
+
+// Valide une quantité déjà convertie en grammes.
+export function validateGrams(parsed: number): string | null {
   if (!Number.isFinite(parsed)) return "Valeur invalide.";
   if (parsed <= 0) return "Doit être supérieur à 0.";
   if (parsed > MAX_WEIGHT_G) return `Maximum ${MAX_WEIGHT_G.toLocaleString("fr-CA")} g.`;

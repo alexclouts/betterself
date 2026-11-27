@@ -1,10 +1,6 @@
 import type { FoodSearchResult } from "../../api/generated/foodSearchResult";
-import {
-  computeNutrientsForQuantity,
-  formatNutrient,
-  getDefaultQuantityG,
-  hasInconsistentCalories,
-} from "../../lib/food";
+import { computeNutrientsForQuantity, formatNutrient, hasInconsistentCalories } from "../../lib/food";
+import { formatSuggestedQuantity, suggestedQuantity } from "../../lib/units";
 import { MacroInline } from "../food/MacroBreakdown";
 
 // Petite horloge discrète : l'aliment fait partie de l'historique de l'utilisateur.
@@ -36,15 +32,16 @@ type FoodResultItemProps = {
   isPending?: boolean;
 };
 
-// Résultat de recherche : nom, marque, calories et macros pour la quantité par défaut.
+// Résultat de recherche : nom, marque, calories et macros pour la quantité proposée.
 export function FoodResultItem({
   food,
   onSelect,
   disabled = false,
   isPending = false,
 }: FoodResultItemProps) {
-  const quantityG = getDefaultQuantityG(food);
-  const nutrients = computeNutrientsForQuantity(food, quantityG);
+  // La quantité proposée à l'ajout, dans l'unité de l'aliment si possible (« 2 tranches »).
+  const suggestion = suggestedQuantity(food);
+  const nutrients = computeNutrientsForQuantity(food, suggestion.grams);
 
   return (
     <li>
@@ -72,8 +69,8 @@ export function FoodResultItem({
             {isPending ? "Ajout…" : `${formatNutrient(nutrients.calories_kcal, 0)} kcal`}
           </span>
           <span className="block text-sm text-muted">
-            {food.serving_g ? "portion de " : ""}
-            {formatNutrient(quantityG)} g
+            {!suggestion.unit && food.serving_g ? "portion de " : ""}
+            {formatSuggestedQuantity(suggestion)}
           </span>
         </span>
       </button>
