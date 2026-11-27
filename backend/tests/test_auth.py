@@ -78,3 +78,25 @@ def test_login_unknown_email(client: TestClient):
     # Vérification que la réponse contient un message d'erreur
     assert response.status_code == 401
     assert response.json() == {"detail": "Les informations entrées sont invalides."}
+
+
+# Une erreur de base de données ne doit pas exposer la requête SQL au client.
+def test_register_hides_database_error(client: TestClient, monkeypatch):
+    from sqlalchemy.exc import OperationalError
+    from betterself.services.user_service import UserService
+
+    def fail(self, data):
+        raise OperationalError("INSERT INTO users (email) VALUES (%(email)s)", {}, Exception("secret"))
+
+    monkeypatch.setattr(UserService, "create_user", fail)
+    response = client.post(
+        f"{AUTH_URL}/register",
+        json={"email": "test@example.com", "password": "testpassword"},
+        headers={"Origin": "http://localhost:8080"},
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Une erreur interne est survenue. Réessayez plus tard."}
+    assert "INSERT" not in response.text and "secret" not in response.text
+    # La réponse passe par CORSMiddleware : le navigateur peut la lire.
+    assert response.headers["access-control-allow-origin"] == "http://localhost:8080"

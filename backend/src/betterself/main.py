@@ -1,10 +1,8 @@
 import logging
 import os
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -55,7 +53,9 @@ app.include_router(consumptions_router)
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
-"""
+# Erreur de base de données : le détail (requête SQL, paramètres) reste dans les
+# journaux du serveur, le client reçoit un message générique. Ce gestionnaire
+# passe par CORSMiddleware, donc le navigateur lit bien la réponse 500.
 @app.exception_handler(SQLAlchemyError)
 async def database_exception_handler(
     request: Request,
@@ -73,4 +73,3 @@ async def database_exception_handler(
             "detail": "Une erreur interne est survenue. Réessayez plus tard."
         },
     )
-"""

@@ -12,6 +12,7 @@ from betterself.services.user_service import UserService
 from betterself.core.security import create_access_token, verify_password
 from betterself.schemas.user_schemas import Token
 from betterself.prefix import AUTH_URL
+from betterself.core.exceptions import DuplicateRecord
 
 from jose import JWTError, jwt
 
@@ -39,10 +40,12 @@ def register_user(
 ):
     try:
         return service.create_user(user_create)
-    except Exception as e:
+    # Seule l'erreur métier est renvoyée telle quelle : une erreur de base de
+    # données passe par le gestionnaire de main.py, qui masque son détail.
+    except DuplicateRecord as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+            detail=str(error)
         )
 
 
