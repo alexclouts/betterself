@@ -2713,6 +2713,43 @@
             ],
             "title": "Serving G"
           },
+          "unit_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Name"
+          },
+          "unit_name_plural": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Name Plural"
+          },
+          "unit_g": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit G"
+          },
+          "weight_is_estimated": {
+            "type": "boolean",
+            "title": "Weight Is Estimated"
+          },
           "calories_kcal": {
             "type": "string",
             "title": "Calories Kcal"
@@ -2775,6 +2812,10 @@
           "category",
           "reference_weight_g",
           "serving_g",
+          "unit_name",
+          "unit_name_plural",
+          "unit_g",
+          "weight_is_estimated",
           "calories_kcal",
           "protein_g",
           "carbohydrates_g",
@@ -2870,6 +2911,43 @@
             ],
             "title": "Serving G"
           },
+          "unit_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Name"
+          },
+          "unit_name_plural": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Name Plural"
+          },
+          "unit_g": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit G"
+          },
+          "weight_is_estimated": {
+            "type": "boolean",
+            "title": "Weight Is Estimated"
+          },
           "calories_kcal": {
             "type": "string",
             "title": "Calories Kcal"
@@ -2897,6 +2975,10 @@
           "brand",
           "reference_weight_g",
           "serving_g",
+          "unit_name",
+          "unit_name_plural",
+          "unit_g",
+          "weight_is_estimated",
           "calories_kcal",
           "protein_g",
           "carbohydrates_g",

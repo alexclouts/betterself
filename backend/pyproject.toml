@@ -25,6 +25,9 @@ pythonpath = ["src"]
 testpaths = ["tests"]
 
 [dependency-groups]
+catalog = [
+    "duckdb>=2.0.1",
+]
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.1.1",

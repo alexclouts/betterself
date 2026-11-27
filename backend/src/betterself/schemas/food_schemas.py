@@ -77,6 +77,12 @@ class FoodRead(BaseModel):
     category: FoodCategory | None
     reference_weight_g: Decimal
     serving_g: Decimal | None
+    # Unité propre à l'aliment (« tranche », 25 g), ou None.
+    unit_name: str | None
+    unit_name_plural: str | None
+    unit_g: Decimal | None
+    # La portion ou l'unité est convertie en grammes sans poids sur l'étiquette.
+    weight_is_estimated: bool
     calories_kcal: Decimal
     protein_g: Decimal
     carbohydrates_g: Decimal
@@ -103,6 +109,12 @@ class FoodSearchResult(BaseModel):
     brand: str | None
     reference_weight_g: Decimal
     serving_g: Decimal | None
+    # Unité propre à l'aliment (« tranche », 25 g), ou None.
+    unit_name: str | None
+    unit_name_plural: str | None
+    unit_g: Decimal | None
+    # La portion ou l'unité est convertie en grammes sans poids sur l'étiquette.
+    weight_is_estimated: bool
     calories_kcal: Decimal
     protein_g: Decimal
     carbohydrates_g: Decimal
@@ -115,6 +127,10 @@ class FoodSearchResult(BaseModel):
             brand=item.brand,
             reference_weight_g=item.reference_weight_g,
             serving_g=item.serving_g,
+            unit_name=item.unit_name,
+            unit_name_plural=item.unit_name_plural,
+            unit_g=item.unit_g,
+            weight_is_estimated=item.weight_is_estimated,
             calories_kcal=item.calories_kcal,
             protein_g=item.protein_g,
             carbohydrates_g=item.carbohydrates_g,

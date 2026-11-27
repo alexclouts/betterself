@@ -177,6 +177,52 @@ def test_implausible_servings_are_ignored(catalog, code, expected):
     assert catalog.get(code).serving_g == expected
 
 
+# --- Unités ---
+
+
+def test_get_reads_unit(catalog):
+    product = catalog.get("0000000000017")
+    assert (product.unit_name, product.unit_name_plural, product.unit_g) == ("biscuit", "biscuits", 12.5)
+    assert product.weight_is_estimated is False
+
+
+def test_product_without_unit(catalog):
+    product = catalog.get("0000000000048")
+    assert (product.unit_name, product.unit_name_plural, product.unit_g) == (None, None, None)
+    assert product.weight_is_estimated is False
+
+
+# Une portion en volume (« 250 ml ») est estimée même sans unité.
+def test_volume_serving_is_estimated(catalog):
+    product = catalog.get("0000000000031")
+    assert product.unit_name is None
+    assert product.weight_is_estimated is True
+
+
+def test_import_keeps_unit(client, configured_catalog):
+    headers = auth_headers(register_and_login(client))
+    food = client.post(f"{CATALOG_URL}/0000000000024/import", headers=headers).json()
+    assert (food["unit_name"], food["unit_name_plural"]) == ("tasse", "tasses")
+    assert Decimal(food["unit_g"]) == 250
+    assert food["weight_is_estimated"] is True
+
+    # Elle est aussi retournée par la lecture et par la recherche.
+    read = client.get(f"{FOODS_URL}/{food['id']}").json()
+    (found,) = client.get(FOODS_URL, params={"query": "lait"}).json()
+    assert read["unit_name"] == found["unit_name"] == "tasse"
+    assert read["weight_is_estimated"] is found["weight_is_estimated"] is True
+
+
+# Le résultat de recherche d'un produit pas encore importé porte aussi l'unité.
+def test_search_result_has_unit(client, configured_catalog):
+    headers = auth_headers(register_and_login(client))
+    results = client.get(f"{FOODS_URL}/search", params={"query": "ecolier"}, headers=headers).json()
+    result = results["results"][0]
+    assert result["catalog_code"] == "0000000000017"
+    assert (result["unit_name"], Decimal(result["unit_g"])) == ("biscuit", Decimal("12.5"))
+    assert result["weight_is_estimated"] is False
+
+
 def test_import_unknown_product(client, configured_catalog):
     response = client.post(
         f"{CATALOG_URL}/9999999999999/import",

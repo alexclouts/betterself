@@ -21,8 +21,12 @@ MAX_TEXT_LENGTH = 255
 MIN_SERVING_G = 1
 MAX_SERVING_G = 1000
 
+# Longueur maximale des colonnes `unit_name` et `unit_name_plural`.
+MAX_UNIT_LENGTH = 50
+
 PRODUCT_COLUMNS = (
     "p.code, p.name, p.brands, p.serving_g, "
+    "p.unit_name, p.unit_name_plural, p.unit_g, p.weight_is_estimated, "
     "p.kcal_100g, p.protein_100g, p.carbs_100g, p.fat_100g, p.scans"
 )
 
@@ -36,6 +40,10 @@ class CatalogProduct:
     name: str
     brand: str | None
     serving_g: Decimal | None
+    unit_name: str | None
+    unit_name_plural: str | None
+    unit_g: Decimal | None
+    weight_is_estimated: bool
     reference_weight_g: Decimal
     calories_kcal: Decimal
     protein_g: Decimal
@@ -56,14 +64,24 @@ def _to_serving(value: float | None) -> Decimal | None:
 
 
 def _to_product(row: tuple) -> CatalogProduct:
-    code, name, brands, serving_g, kcal, protein, carbs, fat, scans = row
+    (
+        code, name, brands, serving_g,
+        unit_name, unit_name_plural, unit_g, weight_is_estimated,
+        kcal, protein, carbs, fat, scans,
+    ) = row
     brand = (brands or "").strip()[:MAX_TEXT_LENGTH]
+    # L'unité n'est gardée que complète, comme l'exige la contrainte de `foods`.
+    has_unit = bool(unit_name and unit_name_plural and unit_g and unit_g > 0)
 
     return CatalogProduct(
         code=code,
         name=name.strip()[:MAX_TEXT_LENGTH],
         brand=brand or None,
         serving_g=_to_serving(serving_g),
+        unit_name=unit_name[:MAX_UNIT_LENGTH] if has_unit else None,
+        unit_name_plural=unit_name_plural[:MAX_UNIT_LENGTH] if has_unit else None,
+        unit_g=_to_decimal(unit_g) if has_unit else None,
+        weight_is_estimated=bool(weight_is_estimated),
         reference_weight_g=REFERENCE_WEIGHT_G,
         calories_kcal=_to_decimal(kcal),
         protein_g=_to_decimal(protein),

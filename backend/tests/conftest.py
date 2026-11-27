@@ -98,6 +98,13 @@ PRODUCTS = [
     ("0055653170259", "Biscuits à l'érable", "Dare", 20, 470.588, 5, 70, 19, 5),
 ]
 
+# Unités tirées de `serving_size` : code → (unité, pluriel, poids, poids estimé).
+PRODUCT_UNITS = {
+    "0000000000017": ("biscuit", "biscuits", 12.5, 0),  # « 2 cookies (25 g) »
+    "0000000000024": ("tasse", "tasses", 250, 1),        # « 1 cup (250 ml) »
+    "0000000000031": (None, None, None, 1),              # « 250 ml »
+}
+
 
 # Construit un petit catalogue ayant le même schéma que build_catalog.py.
 # Le dossier contient une espace, comme le disque externe.
@@ -111,14 +118,18 @@ def catalog_path(tmp_path):
     db.executescript("""
     CREATE TABLE products (
       code TEXT PRIMARY KEY, name TEXT NOT NULL, brands TEXT, categories_tags TEXT,
-      serving_g REAL, kcal_100g REAL, protein_100g REAL, carbs_100g REAL,
+      serving_g REAL, unit_name TEXT, unit_name_plural TEXT, unit_g REAL,
+      weight_is_estimated INTEGER NOT NULL DEFAULT 0,
+      kcal_100g REAL, protein_100g REAL, carbs_100g REAL,
       fat_100g REAL, scans INTEGER, modified INTEGER);
     CREATE VIRTUAL TABLE products_fts USING fts5(
       name, brands, content='products', tokenize='unicode61 remove_diacritics 2');
     """)
     db.executemany(
-        "INSERT INTO products VALUES (?,?,?,NULL,?,?,?,?,?,?,0)",
-        PRODUCTS,
+        "INSERT INTO products (code, name, brands, serving_g, kcal_100g, protein_100g, "
+        "carbs_100g, fat_100g, scans, unit_name, unit_name_plural, unit_g, weight_is_estimated) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        [(*product, *PRODUCT_UNITS.get(product[0], (None, None, None, 0))) for product in PRODUCTS],
     )
     db.execute("INSERT INTO products_fts(products_fts) VALUES ('rebuild')")
     db.commit()

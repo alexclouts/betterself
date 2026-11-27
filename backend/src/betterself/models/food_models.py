@@ -4,6 +4,7 @@ from decimal import Decimal
 from enum import Enum
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     Enum as SAEnum,
@@ -101,6 +102,32 @@ class Food(Base):
         nullable=True,
     )
 
+    # Unité propre à l'aliment (tranche, barre, tasse…) et son poids, tirées
+    # de la portion Open Food Facts. Présentes ensemble, ou absentes ensemble.
+    unit_name: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+    )
+
+    unit_name_plural: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+    )
+
+    unit_g: Mapped[Decimal | None] = mapped_column(
+        Numeric(8, 2),
+        nullable=True,
+    )
+
+    # Vrai si la portion ou l'unité n'a pas de poids sur l'étiquette : volume
+    # converti à raison de 1 ml = 1 g, ou mesure de cuisine à sa valeur par défaut.
+    weight_is_estimated: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+    )
+
     calories_kcal: Mapped[Decimal] = mapped_column(
         Numeric(8, 2),
         nullable=False,
@@ -179,6 +206,11 @@ class Food(Base):
         CheckConstraint(
             "serving_g IS NULL OR serving_g > 0",
             name="foods_check_serving",
+        ),
+        CheckConstraint(
+            "(unit_name IS NULL AND unit_name_plural IS NULL AND unit_g IS NULL) OR "
+            "(unit_name IS NOT NULL AND unit_name_plural IS NOT NULL AND unit_g IS NOT NULL AND unit_g > 0)",
+            name="foods_check_unit",
         ),
         CheckConstraint(
             "calories_kcal >= 0",
