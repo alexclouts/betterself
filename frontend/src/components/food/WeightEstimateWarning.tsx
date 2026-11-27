@@ -13,15 +13,9 @@ export function WeightEstimateWarning({ className = "" }: { className?: string }
       className={className}
     >
       <p>
-        L’emballage n’indique pas le poids en grammes de cette portion. Elle est convertie de
-        façon approximative : 1 ml ≈ 1 g pour un volume, et 1 tasse ≈ 250 g, 1 c. à soupe ≈ 15 g
-        ou 1 c. à thé ≈ 5 g pour une mesure.
-      </p>
-      <p>
-        Ces équivalences valent pour l’eau, mais varient selon l’aliment : une c. à soupe de
-        farine pèse environ 8 g, celle de miel environ 21 g. Les calories et les macronutriments
-        affichés n’ont donc pas pu être vérifiés. Pour plus de précision, pesez l’aliment et
-        saisissez la quantité en grammes.
+        Nos données pour cet emballage n’indique pas le poids en grammes de cette portion. Elle est convertie de
+        façon approximative, ce qui peut produire des erreurs de calcul. Vérifiez la valeur
+        nutritionnelle pour confirmer l'exactitude des informations affichées.
       </p>
     </WarningBanner>
   );
