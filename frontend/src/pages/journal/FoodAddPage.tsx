@@ -26,11 +26,13 @@ import { PageHeader } from "../../components/navigation/PageHeader";
 import { QuantityField } from "../../components/ui/QuantityField";
 import {
   convertAmount,
-  foodUnitOptions,
-  getFoodUnit,
+  findUnit,
+  getFoodUnits,
+  GRAMS,
   hasValidPrecision,
   initialQuantity,
   toGrams,
+  unitOptions,
   unitWeightHint,
   type QuantityUnit,
 } from "../../lib/units";
@@ -47,14 +49,14 @@ type QuantityState = { unit: QuantityUnit; input: string };
  * si elle y tombe (« 2 tranches »). Sans portion, une unité de l'aliment.
  */
 function defaultQuantity(food: FoodRead): QuantityState {
-  const unit = getFoodUnit(food);
-  if (unit && food.serving_g === null) return { unit: "unit", input: "1" };
+  const [main] = getFoodUnits(food);
+  if (main && food.serving_g === null) return { unit: main.key, input: "1" };
   return quantityState(getDefaultQuantityG(food), food);
 }
 
 // Quantité en grammes affichée dans l'unité de l'aliment si possible.
 function quantityState(quantityG: number, food: FoodRead): QuantityState {
-  const { unit, amount } = initialQuantity(quantityG, getFoodUnit(food)?.grams ?? null);
+  const { unit, amount } = initialQuantity(quantityG, getFoodUnits(food));
   return { unit, input: formatQuantityInput(amount) };
 }
 
@@ -88,7 +90,7 @@ export function FoodAddPage() {
   const [food, setFood] = useState<FoodRead | null>(initialFood);
   const [entry, setEntry] = useState<FoodConsumptionRead | null>(null);
   const [initialQuantityState] = useState<QuantityState>(() =>
-    initialFood ? defaultQuantity(initialFood) : { unit: "grams", input: "" },
+    initialFood ? defaultQuantity(initialFood) : { unit: GRAMS, input: "" },
   );
   const [quantityInput, setQuantityInput] = useState(initialQuantityState.input);
   const [unit, setUnit] = useState<QuantityUnit>(initialQuantityState.unit);
@@ -170,11 +172,11 @@ export function FoodAddPage() {
   }, [id, entryId, food, navigate]);
 
   // Validation de la quantité saisie, toujours ramenée en grammes.
-  const foodUnit = food ? getFoodUnit(food) : null;
-  const unitG = foodUnit?.grams ?? 0;
+  const foodUnits = food ? getFoodUnits(food) : [];
+  const foodUnit = findUnit(foodUnits, unit);
   const amount = parseDecimal(quantityInput);
-  const quantityG = toGrams(amount, unit, unitG);
-  const isPrecisionValid = hasValidPrecision(amount, unit);
+  const quantityG = toGrams(amount, foodUnit);
+  const isPrecisionValid = hasValidPrecision(amount, foodUnit);
   const isQuantityValid =
     Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && isPrecisionValid;
 
@@ -182,14 +184,14 @@ export function FoodAddPage() {
   function changeUnit(next: QuantityUnit) {
     if (next === unit) return;
     if (Number.isFinite(amount) && amount > 0) {
-      setQuantityInput(formatQuantityInput(convertAmount(amount, unit, next, unitG)));
+      setQuantityInput(formatQuantityInput(convertAmount(amount, foodUnit, findUnit(foodUnits, next))));
     }
     setUnit(next);
   }
 
   const maxInUnit =
-    unit === "unit" && foodUnit
-      ? `${formatNutrient(MAX_QUANTITY_G / unitG)} ${foodUnit.plural}`
+    foodUnit
+      ? `${formatNutrient(MAX_QUANTITY_G / foodUnit.grams)} ${foodUnit.plural}`
       : `${formatNutrient(MAX_QUANTITY_G)} g`;
 
   // Calcule les nutriments pour la quantité saisie.
@@ -284,7 +286,7 @@ export function FoodAddPage() {
           value={quantityInput}
           onChange={setQuantityInput}
           unit={unit}
-          units={foodUnitOptions(foodUnit, amount)}
+          units={unitOptions(foodUnits, amount)}
           onUnitChange={changeUnit}
           error={
             !isQuantityValid && quantityInput.trim() !== ""
@@ -294,7 +296,7 @@ export function FoodAddPage() {
               : null
           }
           hint={
-            unit === "unit" && foodUnit && isQuantityValid
+            foodUnit && isQuantityValid
               ? unitWeightHint(foodUnit, amount, food.weight_is_estimated)
               : null
           }

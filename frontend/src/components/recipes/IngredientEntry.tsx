@@ -12,11 +12,12 @@ import { PageHeader } from "../navigation/PageHeader";
 import { QuantityField } from "../ui/QuantityField";
 import {
   convertAmount,
-  foodUnitOptions,
-  getFoodUnit,
+  findUnit,
+  getFoodUnits,
   hasValidPrecision,
   initialQuantity,
   toGrams,
+  unitOptions,
   unitWeightHint,
   type QuantityUnit,
 } from "../../lib/units";
@@ -43,21 +44,21 @@ export function IngredientEntry({
   onSubmit,
   onBack,
 }: IngredientEntryProps) {
-  const foodUnit = getFoodUnit(food);
-  const unitG = foodUnit?.grams ?? 0;
-  // Dans l'unité de l'aliment si la quantité y tombe (« 2 tranches »), sinon en grammes.
-  const [initial] = useState(() => initialQuantity(initialQuantityG, foodUnit?.grams ?? null));
+  const foodUnits = getFoodUnits(food);
+  // Dans une unité de l'aliment si la quantité y tombe (« 2 tranches »), sinon en grammes.
+  const [initial] = useState(() => initialQuantity(initialQuantityG, foodUnits));
   const [unit, setUnit] = useState<QuantityUnit>(initial.unit);
+  const foodUnit = findUnit(foodUnits, unit);
   const [quantityInput, setQuantityInput] = useState(() => formatQuantityInput(initial.amount));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // La quantité saisie, toujours ramenée en grammes.
   const amount = parseDecimal(quantityInput);
-  const quantityG = toGrams(amount, unit, unitG);
+  const quantityG = toGrams(amount, foodUnit);
   const quantityError = !Number.isFinite(amount)
     ? "Valeur invalide."
-    : hasValidPrecision(amount, unit)
+    : hasValidPrecision(amount, foodUnit)
       ? validateGrams(quantityG)
       : "Deux décimales au plus.";
 
@@ -65,7 +66,7 @@ export function IngredientEntry({
   function changeUnit(next: QuantityUnit) {
     if (next === unit) return;
     if (Number.isFinite(amount) && amount > 0) {
-      setQuantityInput(formatQuantityInput(convertAmount(amount, unit, next, unitG)));
+      setQuantityInput(formatQuantityInput(convertAmount(amount, foodUnit, findUnit(foodUnits, next))));
     }
     setUnit(next);
   }
@@ -115,11 +116,11 @@ export function IngredientEntry({
           value={quantityInput}
           onChange={setQuantityInput}
           unit={unit}
-          units={foodUnitOptions(foodUnit, amount)}
+          units={unitOptions(foodUnits, amount)}
           onUnitChange={changeUnit}
           error={quantityError && quantityInput.trim() !== "" ? quantityError : null}
           hint={
-            unit === "unit" && foodUnit && quantityError === null
+            foodUnit && quantityError === null
               ? unitWeightHint(foodUnit, amount, food.weight_is_estimated)
               : null
           }

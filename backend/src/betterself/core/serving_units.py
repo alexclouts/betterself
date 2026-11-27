@@ -248,6 +248,9 @@ def _parse_unit(text: str) -> ServingUnit | None:
     grams, is_volume = amount
     if grams is None or not _is_plausible(unit, count, grams):
         return None
+    # « 1 portion (250 ml) » : une portion en volume se mesure à la tasse ou à la cuillère.
+    if unit.singular == "portion" and is_volume:
+        return measure_for_volume(grams / count)
     return ServingUnit(unit.singular, unit.plural, round(grams / count, 2), is_volume)
 
 

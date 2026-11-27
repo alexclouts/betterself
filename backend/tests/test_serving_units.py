@@ -45,7 +45,9 @@ def test_pieces_and_units(text, singular):
 def test_manufacturer_serving_becomes_portion():
     assert unit_of("1 serving (30 g)") == ServingUnit("portion", "portions", 30, False)
     assert unit_of("2 servings (60 g)") == ServingUnit("portion", "portions", 30, False)
-    assert unit_of("1 portion (250 ml)") == ServingUnit("portion", "portions", 250, True)
+    # Une portion en volume devient la mesure correspondante.
+    assert unit_of("1 portion (250 ml)") == ServingUnit("tasse", "tasses", 250, True)
+    assert unit_of("1 serving (15 mL)") == ServingUnit("c. à soupe", "c. à soupe", 15, True)
 
 
 def test_mojibake_is_repaired():
