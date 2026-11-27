@@ -11,6 +11,8 @@ type QuantityFieldProps<T extends string> = {
   onUnitChange?: (unit: T) => void;
   // Message affiché sous le champ; null si la saisie est valide.
   error?: string | null;
+  // Précision affichée sous le champ quand la saisie est valide (« 2 tranches = 50 g »).
+  hint?: string | null;
   autoFocus?: boolean;
 };
 
@@ -25,6 +27,7 @@ export function QuantityField<T extends string>({
   units,
   onUnitChange,
   error = null,
+  hint = null,
   autoFocus,
 }: QuantityFieldProps<T>) {
   const id = useId();
@@ -44,7 +47,7 @@ export function QuantityField<T extends string>({
             onChange={(event) => onChange(event.target.value)}
             className="mt-1 h-13"
             aria-invalid={error !== null}
-            aria-describedby={error ? `${id}-error` : undefined}
+            aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
             autoFocus={autoFocus}
           />
         </div>
@@ -66,10 +69,16 @@ export function QuantityField<T extends string>({
           </Select>
         </div>
       </div>
-      {error && (
+      {error ? (
         <span id={`${id}-error`} className="mt-1 block text-sm text-danger">
           {error}
         </span>
+      ) : (
+        hint && (
+          <span id={`${id}-hint`} className="mt-1 block text-sm text-muted">
+            {hint}
+          </span>
+        )
       )}
     </div>
   );

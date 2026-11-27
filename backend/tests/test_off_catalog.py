@@ -7,7 +7,7 @@ from betterself.core.config import settings
 from betterself.core.exceptions import CatalogUnavailable
 from betterself.models.food_models import Food, FoodSource
 from betterself.repos.off_catalog_repo import OffCatalogRepository
-from tests.api_helpers import FOODS_URL
+from tests.api_helpers import FOODS_URL, RECIPES_URL
 from tests.utils import auth_headers, register_and_login, register_and_login_other_user
 
 CATALOG_URL = f"{FOODS_URL}/catalog"
@@ -288,3 +288,17 @@ def test_imported_food_can_be_consumed(client, configured_catalog):
     )
     assert response.status_code == 201
     assert Decimal(response.json()["calories_kcal"]) == 150
+
+
+# L'ingrédient d'une recette garde l'unité de l'aliment importé.
+def test_recipe_ingredient_has_unit(client, configured_catalog):
+    headers = auth_headers(register_and_login(client))
+    food = client.post(f"{CATALOG_URL}/0000000000017/import", headers=headers).json()
+    recipe = client.post(
+        RECIPES_URL,
+        json={"name": "Collation", "servings": 1, "ingredients": [{"food_id": food["id"], "quantity_g": 25}]},
+        headers=headers,
+    ).json()
+    ingredient_food = recipe["ingredients"][0]["food"]
+    assert (ingredient_food["unit_name"], Decimal(ingredient_food["unit_g"])) == ("biscuit", Decimal("12.5"))
+    assert ingredient_food["weight_is_estimated"] is False

@@ -188,6 +188,11 @@ class RecipeIngredientFoodRead(BaseModel):
     name: str
     brand: str | None
     reference_weight_g: Decimal
+    # Unité propre à l'aliment, pour saisir la quantité en tranches, tasses…
+    unit_name: str | None
+    unit_name_plural: str | None
+    unit_g: Decimal | None
+    weight_is_estimated: bool
     calories_kcal: Decimal
     protein_g: Decimal
     carbohydrates_g: Decimal
