@@ -4,15 +4,16 @@ from pathlib import Path
 
 import duckdb
 
-from betterself.core.serving_units import parse_serving
+from betterself.core.serving_units import parse_serving, unit_for_product
 
 """
 Construit le catalogue Open Food Facts (off.sqlite) à partir de l'export CSV.
 
 Garde les produits vendus au Canada dont les valeurs nutritives sont complètes
 et plausibles, et tire de `serving_size` l'unité propre à l'aliment (tranche,
-barre, tasse…) avec son poids. Le catalogue précédent est conservé si l'export
-contient trop peu de produits.
+barre, tasse…) avec son poids. Une portion en volume reçoit la mesure de
+cuisine correspondante, et un liquide sans unité une tasse (250 ml ≈ 250 g).
+Le catalogue précédent est conservé si l'export contient trop peu de produits.
 
 Usage (depuis backend/) :
     uv run --group catalog python -m betterself.scripts.build_catalog <dossier> [minimum]
@@ -55,7 +56,7 @@ WHERE name <> '' AND kcal BETWEEN 0 AND 900
 def to_catalog_row(row: tuple) -> tuple:
     code, name, brands, categories, serving_size, serving_g, *nutrition = row
     info = parse_serving(serving_size)
-    unit = info.unit
+    unit = unit_for_product(info, categories, serving_g)
     weight_is_estimated = info.serving_is_volume or (unit is not None and unit.is_estimated)
     return (
         code, name, brands, categories, serving_g,

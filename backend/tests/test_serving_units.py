@@ -1,6 +1,6 @@
 import pytest
 
-from betterself.core.serving_units import ServingUnit, parse_serving
+from betterself.core.serving_units import ServingUnit, is_liquid, parse_serving, unit_for_product
 
 
 def unit_of(text):
@@ -107,3 +107,58 @@ def test_implausible_units_are_ignored(text):
 )
 def test_serving_is_volume(text, is_volume):
     assert parse_serving(text).serving_is_volume is is_volume
+
+
+# --- Liquides ---
+
+
+@pytest.mark.parametrize(
+    "tags",
+    [
+        "en:dairies,en:milks-liquid-and-powder,en:milks",
+        "en:beverages-and-beverages-preparations,en:beverages,en:carbonated-drinks,en:sodas",
+        "en:beverages,en:teas,en:tea-based-beverages,en:iced-teas",
+        "en:beverages,en:coffees,en:coffee-drinks",
+        "en:meals,en:soups",
+    ],
+)
+def test_liquids(tags):
+    assert is_liquid(tags)
+
+
+@pytest.mark.parametrize(
+    "tags",
+    [
+        None, "", "en:dairies,en:cheeses",
+        "en:milks,en:milk-powders",
+        "en:beverages,en:instant-beverages,en:instant-coffees",
+        "en:beverages,en:teas,en:tea-bags",
+        "en:beverages,en:coffees,en:ground-coffees",
+        "en:beverages,en:coffees",
+        "en:soups,en:dehydrated-soups",
+        "en:beverages-and-beverages-preparations,en:beverage-preparations",
+    ],
+)
+def test_not_liquids(tags):
+    assert not is_liquid(tags)
+
+
+def test_liquid_without_unit_gets_a_cup():
+    milk = "en:dairies,en:milks"
+    assert unit_for_product(parse_serving("250 ml"), milk) == ServingUnit("tasse", "tasses", 250, True)
+    assert unit_for_product(parse_serving(None), milk) == ServingUnit("tasse", "tasses", 250, True)
+    # Une unité tirée de la portion l'emporte.
+    assert unit_for_product(parse_serving("1 bottle (500 ml)"), milk).singular == "bouteille"
+    # Un solide sans unité reste en grammes.
+    assert unit_for_product(parse_serving(None), "en:dairies,en:cheeses") is None
+
+
+# Une portion en volume se verse : elle reçoit la mesure qui lui correspond, sans catégorie.
+@pytest.mark.parametrize(
+    ("text", "ml", "singular"),
+    [("5 ml", 5, "c. à thé"), ("15 ml", 15, "c. à soupe"), ("30 ml", 30, "c. à soupe"),
+     ("250 ml", 250, "tasse"), ("355 mL", 355, "tasse")],
+)
+def test_volume_serving_gets_a_measure(text, ml, singular):
+    unit = unit_for_product(parse_serving(text), None, ml)
+    assert unit.singular == singular and unit.is_estimated

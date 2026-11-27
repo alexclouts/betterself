@@ -259,3 +259,56 @@ def parse_serving(serving_size: str | None) -> ServingInfo:
     # Une portion exprimée en volume, sans poids : serving_quantity est en ml.
     is_volume = bool(VOLUME_PATTERN.search(text)) and not re.search(r"\d\s*(g|gr|grams?|grammes?)\b", text)
     return ServingInfo(unit=_parse_unit(text), serving_is_volume=is_volume)
+
+
+# --- Liquides ---
+
+# Catégories Open Food Facts des liquides.
+LIQUID_TAGS = {"en:beverages", "en:milks", "en:soups"}
+# Produits secs rangés parmi les boissons : poudres, café moulu, thé en sachets…
+DRY_TAG_PATTERN = re.compile(
+    r"powder|dried|dehydrated|instant|beverage-preparations|preparations$|tea-bags|tea-leaves"
+    r"|capsule|coffee-beans|ground-coffee|soup-mix|noodle"
+)
+# Catégories parentes qui regroupent liquides et produits secs : elles ne tranchent pas.
+MIXED_PARENT_TAGS = {"en:beverages-and-beverages-preparations", "en:milks-liquid-and-powder"}
+# Café et thé : liquides seulement s'ils sont des boissons prêtes à boire.
+DRY_UNLESS_DRINK = {"en:coffees": "en:coffee-drinks", "en:teas": "en:tea-based-beverages"}
+
+# Unité proposée pour un liquide sans unité : une tasse (250 ml ≈ 250 g).
+LIQUID_DEFAULT_UNIT = ServingUnit("tasse", "tasses", DEFAULT_UNIT_G["tasse"], True)
+
+
+# Vrai si les catégories (« en:beverages,en:milks ») désignent un liquide prêt à boire.
+def is_liquid(categories_tags: str | None) -> bool:
+    tags = {tag.strip() for tag in (categories_tags or "").split(",") if tag.strip()}
+    if not tags & LIQUID_TAGS:
+        return False
+    if any(DRY_TAG_PATTERN.search(tag) for tag in tags - MIXED_PARENT_TAGS):
+        return False
+    return not any(dry in tags and drink not in tags for dry, drink in DRY_UNLESS_DRINK.items())
+
+
+# Mesure de cuisine adaptée à une portion en volume : 15 ml → c. à soupe, 250 ml → tasse.
+def measure_for_volume(volume_ml: float) -> ServingUnit:
+    for singular, plural, limit_ml in (("c. à thé", "c. à thé", 7.5), ("c. à soupe", "c. à soupe", 60)):
+        if volume_ml <= limit_ml:
+            return ServingUnit(singular, plural, DEFAULT_UNIT_G[singular], True)
+    return LIQUID_DEFAULT_UNIT
+
+
+"""
+Unité d'un produit : celle de la portion; sinon, pour une portion en volume
+(« 250 ml »), la mesure de cuisine qui lui correspond; sinon une tasse pour
+un liquide reconnu à ses catégories. None : le produit se saisit en grammes.
+"""
+def unit_for_product(
+    info: ServingInfo, categories_tags: str | None, serving_quantity: float | None = None
+) -> ServingUnit | None:
+    if info.unit is not None:
+        return info.unit
+    if info.serving_is_volume and serving_quantity and serving_quantity > 0:
+        return measure_for_volume(serving_quantity)
+    if is_liquid(categories_tags):
+        return LIQUID_DEFAULT_UNIT
+    return None
