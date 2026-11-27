@@ -62,10 +62,10 @@
   --secondary-ink-hover: #9a3412;
 
   /* Violet : complète le vert et l'orange (ex. bouton Scanner). */
-  --tertiary: #8b74f2;
-  --tertiary-dark: #817ff4;
-  /* Bleu : quatrième couleur, pour les lipides. */
-  --quaternary: #30d5db;
+  --tertiary: #7961e2;
+  --tertiary-dark: #674fd6;
+  /* Turquoise : quatrième couleur, pour les lipides. */
+  --quaternary: #30c6cc;
 
   --danger: #dc2626;
   --warning: #d97706;

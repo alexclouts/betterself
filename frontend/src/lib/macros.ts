@@ -4,7 +4,7 @@ export type MacroKey = "protein_g" | "carbohydrates_g" | "fat_g";
 
 /*
  * Macronutriments et leur couleur, partout dans l'application :
- * protéines en secondaire (orange), glucides en tertiaire (violet), lipides en quaternaire (bleu).
+ * protéines en secondaire (orange), glucides en tertiaire (violet), lipides en quaternaire (turquoise).
  * Le vert (primaire) est réservé aux calories.
  */
 export const MACROS: readonly {
