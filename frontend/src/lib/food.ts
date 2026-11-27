@@ -85,13 +85,6 @@ export function hasInconsistentCalories(food: NutritionReference): boolean {
   return Math.abs(per100g.calories_kcal - expected) > Math.max(20, per100g.calories_kcal * 0.2);
 }
 
-// Quantité proposée par défaut : la portion du fabricant, sinon la portion de référence.
-export function getDefaultQuantityG(
-  food: Pick<FoodRead, "serving_g" | "reference_weight_g">,
-): number {
-  return toNumber(food.serving_g ?? food.reference_weight_g);
-}
-
 /*
  * Calcule les valeurs nutritionnelles pour une quantité donnée,
  * à partir des valeurs déclarées pour la portion de référence.

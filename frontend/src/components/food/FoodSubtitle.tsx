@@ -1,28 +1,25 @@
-import { formatNutrient, toNumber } from "../../lib/food";
-import { getFoodUnit, gramsToUnitCount, unitLabel, type FoodUnitFields } from "../../lib/units";
+import { formatNutrient } from "../../lib/food";
+import { formatSuggestedQuantity, suggestedQuantity, type SuggestionFields } from "../../lib/units";
 import type { FoodRead } from "../../api/generated/foodRead";
 
-type FoodSubtitleProps = Pick<FoodRead, "brand" | "serving_g" | "reference_weight_g"> & FoodUnitFields;
+type FoodSubtitleProps = Pick<FoodRead, "brand"> & SuggestionFields;
 
 /*
- * Sous le nom d'un aliment : la marque, puis la portion, avec la quantité en évidence.
- * Une portion qui tombe sur l'unité de l'aliment est exprimée dans cette unité :
- * « 2 tranches (50 g) ».
+ * Sous le nom d'un aliment : la marque, puis la portion proposée, dans l'unité qui
+ * lui correspond le mieux (« 2 tranches (90 g) »), avec la quantité en évidence.
  */
-export function FoodSubtitle({ brand, serving_g, reference_weight_g, ...unitFields }: FoodSubtitleProps) {
-  const quantityG = toNumber(serving_g ?? reference_weight_g);
-  const unit = getFoodUnit(unitFields);
-  const count = serving_g && unit ? gramsToUnitCount(quantityG, unit.grams) : null;
+export function FoodSubtitle({ brand, ...food }: FoodSubtitleProps) {
+  const suggestion = suggestedQuantity(food);
+  const isReference = suggestion.unit === null && food.serving_g === null;
 
   return (
     <div className="-mt-2 space-y-0.5 lg:-mt-4">
       {brand && <p className="font-semibold text-foreground">{brand}</p>}
       <p className="text-sm">
-        {serving_g ? "Portion suggérée" : "Portion de référence"} :{" "}
+        {isReference ? "Portion de référence" : "Portion suggérée"} :{" "}
         <strong className="font-semibold text-foreground">
-          {unit && count !== null
-            ? `${formatNutrient(count, 2)} ${unitLabel(unit, count)} (${formatNutrient(quantityG)} g)`
-            : `${formatNutrient(quantityG)} g`}
+          {formatSuggestedQuantity(suggestion)}
+          {suggestion.unit && ` (${formatNutrient(suggestion.grams)} g)`}
         </strong>
       </p>
     </div>

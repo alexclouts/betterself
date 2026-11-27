@@ -31,7 +31,6 @@ import { journalService } from "../../services/journalService";
 import { PageHeader } from "../../components/navigation/PageHeader";
 import { JournalDayBadge } from "../../components/journal/JournalDayBadge";
 import {
-  convertAmount,
   findUnit,
   GRAMS,
   hasValidPrecision,
@@ -188,12 +187,8 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
         toNumber(entry.calories_kcal),
     ) > SNAPSHOT_TOLERANCE_KCAL;
 
-  // Changer d'unité convertit la valeur saisie pour garder la même quantité.
+  // Changer d'unité garde la valeur saisie : les nutriments suivent la nouvelle mesure.
   function changeUnit(next: QuantityUnit) {
-    if (next === unit) return;
-    if (Number.isFinite(amount) && amount > 0 && portionG > 0) {
-      setQuantityInput(formatQuantityInput(convertAmount(amount, portion, findUnit(units, next))));
-    }
     setUnit(next);
   }
 

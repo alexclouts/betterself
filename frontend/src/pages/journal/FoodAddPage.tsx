@@ -10,7 +10,6 @@ import {
   computeNutrientsForQuantity,
   formatNutrient,
   getDefaultMealType,
-  getDefaultQuantityG,
   hasInconsistentCalories,
   MEAL_TYPE_LABELS,
   toNumber,
@@ -25,15 +24,14 @@ import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 import { PageHeader } from "../../components/navigation/PageHeader";
 import { QuantityField } from "../../components/ui/QuantityField";
 import {
-  convertAmount,
   findUnit,
   getFoodUnits,
   GRAMS,
   hasValidPrecision,
   initialQuantity,
+  suggestedQuantity,
   toGrams,
   unitOptions,
-  unitWeightHint,
   type QuantityUnit,
 } from "../../lib/units";
 import { formatQuantityInput, parseDecimal } from "../../lib/recipe";
@@ -44,14 +42,10 @@ const MAX_QUANTITY_G = 5000;
 
 type QuantityState = { unit: QuantityUnit; input: string };
 
-/*
- * Quantité proposée à l'ajout : la portion du fabricant, dans l'unité de l'aliment
- * si elle y tombe (« 2 tranches »). Sans portion, une unité de l'aliment.
- */
+// Quantité proposée à l'ajout, dans l'unité qui correspond le mieux à l'aliment.
 function defaultQuantity(food: FoodRead): QuantityState {
-  const [main] = getFoodUnits(food);
-  if (main && food.serving_g === null) return { unit: main.key, input: "1" };
-  return quantityState(getDefaultQuantityG(food), food);
+  const { unit, amount } = suggestedQuantity(food);
+  return { unit: unit?.key ?? GRAMS, input: formatQuantityInput(amount) };
 }
 
 // Quantité en grammes affichée dans l'unité de l'aliment si possible.
@@ -180,12 +174,8 @@ export function FoodAddPage() {
   const isQuantityValid =
     Number.isFinite(quantityG) && quantityG > 0 && quantityG <= MAX_QUANTITY_G && isPrecisionValid;
 
-  // Changer d'unité convertit la valeur saisie pour garder la même quantité.
+  // Changer d'unité garde la valeur saisie : les nutriments suivent la nouvelle mesure.
   function changeUnit(next: QuantityUnit) {
-    if (next === unit) return;
-    if (Number.isFinite(amount) && amount > 0) {
-      setQuantityInput(formatQuantityInput(convertAmount(amount, foodUnit, findUnit(foodUnits, next))));
-    }
     setUnit(next);
   }
 
@@ -293,11 +283,6 @@ export function FoodAddPage() {
               ? isPrecisionValid
                 ? `Entrez une quantité supérieure à 0 et d’au plus ${maxInUnit}.`
                 : "Entrez une quantité avec deux décimales au plus."
-              : null
-          }
-          hint={
-            foodUnit && isQuantityValid
-              ? unitWeightHint(foodUnit, amount, food.weight_is_estimated)
               : null
           }
         />

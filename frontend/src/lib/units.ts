@@ -91,12 +91,6 @@ export function hasValidPrecision(amount: number, unit: FoodUnit | null): boolea
   return unit !== null || roundCents(amount) === amount;
 }
 
-// Valeur saisie convertie d'une unité à l'autre (null : grammes), pour garder la même quantité.
-export function convertAmount(amount: number, from: FoodUnit | null, to: FoodUnit | null): number {
-  const grams = amount * (from?.grams ?? 1);
-  return roundCents(grams / (to?.grams ?? 1));
-}
-
 /*
  * Quantité en unités si les grammes tombent sur un quart d'unité (« 2 tranches »,
  * « 1,5 tasse »), sinon null : la quantité s'affiche alors en grammes.
@@ -116,9 +110,27 @@ export function initialQuantity(quantityG: number, units: FoodUnit[]): { unit: Q
   return { unit: GRAMS, amount: quantityG };
 }
 
-// Poids sous le champ : « 1 tranche = 25 g », « 2 tasses ≈ 500 g » (poids estimé).
-export function unitWeightHint(unit: FoodUnit, amount: number, isEstimated: boolean): string {
-  const count = Number.isFinite(amount) && amount > 0 ? amount : 1;
-  const sign = isEstimated ? "≈" : "=";
-  return `${formatNutrient(count, 2)} ${unitLabel(unit, count)} ${sign} ${formatNutrient(count * unit.grams)} g`;
+// Champs d'un aliment ou d'un résultat de recherche qui fixent la quantité proposée.
+export type SuggestionFields = FoodUnitFields & Pick<FoodRead, "serving_g" | "reference_weight_g">;
+
+export type SuggestedQuantity = { grams: number; unit: FoodUnit | null; amount: number };
+
+/*
+ * Quantité proposée pour un aliment, dans l'unité qui lui correspond le mieux :
+ * la portion du fabricant si elle tombe sur une unité (« 2 tranches »), sinon en
+ * grammes. Sans portion, une unité de l'aliment, ou la portion de référence (100 g).
+ */
+export function suggestedQuantity(food: SuggestionFields): SuggestedQuantity {
+  const units = getFoodUnits(food);
+  if (units.length > 0 && food.serving_g === null) {
+    return { grams: units[0].grams, unit: units[0], amount: 1 };
+  }
+  const grams = toNumber(food.serving_g ?? food.reference_weight_g);
+  const initial = initialQuantity(grams, units);
+  return { grams, unit: findUnit(units, initial.unit), amount: initial.amount };
+}
+
+// « 2 tranches » ou « 90 g ».
+export function formatSuggestedQuantity({ grams, unit, amount }: SuggestedQuantity): string {
+  return unit ? `${formatNutrient(amount, 2)} ${unitLabel(unit, amount)}` : `${formatNutrient(grams)} g`;
 }

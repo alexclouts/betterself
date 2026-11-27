@@ -11,14 +11,12 @@ import {
 import { PageHeader } from "../navigation/PageHeader";
 import { QuantityField } from "../ui/QuantityField";
 import {
-  convertAmount,
   findUnit,
   getFoodUnits,
   hasValidPrecision,
   initialQuantity,
   toGrams,
   unitOptions,
-  unitWeightHint,
   type QuantityUnit,
 } from "../../lib/units";
 import { FoodSubtitle } from "../food/FoodSubtitle";
@@ -62,12 +60,8 @@ export function IngredientEntry({
       ? validateGrams(quantityG)
       : "Deux décimales au plus.";
 
-  // Changer d'unité convertit la valeur saisie pour garder la même quantité.
+  // Changer d'unité garde la valeur saisie : les nutriments suivent la nouvelle mesure.
   function changeUnit(next: QuantityUnit) {
-    if (next === unit) return;
-    if (Number.isFinite(amount) && amount > 0) {
-      setQuantityInput(formatQuantityInput(convertAmount(amount, foodUnit, findUnit(foodUnits, next))));
-    }
     setUnit(next);
   }
   const nutrients = quantityError === null ? computeNutrientsForQuantity(food, quantityG) : null;
@@ -119,11 +113,6 @@ export function IngredientEntry({
           units={unitOptions(foodUnits, amount)}
           onUnitChange={changeUnit}
           error={quantityError && quantityInput.trim() !== "" ? quantityError : null}
-          hint={
-            foodUnit && quantityError === null
-              ? unitWeightHint(foodUnit, amount, food.weight_is_estimated)
-              : null
-          }
           autoFocus
         />
 

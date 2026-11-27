@@ -10,7 +10,8 @@ import { RecipeNutritionCard } from "../../components/recipes/RecipeNutritionCar
 import Button from "../../components/ui/Button";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { useIngredientFlow } from "../../hooks/useIngredientFlow";
-import { computeNutrientsForQuantity, getDefaultQuantityG } from "../../lib/food";
+import { computeNutrientsForQuantity } from "../../lib/food";
+import { suggestedQuantity } from "../../lib/units";
 import { readJournalNavState } from "../../lib/journal";
 import { queryKeys } from "../../lib/queryClient";
 import {
@@ -144,7 +145,7 @@ export function RecipeNewPage() {
       <main className="mx-auto w-full max-w-md px-4 py-6">
         <IngredientSearch
           excludedFoodIds={excludedFoodIds}
-          onPick={(food) => showEntry(food, getDefaultQuantityG(food))}
+          onPick={(food) => showEntry(food, suggestedQuantity(food).grams)}
           onBack={showRecipe}
         />
         {leaveDialog}
