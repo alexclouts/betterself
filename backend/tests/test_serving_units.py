@@ -164,3 +164,18 @@ def test_liquid_without_unit_gets_a_cup():
 def test_volume_serving_gets_a_measure(text, ml, singular):
     unit = unit_for_product(parse_serving(text), None, ml)
     assert unit.singular == singular and unit.is_estimated
+
+
+# Les adjectifs de taille ne cachent pas l'unité.
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("2 tranches moyennes (86 g)", ServingUnit("tranche", "tranches", 43, False)),
+        ("1 medium slice (35 g)", ServingUnit("tranche", "tranches", 35, False)),
+        ("3 thin slices (30 g)", ServingUnit("tranche", "tranches", 10, False)),
+        ("1 petit pain (60 g)", ServingUnit("pain", "pains", 60, False)),
+        ("2 large eggs (100 g)", ServingUnit("œuf", "œufs", 50, False)),
+    ],
+)
+def test_size_words_are_ignored(text, expected):
+    assert unit_of(text) == expected

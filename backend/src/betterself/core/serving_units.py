@@ -199,6 +199,24 @@ def _amount(text: str) -> tuple[float, bool] | None:
     return _number(match.group(1)), match.group(2) == "ml"
 
 
+# Adjectifs de taille ignorés : « 2 tranches moyennes », « 1 medium slice », « 3 thin slices ».
+SIZE_WORDS = {
+    "petit", "petite", "petits", "petites", "moyen", "moyenne", "moyens", "moyennes",
+    "grand", "grande", "grands", "grandes", "gros", "grosse", "grosses",
+    "mince", "minces", "épais", "épaisse", "épaisses",
+    "small", "medium", "large", "extra", "thin", "thick", "regular", "big", "mini",
+}
+
+
+# « tranches moyennes » → « tranches », sauf si l'expression est connue telle quelle
+# (« petit pain », « large eggs »).
+def _without_size_words(word: str) -> str:
+    if word in UNITS:
+        return word
+    kept = [part for part in word.split() if part not in SIZE_WORDS]
+    return " ".join(kept) if kept else word
+
+
 def _is_plausible(unit: Unit, count: float, grams: float) -> bool:
     # « 75 slices (75 g) » : le poids a été saisi à la place du nombre.
     if count >= 10 and abs(count - grams) <= 0.2 * grams:
@@ -219,7 +237,7 @@ def _parse_unit(text: str) -> ServingUnit | None:
         return None
 
     count = _number(match.group(1)) if match.group(1) else 1.0
-    word = match.group(2).strip(" .:-")
+    word = _without_size_words(match.group(2).strip(" .:-"))
     details = match.group(3) or ""
 
     if word in WEIGHT_WORDS:
