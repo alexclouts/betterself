@@ -5,6 +5,7 @@ import {
   getDefaultQuantityG,
   hasInconsistentCalories,
 } from "../../lib/food";
+import { MacroInline } from "../food/MacroBreakdown";
 
 // Petite horloge discrète : l'aliment fait partie de l'historique de l'utilisateur.
 function HistoryIcon() {
@@ -60,10 +61,7 @@ export function FoodResultItem({
             {food.in_history && <HistoryIcon />}
           </span>
           {food.brand && <span className="block truncate text-sm text-muted">{food.brand}</span>}
-          <span className="mt-1 block text-sm text-muted">
-            P {formatNutrient(nutrients.protein_g)} g · G {formatNutrient(nutrients.carbohydrates_g)} g
-            {" "}· L {formatNutrient(nutrients.fat_g)} g
-          </span>
+          <MacroInline nutrients={nutrients} className="mt-1" />
           {hasInconsistentCalories(food) && (
             <span className="block text-sm text-warning">Calories à vérifier sur l’emballage</span>
           )}

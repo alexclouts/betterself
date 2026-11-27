@@ -11,7 +11,7 @@ export function TabLayout() {
   return (
     <>
       {/* Réserve la hauteur de la barre pour que la fin du contenu reste visible. */}
-      <div className="flex w-full flex-1 flex-col items-center pb-[calc(5rem+env(safe-area-inset-bottom))]">
+      <div className="flex w-full flex-1 flex-col items-center pb-[calc(5rem+var(--safe-bottom))]">
         <Outlet />
       </div>
       <BottomNav />

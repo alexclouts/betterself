@@ -1,6 +1,7 @@
 import type { RecipeRead } from "../../api/generated/recipeRead";
 import { formatNutrient } from "../../lib/food";
 import { formatCount, perServing, recipeTotals, servingWeightG } from "../../lib/recipe";
+import { MacroInline } from "../food/MacroBreakdown";
 
 type RecipeResultItemProps = {
   recipe: RecipeRead;
@@ -23,10 +24,7 @@ export function RecipeResultItem({ recipe, onSelect }: RecipeResultItemProps) {
           <span className="block text-sm text-muted">
             {formatCount(recipe.servings, "portion", "portions")}
           </span>
-          <span className="mt-1 block text-sm text-muted">
-            P {formatNutrient(nutrients.protein_g)} g · G {formatNutrient(nutrients.carbohydrates_g)} g
-            {" "}· L {formatNutrient(nutrients.fat_g)} g
-          </span>
+          <MacroInline nutrients={nutrients} className="mt-1" />
         </span>
 
         <span className="shrink-0 text-right">

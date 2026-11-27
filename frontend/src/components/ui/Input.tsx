@@ -13,7 +13,7 @@ export default function Input({
 }: InputProps) {
   return (
     <input
-      className={`w-full rounded-l placeholder:text-muted border border-border bg-field p-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 ${className}`}
+      className={`w-full rounded-none placeholder:text-muted border border-border bg-field p-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 ${className}`}
       type={type}
       placeholder={placeholder}
       autoComplete={autoComplete}

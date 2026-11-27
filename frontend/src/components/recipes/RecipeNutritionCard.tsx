@@ -2,6 +2,7 @@ import { useState } from "react";
 import Card from "../ui/Card";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { formatNutrient, type FoodNutrients } from "../../lib/food";
+import { MacroBreakdown } from "../food/MacroBreakdown";
 import { formatCount, perServing } from "../../lib/recipe";
 
 type Scope = "serving" | "recipe";
@@ -49,20 +50,7 @@ export function RecipeNutritionCard({ totals, servings, totalWeightG }: RecipeNu
           <span>kcal</span>
         </p>
 
-        <dl className="mt-4 grid grid-cols-3 gap-3">
-          <div>
-            <dt className="text-sm text-muted">Protéines</dt>
-            <dd className="font-semibold text-foreground">{formatNutrient(nutrients.protein_g)} g</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Glucides</dt>
-            <dd className="font-semibold text-foreground">{formatNutrient(nutrients.carbohydrates_g)} g</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Lipides</dt>
-            <dd className="font-semibold text-foreground">{formatNutrient(nutrients.fat_g)} g</dd>
-          </div>
-        </dl>
+        <MacroBreakdown nutrients={nutrients} className="mt-4" />
       </div>
     </Card>
   );

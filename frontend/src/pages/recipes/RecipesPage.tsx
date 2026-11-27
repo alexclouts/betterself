@@ -65,8 +65,7 @@ export function RecipesPage() {
       ) : (
         <ul className="mt-6 divide-y divide-border text-left">
           {recipes.map((recipe) => {
-            const { calories_kcal: calories, protein_g: protein } = perServing(recipeTotals(recipe), recipe.servings);
-            const ingredientCount = recipe.ingredients?.length ?? 0;
+            const { calories_kcal: calories } = perServing(recipeTotals(recipe), recipe.servings);
 
             return (
               <li key={recipe.id} className="flex items-center gap-3 py-3">
@@ -75,39 +74,56 @@ export function RecipesPage() {
                   type="button"
                   onClick={() => navigate(`/recipes/${recipe.id}`)}
                   aria-label={`Ouvrir la recette ${recipe.name}${recipe.is_archived ? " (archivée)" : ""}`}
-                  className={`flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-lg px-2 py-1 text-left hover:bg-surface-raised ${
+                  className={`flex min-w-0 flex-1 items-center justify-between gap-3 rounded-lg px-2 py-1 text-left hover:bg-surface-raised ${
                     recipe.is_archived ? "opacity-60" : ""
                   }`}
                 >
+                  {/* L'essentiel seulement : nom et portions à gauche, calories d'une portion à droite. */}
                   <span className="min-w-0">
-                    <span className="block break-words text-foreground">{recipe.name}</span>
-                    <span className="text-sm text-muted">
-                      {recipe.is_archived && "Archivée · "}
-                      {formatCount(ingredientCount, "ingrédient", "ingrédients")}
-                      {" · "}
-                      {formatCount(recipe.servings, "portion", "portions")}
+                    <span className="line-clamp-2 font-medium break-words text-foreground">{recipe.name}</span>
+                    <span className="block text-sm text-muted">
+                      {recipe.is_archived ? "Archivée" : formatCount(recipe.servings, "portion", "portions")}
                     </span>
                   </span>
                   <span className="shrink-0 text-right">
                     <strong className="block text-foreground">{formatNutrient(calories, 0)} kcal</strong>
-                    <span className="text-sm text-muted">
-                      {formatNutrient(protein)} g prot. / portion
-                    </span>
+                    <span className="block text-xs text-muted">par portion</span>
                   </span>
                 </button>
 
-                {/* Bouton texte, comme « + Ajouter un aliment » du journal :
-                    Archiver en couleur secondaire, Réactiver en couleur primaire. */}
+                {/* Icône plutôt que texte, pour alléger la rangée :
+                    archiver en couleur secondaire, réactiver en couleur primaire. */}
                 <button
                   type="button"
                   onClick={() => toggleArchive(recipe)}
                   disabled={pendingId === recipe.id}
                   aria-label={`${recipe.is_archived ? "Réactiver" : "Archiver"} la recette ${recipe.name}`}
-                  className={`shrink-0 text-sm font-semibold disabled:opacity-30 ${
+                  title={recipe.is_archived ? "Réactiver" : "Archiver"}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-surface-raised disabled:opacity-30 ${
                     recipe.is_archived ? "text-primary-ink" : "text-secondary-ink"
                   }`}
                 >
-                  {recipe.is_archived ? "Réactiver" : "Archiver"}
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    {recipe.is_archived ? (
+                      // Flèche circulaire : réactiver.
+                      <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
+                    ) : (
+                      // Boîte d'archives.
+                      <>
+                        <rect x="3" y="4" width="18" height="4" rx="1" />
+                        <path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4" />
+                      </>
+                    )}
+                  </svg>
                 </button>
               </li>
             );

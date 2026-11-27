@@ -10,7 +10,7 @@ import Button from "../../components/ui/Button";
 import { QuantityField } from "../../components/ui/QuantityField";
 import Select from "../../components/ui/Select";
 import { useRecipe } from "../../hooks/useRecipe";
-import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
+import { consumedAtForDay, toDateKey, todayKey } from "../../lib/date";
 import {
   formatNutrient,
   getDefaultMealType,
@@ -30,6 +30,7 @@ import {
 } from "../../lib/recipe";
 import { journalService } from "../../services/journalService";
 import { PageHeader } from "../../components/navigation/PageHeader";
+import { JournalDayBadge } from "../../components/journal/JournalDayBadge";
 
 // Quantité maximale acceptée par l'API pour une consommation.
 const MAX_QUANTITY_G = 5000;
@@ -236,10 +237,13 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
       <PageHeader onBack={() => navigate(-1)} />
 
       <h1 className="break-words">{recipe.name}</h1>
-      <p className="mt-1">
-        Recette · {formatCount(recipe.servings, "portion", "portions")} de{" "}
-        {formatNutrient(portionG, 0)} g
+      <p className="-mt-2 text-sm lg:-mt-4">
+        <strong className="font-semibold text-foreground">
+          {formatCount(recipe.servings, "portion", "portions")}
+        </strong>{" "}
+        de <strong className="font-semibold text-foreground">{formatNutrient(portionG, 0)} g</strong>
       </p>
+      {dayKey !== todayKey() && <JournalDayBadge dayKey={dayKey} isEntry={entry !== null} className="mt-3" />}
 
       <NutritionFactsCard nutrients={nutrients} className="mt-6" />
       <RecipeIngredientsDetails
@@ -247,12 +251,6 @@ function RecipeEntryForm({ recipe, entry }: { recipe: RecipeRead; entry?: FoodCo
         quantityG={isQuantityValid ? quantityG : null}
         className="mt-3"
       />
-      {dayKey !== todayKey() && (
-        <p className="mt-1">
-          {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}
-          {formatDayLabel(dayKey).toLowerCase()}
-        </p>
-      )}
       {isSnapshotOutdated && (
         <p className="mt-2 text-sm text-muted" role="note">
           La recette a été modifiée depuis cet ajout. Changer la quantité recalculera les valeurs

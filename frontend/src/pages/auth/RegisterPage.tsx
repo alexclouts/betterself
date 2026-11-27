@@ -87,7 +87,7 @@ export function RegisterPage() {
                     />
 
                     {error && (
-                        <p className="text-danger" role="alert">
+                        <p className="text-sm text-danger" role="alert">
                             {error}
                         </p>
                     )}

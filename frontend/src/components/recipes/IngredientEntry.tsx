@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NutritionFactsCard } from "../food/NutritionFactsCard";
 import Button from "../ui/Button";
-import { computeNutrientsForQuantity, formatNutrient } from "../../lib/food";
+import { computeNutrientsForQuantity, hasInconsistentCalories } from "../../lib/food";
 import {
   formatQuantityInput,
   parseDecimal,
@@ -11,6 +11,7 @@ import {
 import { PageHeader } from "../navigation/PageHeader";
 import { QuantityField } from "../ui/QuantityField";
 import { GRAM_UNIT_OPTIONS } from "../../lib/units";
+import { FoodSubtitle } from "../food/FoodSubtitle";
 
 type IngredientEntryProps = {
   food: PickedFood;
@@ -64,15 +65,13 @@ export function IngredientEntry({
       />
 
       <h1>{food.name}</h1>
-      {food.brand && <p>{food.brand}</p>}
+      <FoodSubtitle brand={food.brand} serving_g={food.serving_g} reference_weight_g={food.reference_weight_g} />
 
-      <p className="mt-1">
-        {food.serving_g
-          ? `Portion suggérée : ${formatNutrient(food.serving_g)} g`
-          : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
-      </p>
-
-      <NutritionFactsCard nutrients={nutrients} className="mt-6" />
+      <NutritionFactsCard
+        nutrients={nutrients}
+        showCalorieWarning={hasInconsistentCalories(food)}
+        className="mt-6"
+      />
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <QuantityField
