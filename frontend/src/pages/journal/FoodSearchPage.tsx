@@ -160,8 +160,26 @@ export function FoodSearchPage() {
         <div className="mt-2 grid grid-cols-3 gap-2 text-sm font-semibold">
           <button
             type="button"
+            onClick={() =>
+              navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
+            }
+            aria-label="Créer un aliment"
+            className="rounded-full bg-primary px-2 py-2 text-white hover:bg-primary-dark"
+          >
+            + Aliment
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/recipes/new", { state: journalNavState })}
+            aria-label="Créer une recette"
+            className="rounded-full bg-secondary px-2 py-2 text-white hover:bg-secondary-dark"
+          >
+            + Recette
+          </button>
+                    <button
+            type="button"
             onClick={() => navigate("/journal/scan", { state: journalNavState })}
-            className="flex items-center justify-center gap-1.5 rounded-full bg-surface px-2 py-2 text-foreground hover:bg-surface-raised"
+            className="flex items-center justify-center gap-1.5 rounded-full bg-tertiary px-2 py-2 text-white hover:bg-tertiary-dark"
           >
             {/* Code-barres dans un cadre de visée. */}
             <svg
@@ -178,24 +196,6 @@ export function FoodSearchPage() {
               <path d="M7 8v8M10 8v8M13 8v8M17 8v8" />
             </svg>
             Scanner
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/journal/food/new", { state: { ...journalNavState, name: query.trim() } })
-            }
-            aria-label="Créer un aliment"
-            className="rounded-full bg-surface px-2 py-2 text-primary-ink hover:bg-surface-raised"
-          >
-            + Aliment
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/recipes/new", { state: journalNavState })}
-            aria-label="Créer une recette"
-            className="rounded-full bg-surface px-2 py-2 text-secondary-ink hover:bg-surface-raised"
-          >
-            + Recette
           </button>
         </div>
       </div>

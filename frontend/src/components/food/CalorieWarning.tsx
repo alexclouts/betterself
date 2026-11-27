@@ -2,23 +2,49 @@ import { useState } from "react";
 import { InfoDialog } from "../ui/InfoDialog";
 
 /*
- * Mention « Calories à vérifier sur l'emballage », avec un bouton « i » qui
- * ouvre un dialogue expliquant d'où vient l'avertissement.
+ * Bandeau « Calories à vérifier sur l'emballage », en bas de la carte des valeurs
+ * nutritives. Tout le bandeau est un bouton qui ouvre l'explication.
  */
 export function CalorieWarning({ className = "" }: { className?: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className={`flex items-center gap-2 text-left text-sm ${className}`}>
-      <span className="text-foreground">Calories à vérifier sur l’emballage</span>
+    <>
       <button
         type="button"
         onClick={() => setIsOpen(true)}
         aria-haspopup="dialog"
-        aria-label="Pourquoi vérifier les calories ?"
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-warning font-serif text-xs font-bold text-foreground italic hover:bg-surface-raised"
+        className={`flex w-full items-center gap-2 rounded-xl bg-warning/10 px-3 py-2 text-left text-sm font-semibold text-warning transition hover:bg-warning/20 ${className}`}
       >
-        i
+        {/* Triangle d'avertissement. */}
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+          <path d="M12 9v4M12 17h.01" />
+        </svg>
+        <span className="flex-1">Calories à vérifier sur l’emballage</span>
+        {/* Cercle « i » : le bandeau ouvre une explication. */}
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v5M12 8h.01" />
+        </svg>
       </button>
 
       <InfoDialog open={isOpen} title="Calories à vérifier" onClose={() => setIsOpen(false)}>
@@ -33,6 +59,6 @@ export function CalorieWarning({ className = "" }: { className?: string }) {
           de l’emballage avant d’ajouter l’aliment.
         </p>
       </InfoDialog>
-    </div>
+    </>
   );
 }

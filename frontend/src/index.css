@@ -16,6 +16,10 @@
   --color-secondary-ink: var(--secondary-ink);
   --color-secondary-ink-hover: var(--secondary-ink-hover);
 
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-dark: var(--tertiary-dark);
+  --color-quaternary: var(--quaternary);
+
   --color-danger: var(--danger);
   --color-warning: var(--warning);
 
@@ -56,6 +60,12 @@
   --primary-ink-hover: #065f46;
   --secondary-ink: #c2410c;
   --secondary-ink-hover: #9a3412;
+
+  /* Violet : complète le vert et l'orange (ex. bouton Scanner). */
+  --tertiary: #8b74f2;
+  --tertiary-dark: #817ff4;
+  /* Bleu : quatrième couleur, pour les lipides. */
+  --quaternary: #30d5db;
 
   --danger: #dc2626;
   --warning: #d97706;
@@ -100,7 +110,7 @@
     --field: #353535;
     --border: #525252;
     --code-bg: #1f2028;
-    --accent: #c084fc;
+    --accent: #b89cff;
     --accent-bg: rgba(192, 132, 252, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
     --social-bg: rgba(47, 48, 58, 0.5);

@@ -8,7 +8,6 @@ import Button from "../../components/ui/Button";
 import Select from "../../components/ui/Select";
 import {
   computeNutrientsForQuantity,
-  formatNutrient,
   getDefaultMealType,
   getDefaultQuantityG,
   hasAtMostTwoDecimals,
@@ -20,13 +19,14 @@ import {
 import { foodService } from "../../services/foodService";
 import { journalService } from "../../services/journalService";
 import { queryKeys } from "../../lib/queryClient";
-import { consumedAtForDay, formatDayLabel, toDateKey, todayKey } from "../../lib/date";
+import { consumedAtForDay, toDateKey, todayKey } from "../../lib/date";
 import { journalUrl, readJournalNavState } from "../../lib/journal";
 import { NutritionFactsCard } from "../../components/food/NutritionFactsCard";
 import { PageHeader } from "../../components/navigation/PageHeader";
 import { QuantityField } from "../../components/ui/QuantityField";
 import { GRAM_UNIT_OPTIONS } from "../../lib/units";
-import { CalorieWarning } from "../../components/food/CalorieWarning";
+import { FoodSubtitle } from "../../components/food/FoodSubtitle";
+import { JournalDayBadge } from "../../components/journal/JournalDayBadge";
 
 const MAX_QUANTITY_G = 5000;
 
@@ -213,21 +213,13 @@ export function FoodAddPage() {
       <PageHeader onBack={() => navigate(-1)} />
 
       <h1>{food.name}</h1>
-      {food.brand && <p>{food.brand}</p>}
-
-      <p className="mt-1">
-        {food.serving_g
-          ? `Portion suggérée : ${formatNutrient(food.serving_g)} g`
-          : `Portion de référence : ${formatNutrient(food.reference_weight_g)} g`}
-      </p>
-      <NutritionFactsCard nutrients={nutrients} className="mt-6" />
-      {hasInconsistentCalories(food) && <CalorieWarning className="mt-2" />}
-      {dayKey !== todayKey() && (
-        <p className="mt-1">
-          {entry ? "Entrée du journal de" : "Ajout au journal de"} :{" "}
-          {formatDayLabel(dayKey).toLowerCase()}
-        </p>
-      )}
+      <FoodSubtitle brand={food.brand} serving_g={food.serving_g} reference_weight_g={food.reference_weight_g} />
+      {dayKey !== todayKey() && <JournalDayBadge dayKey={dayKey} isEntry={entry !== null} className="mt-3" />}
+      <NutritionFactsCard
+        nutrients={nutrients}
+        showCalorieWarning={hasInconsistentCalories(food)}
+        className="mt-6"
+      />
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
         <QuantityField

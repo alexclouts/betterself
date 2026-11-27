@@ -211,7 +211,7 @@ export function FoodCreatePage() {
         <Card className="w-full mt-10 bg-surface">
           <fieldset className="space-y-3 p-4">
             <legend className="px-1 text-sm font-bold">
-              Valeurs nutritives pour la portion de référence
+              Valeurs nutritives
             </legend>
 
             {NUMERIC_FIELDS.map(({ key, label, unit }) => (
