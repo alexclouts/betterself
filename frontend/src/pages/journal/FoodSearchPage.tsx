@@ -157,7 +157,7 @@ export function FoodSearchPage() {
           className="w-full border px-4 py-3"
         />
 
-        <div className="mt-2 grid grid-cols-3 gap-2 text-sm font-semibold">
+        <div className="mt-3 grid grid-cols-3 gap-2 text-sm font-semibold">
           <button
             type="button"
             onClick={() =>

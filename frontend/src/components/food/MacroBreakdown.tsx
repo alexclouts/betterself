@@ -59,3 +59,28 @@ export function MacroBreakdown({ nutrients, className = "" }: MacroBreakdownProp
     </div>
   );
 }
+
+// Abréviations des listes compactes.
+const MACRO_SHORT_LABELS: Record<string, string> = {
+  protein_g: "Prot.",
+  carbohydrates_g: "Gluc.",
+  fat_g: "Lip.",
+};
+
+/*
+ * Version compacte pour les listes (résultats de recherche) : « Prot. 12 g  Gluc. 30 g  Lip. 5 g »,
+ * la quantité en évidence et l'abréviation en retrait. Uniquement des <span>,
+ * pour pouvoir être placé dans un bouton.
+ */
+export function MacroInline({ nutrients, className = "" }: { nutrients: FoodNutrients; className?: string }) {
+  return (
+    <span className={`flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-sm text-muted ${className}`}>
+      {MACROS.map((macro) => (
+        <span key={macro.key} title={macro.label}>
+          {MACRO_SHORT_LABELS[macro.key]}{" "}
+          <span className="font-semibold text-foreground">{formatNutrient(nutrients[macro.key])} g</span>
+        </span>
+      ))}
+    </span>
+  );
+}
