@@ -1,3 +1,6 @@
+import hashlib
+import secrets
+
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from datetime import datetime, timedelta, timezone
@@ -39,3 +42,21 @@ def create_access_token(subject:str) -> str:
     # Encode le jeton en utilisant la clé secrète et l'algorithme spécifiés dans les paramètres de configuration.
     encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
+
+"""
+Jetons à usage unique envoyés par courriel (vérification de l'adresse).
+
+Le jeton est aléatoire et long : un simple SHA-256 suffit pour le stocker.
+Argon2 est lent exprès pour protéger des mots de passe faibles, ce qui
+n'est pas utile ici.
+"""
+
+# Génère un jeton aléatoire. Retourne le jeton en clair (à envoyer) et son hash (à stocker).
+def generate_email_token() -> tuple[str, str]:
+    token = secrets.token_urlsafe(32)
+    return token, hash_email_token(token)
+
+
+# Calcule le hash d'un jeton reçu, pour le chercher dans la base de données.
+def hash_email_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()

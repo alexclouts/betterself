@@ -38,6 +38,9 @@ class UserService:
         data: UserCreate,
     ) -> User:
         email = data.email.lower()
+        # Le hachage se fait avant la vérification du doublon : la réponse prend
+        # le même temps, que l'adresse ait déjà un compte ou non.
+        pwd_hash = hash_password(data.password)
 
         if self.user_repository.exists_by_email(email):
             raise DuplicateRecord(
@@ -46,6 +49,6 @@ class UserService:
 
         user = User(
             email=email,
-            pwd_hash=hash_password(data.password),
+            pwd_hash=pwd_hash,
         )
         return self.user_repository.add(user)

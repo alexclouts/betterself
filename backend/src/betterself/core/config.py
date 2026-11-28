@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:5173"
     # Durée de validité d'un lien de vérification du courriel.
     email_verification_expire_hours: int = 24
+    # Délai minimal entre deux envois du lien de vérification, contre les abus.
+    email_verification_resend_seconds: int = 60
 
     model_config = {
         "env_file": ".env",

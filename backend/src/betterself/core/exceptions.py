@@ -19,3 +19,9 @@ class CatalogUnavailable(Exception):
     def __init__(self, message="Le catalogue Open Food Facts est indisponible"):
         self.message = message
         super().__init__(self.message)
+
+# Le lien de vérification du courriel est inconnu, expiré ou déjà utilisé.
+class InvalidVerificationToken(Exception):
+    def __init__(self, message="Ce lien de vérification est invalide ou expiré."):
+        self.message = message
+        super().__init__(self.message)
