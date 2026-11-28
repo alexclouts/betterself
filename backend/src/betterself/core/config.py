@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     # STARTTLS chiffre la connexion; Mailpit ne le demande pas, un vrai fournisseur oui.
     smtp_starttls: bool = False
     mail_from: str = "BetterSelf <no-reply@betterself.local>"
+    # Adresse qui reçoit les réponses aux courriels envoyés. Facultative.
+    mail_reply_to: str | None = None
     # Adresse du frontend, utilisée pour construire les liens envoyés par courriel.
     frontend_url: str = "http://localhost:5173"
     # Durée de validité d'un lien de vérification du courriel.
