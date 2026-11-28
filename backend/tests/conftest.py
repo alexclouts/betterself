@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from betterself.core.config import settings
 from betterself.core.database import Base, create_db_engine, get_db
+from betterself.core.email import get_email_sender
 from betterself.main import app
 from betterself.models.user_models import User
 
@@ -65,8 +66,23 @@ def test_session(test_engine):
         connection.close()
 
 
+# Remplace l'envoi SMTP : les courriels sont conservés en mémoire pour que
+# les tests puissent lire leur contenu (par exemple le lien de vérification).
+class FakeEmailSender:
+    def __init__(self):
+        self.sent: list[dict[str, str]] = []
+
+    def send(self, to: str, subject: str, body: str) -> None:
+        self.sent.append({"to": to, "subject": subject, "body": body})
+
+
 @pytest.fixture
-def client(test_session):
+def email_sender():
+    return FakeEmailSender()
+
+
+@pytest.fixture
+def client(test_session, email_sender):
     def override_get_db():
         try:
             yield test_session
@@ -75,6 +91,8 @@ def client(test_session):
 
     # Remplace la dépendance de base de données de l'application par la session de test
     app.dependency_overrides[get_db] = override_get_db
+    # Aucun courriel réel n'est envoyé pendant les tests
+    app.dependency_overrides[get_email_sender] = lambda: email_sender
 
     # Crée un client de test pour l'application FastAPI avec la session de test
     with TestClient(app) as test_client:

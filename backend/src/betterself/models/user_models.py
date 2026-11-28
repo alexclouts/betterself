@@ -54,6 +54,13 @@ class User(Base):
         nullable=False,
     )
 
+    # Date à laquelle l'utilisateur a confirmé son adresse courriel.
+    # None tant que l'adresse n'est pas vérifiée.
+    email_verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     # Relation vers le profil utilisateur associé. Un utilisateur peut avoir au maximum un profil.
     profile: Mapped["UserProfile | None"] = relationship(
         "UserProfile",

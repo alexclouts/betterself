@@ -22,5 +22,15 @@ services:
       timeout: 3s
       retries: 10
 
+  # Faux serveur SMTP pour le développement : il reçoit les courriels envoyés par
+  # le backend sans jamais les livrer. Interface web : http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.33
+    ports:
+      # SMTP (utilisé par le backend)
+      - "127.0.0.1:1025:1025"
+      # Interface web pour lire les courriels reçus
+      - "127.0.0.1:8025:8025"
+
 volumes:
   pgdata:

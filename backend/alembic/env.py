@@ -20,6 +20,7 @@ from betterself.models.recipe_models import Recipe
 from betterself.models.consumption_models import FoodConsumption
 from betterself.models.target_models import GoalTarget
 from betterself.models.profile_models import UserProfile
+from betterself.models.email_verification_models import EmailVerificationToken
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
