@@ -52,7 +52,7 @@ Suite à ces recommandations, l'environnement de test est accessible à partir d
 Le navigateur par défaut que j'utilise sur mon téléphone est Google Chrome. En essayant de scanner un article, l'application n'arrivait pas à lire le code-barres.
 
 {{< img
-src="troubleshooting1.png"
+src="troubleshooting1.jpg"
 alt="Troubleshooting 1"
 caption=""
 width="800">}}
