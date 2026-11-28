@@ -3,6 +3,8 @@ import { createBrowserRouter, createRoutesFromElements, Route } from "react-rout
 import App from "../App";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
+import { CheckEmailPage } from "../pages/auth/CheckEmailPage";
+import { VerifyEmailPage } from "../pages/auth/VerifyEmailPage";
 import { ProtectedRoute } from "../routes/ProtectedRoutes";
 import { OnboardingGuard } from "../routes/OnboardingGuard";
 import { TabLayout } from "../routes/TabLayout";
@@ -32,6 +34,9 @@ export const router = createBrowserRouter(
             {/* Route publique pour la page de connexion */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            {/* Validation de l'adresse courriel après l'inscription */}
+            <Route path="/check-email" element={<CheckEmailPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
             {/* Routes protégées nécessitant une authentification */}
             <Route element={<ProtectedRoute />}>

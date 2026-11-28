@@ -1,7 +1,8 @@
 // src/features/auth/LoginPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../../services/authService";
+import { authService, EmailNotVerifiedError } from "../../services/authService";
+import { ResendVerificationButton } from "../../components/auth/ResendVerificationButton";
 import { useAuthStore } from "../../stores/authStore";
 import { useOnboarding } from "../../context/OnboardingContext";
 import Card from "../../components/ui/Card";
@@ -21,6 +22,8 @@ export function LoginPage() {
     
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // Le mot de passe est bon, mais l'adresse n'est pas confirmée : on propose de renvoyer le lien.
+    const [isUnverified, setIsUnverified] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Récupère la fonction pour rafraîchir le statut de l'onboarding utilisateur.
@@ -29,6 +32,7 @@ export function LoginPage() {
     async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
         setError(null);
+        setIsUnverified(false);
         setIsSubmitting(true);
 
         try {
@@ -48,7 +52,12 @@ export function LoginPage() {
                     "Connexion réussie, mais impossible de vérifier votre onboarding. Réessayez."
                 );
             }
-        } catch {
+        } catch (loginError) {
+            if (loginError instanceof EmailNotVerifiedError) {
+                setIsUnverified(true);
+                setError(loginError.message);
+                return;
+            }
             // Si la connexion échoue, on affiche un message d'erreur.
             setError("Impossible de vous connecter. Vérifiez vos identifiants.");
         } finally {
@@ -86,6 +95,8 @@ export function LoginPage() {
                             {error}
                         </p>
                     )}
+
+                    {isUnverified && <ResendVerificationButton email={email} />}
 
                     <Button className="bg-primary text-white font-bold hover:bg-primary-dark mt-4">
                     Se connecter

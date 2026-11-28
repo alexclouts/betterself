@@ -40,11 +40,10 @@ export function RegisterPage() {
         try {
             await authService.register({ email, password });
 
-            navigate("/login", {
+            // Le compte n'est utilisable qu'après la confirmation de l'adresse.
+            navigate("/check-email", {
                 replace: true,
-                state: {
-                    message: "Compte créé avec succès. Connecte-toi maintenant.",
-                },
+                state: { email: email.trim() },
             });
         } catch (registrationError) {
             setError(
