@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # Adresse qui reçoit les réponses aux courriels envoyés. Facultative.
     mail_reply_to: str | None = None
     # Adresse du frontend, utilisée pour construire les liens envoyés par courriel.
-    frontend_url: str = "http://localhost:5173"
+    frontend_url: str = "http://localhost:8080"
     # Durée de validité d'un lien de vérification du courriel.
     email_verification_expire_hours: int = 24
     # Délai minimal entre deux envois du lien de vérification, contre les abus.
