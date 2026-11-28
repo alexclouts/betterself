@@ -1,6 +1,5 @@
 import uuid
 
-from betterself.core.exceptions import DuplicateRecord
 from betterself.core.security import hash_password
 from betterself.models.user_models import User
 from betterself.repos.user_repo import UserRepository
@@ -31,21 +30,33 @@ class UserService:
         return self.user_repository.get_by_id(user_id)
 
 
-    # Crée un nouvel utilisateur.
-    # Lève une exception DuplicateRecord si un utilisateur avec le même email existe déjà.
-    def create_user(
+    # Inscrit un utilisateur. Retourne (utilisateur, True) si le compte est créé, ou
+    # (compte existant, False) si l'adresse a déjà un compte. Ne lève pas d'erreur pour
+    # un doublon : le routeur répond la même chose dans les deux cas.
+    #
+    # Si le compte existant n'est pas encore vérifié, la dernière inscription remplace
+    # son mot de passe. Quelqu'un qui aurait inscrit l'adresse d'une autre personne
+    # ne garde donc pas le contrôle du compte : la vraie propriétaire se réinscrit,
+    # et la confirmation exige le mot de passe qu'elle vient de choisir.
+    def register(
         self,
         data: UserCreate,
-    ) -> User:
+    ) -> tuple[User, bool]:
         email = data.email.lower()
+        # Le hachage se fait dans tous les cas : la réponse prend le même temps,
+        # que l'adresse ait déjà un compte ou non.
+        pwd_hash = hash_password(data.password)
 
-        if self.user_repository.exists_by_email(email):
-            raise DuplicateRecord(
-                "Les informations entrées sont invalides."
-            )
+        # Le verrou évite que deux inscriptions simultanées de la même adresse
+        # envoient chacune un courriel.
+        existing = self.user_repository.get_by_email_for_update(email)
+        if existing is not None:
+            if existing.email_verified_at is None:
+                existing.pwd_hash = pwd_hash
+            return existing, False
 
         user = User(
             email=email,
-            pwd_hash=hash_password(data.password),
+            pwd_hash=pwd_hash,
         )
-        return self.user_repository.add(user)
+        return self.user_repository.add(user), True

@@ -22,6 +22,30 @@ class Settings(BaseSettings):
     off_catalog_path: str | None = None
     allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # Envoi des courriels. Les valeurs par défaut pointent vers Mailpit
+    # (docker-compose.yml), qui intercepte les courriels en développement.
+    # En production, ces valeurs viennent des variables d'environnement du fournisseur.
+    smtp_host: str = "localhost"
+    smtp_port: int = 1025
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    # Chiffrement de la connexion. Mailpit n'en demande pas, un vrai fournisseur oui :
+    #   - STARTTLS, habituellement sur le port 587;
+    #   - TLS dès la connexion (SMTP_SSL), habituellement sur le port 465.
+    smtp_starttls: bool = False
+    smtp_ssl: bool = False
+    mail_from: str = "BetterSelf <no-reply@betterself.local>"
+    # Adresse qui reçoit les réponses aux courriels envoyés. Facultative.
+    mail_reply_to: str | None = None
+    # Adresse du frontend, utilisée pour construire les liens envoyés par courriel.
+    frontend_url: str = "http://localhost:8080"
+    # Durée de validité d'un lien de vérification du courriel.
+    email_verification_expire_hours: int = 24
+    # Délai minimal entre deux envois du lien de vérification, contre les abus.
+    email_verification_resend_seconds: int = 60
+    # Délai minimal entre deux avis « vous avez déjà un compte » envoyés à la même adresse.
+    account_notice_cooldown_seconds: int = 3600
+
     model_config = {
         "env_file": ".env",
         "extra": "ignore",

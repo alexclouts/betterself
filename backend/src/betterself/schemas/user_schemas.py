@@ -17,3 +17,17 @@ class UserRead(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+# Réponse contenant seulement un message pour l'utilisateur
+class MessageResponse(BaseModel):
+    message: str
+
+# Jeton reçu par courriel pour confirmer l'adresse
+class VerifyEmailRequest(BaseModel):
+    token: str = Field(min_length=1, max_length=128)
+    # Mot de passe du compte : prouve que la personne qui confirme est celle qui s'est inscrite.
+    password: str = Field(min_length=1, max_length=128)
+
+# Demande d'un nouveau lien de vérification
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
