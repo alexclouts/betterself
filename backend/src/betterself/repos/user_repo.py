@@ -18,6 +18,15 @@ class UserRepository:
         return self.db.scalar(query)
 
 
+    # Comme get_by_email, mais verrouille la ligne jusqu'à la fin de la transaction
+    # (SELECT ... FOR UPDATE). Une requête simultanée sur le même compte attend son tour.
+    def get_by_email_for_update(self, email: str) -> User | None:
+        query = select(User).where(
+            User.email == email.lower(),
+        ).with_for_update()
+        return self.db.scalar(query)
+
+
     # Récupère un utilisateur par son ID. Retourne None si l'utilisateur n'existe pas.
     def get_by_id(self,user_id: uuid.UUID) -> User | None:
         return self.db.get(User, user_id)

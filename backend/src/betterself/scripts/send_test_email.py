@@ -18,7 +18,10 @@ if len(sys.argv) != 2:
     sys.exit("Utilisation : python -m betterself.scripts.send_test_email destinataire@exemple.com")
 
 recipient = sys.argv[1]
-print(f"Serveur : {settings.smtp_host}:{settings.smtp_port} (STARTTLS : {settings.smtp_starttls})")
+print(
+    f"Serveur : {settings.smtp_host}:{settings.smtp_port} "
+    f"(STARTTLS : {settings.smtp_starttls}, SSL : {settings.smtp_ssl})"
+)
 print(f"Expéditeur : {settings.mail_from}")
 
 get_email_sender().send(

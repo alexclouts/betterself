@@ -44,7 +44,7 @@ def register_and_verify(client, email: str, password: str) -> None:
     assert response.status_code == 202
 
     token = last_verification_token(client, email)
-    response = client.post("/auth/verify-email", json={"token": token})
+    response = client.post("/auth/verify-email", json={"token": token, "password": password})
     assert response.status_code == 200
 
 

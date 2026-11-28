@@ -20,6 +20,12 @@ class CatalogUnavailable(Exception):
         self.message = message
         super().__init__(self.message)
 
+# Le mot de passe entré ne correspond pas à celui du compte.
+class IncorrectPassword(Exception):
+    def __init__(self, message="Le mot de passe est incorrect."):
+        self.message = message
+        super().__init__(self.message)
+
 # Le lien de vérification du courriel est inconnu, expiré ou déjà utilisé.
 class InvalidVerificationToken(Exception):
     def __init__(self, message="Ce lien de vérification est invalide ou expiré."):

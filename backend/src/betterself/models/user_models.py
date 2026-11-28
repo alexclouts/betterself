@@ -61,6 +61,13 @@ class User(Base):
         nullable=True,
     )
 
+    # Date du dernier courriel « vous avez déjà un compte ». Sert à limiter ces
+    # avis, pour qu'on ne puisse pas inonder une adresse en répétant l'inscription.
+    account_notice_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     # Relation vers le profil utilisateur associé. Un utilisateur peut avoir au maximum un profil.
     profile: Mapped["UserProfile | None"] = relationship(
         "UserProfile",

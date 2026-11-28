@@ -29,14 +29,25 @@ class SmtpEmailSender:
         user: str | None = None,
         password: str | None = None,
         starttls: bool = False,
+        use_ssl: bool = False,
         reply_to: str | None = None,
     ):
+        # Un identifiant SMTP ne doit jamais circuler en clair sur le réseau.
+        if user and password and not (starttls or use_ssl):
+            raise ValueError(
+                "SMTP_USER et SMTP_PASSWORD exigent un chiffrement : "
+                "SMTP_STARTTLS=true (port 587) ou SMTP_SSL=true (port 465)."
+            )
+        if starttls and use_ssl:
+            raise ValueError("Choisir SMTP_STARTTLS ou SMTP_SSL, pas les deux.")
+
         self.host = host
         self.port = port
         self.mail_from = mail_from
         self.user = user
         self.password = password
         self.starttls = starttls
+        self.use_ssl = use_ssl
         self.reply_to = reply_to
 
 
@@ -50,12 +61,19 @@ class SmtpEmailSender:
             message["Reply-To"] = self.reply_to
         message.set_content(body)
 
+        # Sans contexte explicite, smtplib chiffre sans vérifier le certificat du
+        # serveur : le mot de passe SMTP pourrait alors être intercepté.
+        context = ssl.create_default_context()
+
         # Le délai évite qu'un serveur SMTP qui ne répond pas bloque indéfiniment.
-        with smtplib.SMTP(self.host, self.port, timeout=10) as smtp:
+        if self.use_ssl:
+            connection = smtplib.SMTP_SSL(self.host, self.port, timeout=10, context=context)
+        else:
+            connection = smtplib.SMTP(self.host, self.port, timeout=10)
+
+        with connection as smtp:
             if self.starttls:
-                # Sans contexte, smtplib chiffre sans vérifier le certificat du serveur :
-                # le mot de passe SMTP pourrait alors être intercepté.
-                smtp.starttls(context=ssl.create_default_context())
+                smtp.starttls(context=context)
             if self.user and self.password:
                 smtp.login(self.user, self.password)
             smtp.send_message(message)
@@ -70,5 +88,6 @@ def get_email_sender() -> EmailSender:
         user=settings.smtp_user,
         password=settings.smtp_password,
         starttls=settings.smtp_starttls,
+        use_ssl=settings.smtp_ssl,
         reply_to=settings.mail_reply_to,
     )

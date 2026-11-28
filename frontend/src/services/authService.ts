@@ -25,6 +25,9 @@ export type MessageResponse = {
 // Le mot de passe est correct, mais l'adresse courriel n'est pas encore confirmée (403).
 export class EmailNotVerifiedError extends Error {}
 
+// Le lien de vérification est valide, mais le mot de passe entré est incorrect (401).
+export class IncorrectPasswordError extends Error {}
+
 
 export const authService = {
 
@@ -49,12 +52,19 @@ export const authService = {
         }
     },
 
-    // Confirme l'adresse courriel avec le jeton reçu dans le lien
-    async verifyEmail(token: string): Promise<MessageResponse> {
+    // Confirme l'adresse courriel avec le jeton reçu dans le lien et le mot de passe du compte.
+    // Retourne un jeton d'accès : l'utilisateur est connecté directement.
+    async verifyEmail(token: string, password: string): Promise<LoginResponse> {
         try {
             const { verifyEmailAuthVerifyEmailPost } = getAuthentication();
-            return await verifyEmailAuthVerifyEmailPost({ token });
+            return await verifyEmailAuthVerifyEmailPost({ token, password });
         } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                throw new IncorrectPasswordError(
+                    getErrorMessage(error, "Le mot de passe est incorrect."),
+                    { cause: error },
+                );
+            }
             throw new Error(getErrorMessage(error, "Impossible de confirmer l'adresse courriel."), { cause: error });
         }
     },

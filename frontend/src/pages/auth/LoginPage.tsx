@@ -23,7 +23,9 @@ export function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     // Le mot de passe est bon, mais l'adresse n'est pas confirmée : on propose de renvoyer le lien.
-    const [isUnverified, setIsUnverified] = useState(false);
+    // On garde l'adresse soumise : si le champ est modifié ensuite, le lien part quand même
+    // à l'adresse qui a reçu le refus.
+    const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Récupère la fonction pour rafraîchir le statut de l'onboarding utilisateur.
@@ -32,7 +34,7 @@ export function LoginPage() {
     async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
         setError(null);
-        setIsUnverified(false);
+        setUnverifiedEmail(null);
         setIsSubmitting(true);
 
         try {
@@ -54,7 +56,7 @@ export function LoginPage() {
             }
         } catch (loginError) {
             if (loginError instanceof EmailNotVerifiedError) {
-                setIsUnverified(true);
+                setUnverifiedEmail(email.trim());
                 setError(loginError.message);
                 return;
             }
@@ -96,7 +98,7 @@ export function LoginPage() {
                         </p>
                     )}
 
-                    {isUnverified && <ResendVerificationButton email={email} />}
+                    {unverifiedEmail && <ResendVerificationButton email={unverifiedEmail} />}
 
                     <Button className="bg-primary text-white font-bold hover:bg-primary-dark mt-4">
                     Se connecter

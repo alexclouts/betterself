@@ -25,6 +25,8 @@ class MessageResponse(BaseModel):
 # Jeton reçu par courriel pour confirmer l'adresse
 class VerifyEmailRequest(BaseModel):
     token: str = Field(min_length=1, max_length=128)
+    # Mot de passe du compte : prouve que la personne qui confirme est celle qui s'est inscrite.
+    password: str = Field(min_length=1, max_length=128)
 
 # Demande d'un nouveau lien de vérification
 class ResendVerificationRequest(BaseModel):

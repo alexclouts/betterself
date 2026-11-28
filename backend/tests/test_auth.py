@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from betterself.core.config import settings
+from betterself.core.email import SmtpEmailSender
 from betterself.core.security import hash_email_token
 from betterself.models.email_verification_models import EmailVerificationToken
 from betterself.models.user_models import User
@@ -56,6 +58,58 @@ def test_register_user_existing_email(client: TestClient, email_sender, register
 
     login = client.post(f"{AUTH_URL}/login", data={"username": "test@example.com", "password": "otherpassword"})
     assert login.status_code == 401
+
+
+# L'avis « compte existant » n'est envoyé qu'une fois par délai : répéter l'inscription
+# ne permet pas d'inonder l'adresse de courriels.
+def test_register_existing_email_notice_rate_limited(client: TestClient, email_sender, registered_user):
+    sent_before = len(email_sender.sent)
+
+    for _ in range(3):
+        response = client.post(f"{AUTH_URL}/register", json={"email": "test@example.com", "password": "otherpassword"})
+        assert response.status_code == 202
+
+    assert len(email_sender.sent) == sent_before + 1
+
+
+# Une personne qui se réinscrit sans avoir confirmé son compte reçoit un nouveau lien,
+# pas l'avis « connectez-vous » qui la laisserait bloquée. Son nouveau mot de passe remplace l'ancien.
+def test_register_again_unverified_sends_new_link(client: TestClient, email_sender, test_session):
+    old_token = register(client)
+    age_latest_token(test_session)
+
+    response = client.post(f"{AUTH_URL}/register", json={"email": "test@example.com", "password": "newpassword"})
+
+    assert response.status_code == 202
+    assert email_sender.sent[-1]["subject"] == "Confirmez votre adresse courriel"
+    new_token = last_verification_token(client, "test@example.com")
+    assert new_token != old_token
+
+    assert verify(client, new_token, "testpassword").status_code == 401
+    assert verify(client, new_token, "newpassword").status_code == 200
+
+
+# Deux inscriptions rapprochées d'un compte non vérifié n'envoient qu'un seul lien
+def test_register_again_unverified_rate_limited(client: TestClient, email_sender):
+    register(client)
+    register(client)
+
+    assert len(email_sender.sent) == 1
+
+
+# Quelqu'un inscrit l'adresse d'une autre personne avant elle. La vraie propriétaire se
+# réinscrit, confirme avec son propre mot de passe, et l'intrus n'a plus accès au compte.
+def test_register_preemptive_account_is_reclaimed(client: TestClient, test_session):
+    client.post(f"{AUTH_URL}/register", json={"email": "victim@example.com", "password": "intruderpass"})
+    age_latest_token(test_session)
+
+    client.post(f"{AUTH_URL}/register", json={"email": "victim@example.com", "password": "ownerpassword"})
+    token = last_verification_token(client, "victim@example.com")
+
+    assert verify(client, token, "intruderpass").status_code == 401
+    assert verify(client, token, "ownerpassword").status_code == 200
+    intruder = client.post(f"{AUTH_URL}/login", data={"username": "victim@example.com", "password": "intruderpass"})
+    assert intruder.status_code == 401
 
 
 # Un échec d'envoi du courriel ne fait pas échouer l'inscription
@@ -120,7 +174,7 @@ def test_register_hides_database_error(client: TestClient, monkeypatch):
     def fail(self, data):
         raise OperationalError("INSERT INTO users (email) VALUES (%(email)s)", {}, Exception("secret"))
 
-    monkeypatch.setattr(UserService, "create_user", fail)
+    monkeypatch.setattr(UserService, "register", fail)
     response = client.post(
         f"{AUTH_URL}/register",
         json={"email": "test@example.com", "password": "testpassword"},
@@ -164,17 +218,23 @@ def register(client: TestClient, email: str = "test@example.com") -> str:
     return last_verification_token(client, email)
 
 
+def verify(client: TestClient, token: str, password: str = "testpassword"):
+    return client.post(f"{AUTH_URL}/verify-email", json={"token": token, "password": password})
+
+
 def login_status(client: TestClient, email: str = "test@example.com") -> int:
     return client.post(f"{AUTH_URL}/login", data={"username": email, "password": "testpassword"}).status_code
 
 
-# Le lien reçu confirme l'adresse, puis la connexion fonctionne
+# Le lien reçu et le mot de passe confirment l'adresse et connectent l'utilisateur
 def test_verify_email_success(client: TestClient, test_session):
     token = register(client)
 
-    response = client.post(f"{AUTH_URL}/verify-email", json={"token": token})
+    response = verify(client, token)
 
     assert response.status_code == 200
+    access_token = response.json()["access_token"]
+    assert client.get("/users/me", headers={"Authorization": f"Bearer {access_token}"}).status_code == 200
     user = test_session.scalar(select(User).where(User.email == "test@example.com"))
     assert user.email_verified_at is not None
     assert login_status(client) == 200
@@ -183,9 +243,9 @@ def test_verify_email_success(client: TestClient, test_session):
 # Un jeton ne sert qu'une fois
 def test_verify_email_token_single_use(client: TestClient):
     token = register(client)
-    client.post(f"{AUTH_URL}/verify-email", json={"token": token})
+    verify(client, token)
 
-    response = client.post(f"{AUTH_URL}/verify-email", json={"token": token})
+    response = verify(client, token)
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Ce lien de vérification est invalide ou expiré."}
@@ -193,7 +253,7 @@ def test_verify_email_token_single_use(client: TestClient):
 
 # Un jeton inventé est refusé
 def test_verify_email_unknown_token(client: TestClient):
-    response = client.post(f"{AUTH_URL}/verify-email", json={"token": "jeton-invente"})
+    response = verify(client, "jeton-invente")
 
     assert response.status_code == 400
     assert login_status(client) == 401
@@ -206,16 +266,31 @@ def test_verify_email_expired_token(client: TestClient, test_session):
     stored.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
     test_session.flush()
 
-    response = client.post(f"{AUTH_URL}/verify-email", json={"token": token})
+    response = verify(client, token)
 
     assert response.status_code == 400
     assert login_status(client) == 403
 
 
-# Un jeton vide ou démesuré est rejeté par la validation
+# Un mauvais mot de passe refuse la confirmation, sans consommer le jeton.
+# Un filtre antipourriel qui ouvre le lien ne peut donc pas confirmer l'adresse.
+def test_verify_email_wrong_password(client: TestClient):
+    token = register(client)
+
+    response = verify(client, token, "wrongpassword")
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Le mot de passe est incorrect."}
+    assert login_status(client) == 403
+    assert verify(client, token).status_code == 200
+
+
+# Un jeton ou un mot de passe vide, ou démesuré, est rejeté par la validation
 def test_verify_email_invalid_payload(client: TestClient):
-    assert client.post(f"{AUTH_URL}/verify-email", json={"token": ""}).status_code == 422
-    assert client.post(f"{AUTH_URL}/verify-email", json={"token": "a" * 129}).status_code == 422
+    endpoint = f"{AUTH_URL}/verify-email"
+    assert client.post(endpoint, json={"token": "", "password": "testpassword"}).status_code == 422
+    assert client.post(endpoint, json={"token": "a" * 129, "password": "testpassword"}).status_code == 422
+    assert client.post(endpoint, json={"token": "abc"}).status_code == 422
 
 
 """
@@ -244,8 +319,8 @@ def test_resend_verification_replaces_token(client: TestClient, email_sender, te
     new_token = last_verification_token(client, "test@example.com")
     assert new_token != old_token
 
-    assert client.post(f"{AUTH_URL}/verify-email", json={"token": old_token}).status_code == 400
-    assert client.post(f"{AUTH_URL}/verify-email", json={"token": new_token}).status_code == 200
+    assert verify(client, old_token).status_code == 400
+    assert verify(client, new_token).status_code == 200
 
 
 # Deux demandes rapprochées n'envoient qu'un seul courriel
@@ -268,3 +343,21 @@ def test_resend_verification_unknown_or_verified(client: TestClient, email_sende
     assert unknown.status_code == verified.status_code == 202
     assert unknown.json() == verified.json() == {"message": CHECK_INBOX_MESSAGE}
     assert len(email_sender.sent) == sent_before
+
+
+
+"""
+Tests pour la configuration de l'envoi SMTP.
+"""
+
+# Un identifiant SMTP sans chiffrement est refusé avant toute connexion :
+# le mot de passe circulerait en clair.
+def test_smtp_credentials_require_encryption():
+    with pytest.raises(ValueError):
+        SmtpEmailSender("smtp.example.com", 587, "a@example.com", user="a@example.com", password="secret")
+
+    with pytest.raises(ValueError):
+        SmtpEmailSender("smtp.example.com", 465, "a@example.com", starttls=True, use_ssl=True)
+
+    # Sans identifiant (Mailpit en développement), aucun chiffrement n'est exigé
+    SmtpEmailSender("localhost", 1025, "a@example.com")

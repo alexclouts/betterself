@@ -17,12 +17,12 @@ from betterself.services.user_service import UserService
 from betterself.core.security import create_access_token, verify_password
 from betterself.schemas.user_schemas import Token
 from betterself.prefix import AUTH_URL
-from betterself.core.exceptions import DuplicateRecord, InvalidVerificationToken
+from betterself.core.exceptions import IncorrectPassword, InvalidVerificationToken
 from betterself.core.email import EmailSender, get_email_sender
 from betterself.repos.email_verification_repo import EmailVerificationRepository
 from betterself.services.email_verification_service import (
+    Email,
     EmailVerificationService,
-    build_account_exists_email,
     send_email,
 )
 
@@ -61,43 +61,62 @@ CHECK_INBOX_MESSAGE = (
 )
 
 
+# Enregistre les changements, puis programme l'envoi du courriel.
+# L'ordre compte : FastAPI exécute les tâches d'arrière-plan avant la fin de get_db,
+# donc avant son commit. Sans ce commit explicite, le courriel pourrait partir pour un
+# jeton jamais enregistré, et la transaction resterait ouverte pendant l'envoi SMTP.
+def commit_then_send(
+    session: Session,
+    background_tasks: BackgroundTasks,
+    email_sender: EmailSender,
+    email: Email | None,
+) -> None:
+    session.commit()
+    if email is not None:
+        background_tasks.add_task(send_email, email_sender, email)
+
+
 # Endpoint pour l'enregistrement d'un nouvel utilisateur.
 # Le compte est créé non vérifié et un lien de confirmation est envoyé par courriel.
-# Si l'adresse a déjà un compte, rien n'est créé : son propriétaire reçoit plutôt un
-# courriel l'en informant. Dans les deux cas, la réponse est la même.
+# Si l'adresse a déjà un compte, voir EmailVerificationService.email_after_signup.
+# Dans tous les cas, la réponse est la même.
+# Une erreur de base de données passe par le gestionnaire de main.py, qui masque son détail.
 @router.post("/register", response_model=MessageResponse, status_code=status.HTTP_202_ACCEPTED)
 def register_user(
     user_create: UserCreate,
     background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db),
     service: UserService = Depends(get_user_service),
     verification_service: EmailVerificationService = Depends(get_email_verification_service),
     email_sender: EmailSender = Depends(get_email_sender),
 ):
-    # Une erreur de base de données passe par le gestionnaire de main.py, qui masque son détail.
-    try:
-        user = service.create_user(user_create)
-        email = verification_service.issue(user)
-    except DuplicateRecord:
-        email = build_account_exists_email(user_create.email.lower())
+    user, created = service.register(user_create)
+    email = verification_service.email_after_signup(user, created)
 
-    background_tasks.add_task(send_email, email_sender, email)
+    commit_then_send(session, background_tasks, email_sender, email)
     return MessageResponse(message=CHECK_INBOX_MESSAGE)
 
 
-# Endpoint pour confirmer l'adresse courriel avec le jeton reçu par courriel.
-@router.post("/verify-email", response_model=MessageResponse)
+# Endpoint pour confirmer l'adresse courriel avec le jeton reçu par courriel et le
+# mot de passe du compte. L'utilisateur est connecté directement : il retourne un jeton d'accès.
+@router.post("/verify-email", response_model=Token)
 def verify_email(
     payload: VerifyEmailRequest,
     verification_service: EmailVerificationService = Depends(get_email_verification_service),
 ):
     try:
-        verification_service.verify(payload.token)
+        user = verification_service.verify(payload.token, payload.password)
     except InvalidVerificationToken as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(error),
         )
-    return MessageResponse(message="Votre adresse courriel est confirmée. Vous pouvez vous connecter.")
+    except IncorrectPassword as error:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(error),
+        )
+    return Token(access_token=create_access_token(subject=str(user.id)))
 
 
 # Endpoint pour recevoir un nouveau lien de vérification.
@@ -106,12 +125,13 @@ def verify_email(
 def resend_verification(
     payload: ResendVerificationRequest,
     background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db),
     verification_service: EmailVerificationService = Depends(get_email_verification_service),
     email_sender: EmailSender = Depends(get_email_sender),
 ):
     email = verification_service.resend(payload.email)
-    if email is not None:
-        background_tasks.add_task(send_email, email_sender, email)
+
+    commit_then_send(session, background_tasks, email_sender, email)
     return MessageResponse(message=CHECK_INBOX_MESSAGE)
 
 

@@ -70,7 +70,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
+                  "$ref": "#/components/schemas/Token"
                 }
               }
             }
@@ -4608,11 +4608,18 @@
             "maxLength": 128,
             "minLength": 1,
             "title": "Token"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
           }
         },
         "type": "object",
         "required": [
-          "token"
+          "token",
+          "password"
         ],
         "title": "VerifyEmailRequest"
       }
